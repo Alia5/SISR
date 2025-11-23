@@ -1,0 +1,41 @@
+{
+  "FixedFileInfo": {
+    "FileVersion": {
+      "Major": 0,
+      "Minor": 0,
+      "Patch": 0,
+      "Build": 0
+    },
+    "ProductVersion": {
+      "Major": 0,
+      "Minor": 0,
+      "Patch": 0,
+      "Build": 0
+    },
+    "FileFlagsMask": "3f",
+    "FileFlags ": "00",
+    "FileOS": "040004",
+    "FileType": "01",
+    "FileSubType": "00"
+  },
+  "StringFileInfo": {
+    "Comments": "Steam Input System Redirector",
+    "CompanyName": "Peter Repukat",
+    "FileDescription": "SISR - Steam Input System Redirector",
+    "FileVersion": "0.0.0.0",
+    "InternalName": "sisr",
+    "LegalCopyright": "Copyright (C) 2025 Peter Repukat - GPL-3.0",
+    "LegalTrademarks": "",
+    "OriginalFilename": "sisr.exe",
+    "PrivateBuild": "",
+    "ProductName": "SISR",
+    "ProductVersion": "0.0.0.0",
+    "SpecialBuild": ""
+  },
+  "VarFileInfo": {
+    "Translation": {
+      "LangID": "0409",
+      "CharsetID": "04B0"
+    }
+  }
+}

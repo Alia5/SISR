@@ -39,12 +39,17 @@ COMMIT := $(shell git rev-parse --short HEAD 2>$(NULL_DEVICE) || echo unknown)
 BUILD_TIME := $(shell $(DATE_CMD))
 
 # Go build flags
-LDFLAGS := -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.buildTime=$(BUILD_TIME) -X sisr/internal/codegen/common.Version=$(VERSION)
+ifeq ($(OS),Windows_NT)
+	GUI_LDFLAG := -H windowsgui
+else
+	GUI_LDFLAG :=
+endif
+LDFLAGS := -s -w $(GUI_LDFLAG) -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.buildTime=$(BUILD_TIME) -X github.com/Alia5/SISR/internal/codegen/common.Version=$(VERSION)
 BUILD_FLAGS := -trimpath -ldflags "$(LDFLAGS)"
 
-############################################################
-# (Legacy) Windows detection section replaced by unified block
-############################################################
+# Windows resource embedding
+VERSIONINFO_JSON := versioninfo.json
+RESOURCE_SYSO := cmd/sisr/resource.syso
 
 .PHONY: all
 all: test build
@@ -63,6 +68,8 @@ help: ## Show this help message
 	@echo   test                 Run tests
 	@echo   test-coverage        Run tests with coverage
 	@echo   clean                Remove build artifacts
+	@echo   generate-versioninfo Generate Windows version info resource
+	@echo   clean-versioninfo    Remove Windows version info resource
 	@echo   fmt                  Format Go code
 	@echo   vet                  Run go vet
 	@echo   lint                 Run golangci-lint
@@ -94,12 +101,32 @@ test-coverage: ## Run tests with coverage
 	cd $(SRC_DIR) && go test -count=1 -coverprofile=coverage.out ./...
 	cd $(SRC_DIR) && go tool cover -html=coverage.out -o coverage.html
 
+.PHONY: generate-versioninfo
+generate-versioninfo: ## Generate Windows version info resource
+ifeq ($(OS),Windows_NT)
+	@echo Generating Windows version info...
+	@go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+	@powershell -NoProfile -NonInteractive -File scripts/inject-version.ps1 "$(VERSION)" "$(VERSIONINFO_JSON)" "versioninfo.tmp.json"
+	@cd $(SRC_DIR) && goversioninfo -o $(RESOURCE_SYSO) versioninfo.tmp.json
+	@del versioninfo.tmp.json
+else
+	@echo Skipping versioninfo generation on non-Windows platform
+endif
+
+.PHONY: clean-versioninfo
+clean-versioninfo: ## Remove generated Windows version info resource
+	-@$(RM_FILE) $(RESOURCE_SYSO) 2>$(NULL_DEVICE)
+	-@$(RM_FILE) versioninfo.tmp.json 2>$(NULL_DEVICE)
+
 .PHONY: build
 build: ## Build for current platform
-	cd $(SRC_DIR) && go build $(BUILD_FLAGS) -o ./$(DIST_DIR)/$(BINARY_NAME)$(EXE_EXT) $(MAIN_PKG)
+ifeq ($(OS),Windows_NT)
+	@$(MAKE) generate-versioninfo
+endif
+	cd $(SRC_DIR) && go build $(BUILD_FLAGS) -o $(DIST_DIR)/$(BINARY_NAME)$(EXE_EXT) $(MAIN_PKG)
 
 .PHONY: clean
-clean: ## Remove build artifacts
+clean: clean-versioninfo ## Remove build artifacts
 	-@$(RM_DIR) $(DIST_DIR) 2>$(NULL_DEVICE)
 	-@$(RM_FILE) $(COVERAGE_OUT) 2>$(NULL_DEVICE)
 	-@$(RM_FILE) $(COVERAGE_HTML) 2>$(NULL_DEVICE)

@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_base.yml
+    with:
+      artifact_suffix: "-Release"
+      upload_artifacts: true
+
+  generate-changelog:
+    name: Generate Changelog
+    needs: build
+    uses: ./.github/workflows/generate-changelog.yml
+    with:
+      mode: release
+      tag_name: ${{ github.ref_name }}
+
+
+  create-release:
+    name: Create Release
+    needs: [build, generate-changelog]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize and rename artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release_files
+          for dir in artifacts/*; do
+            if [ -d "$dir" ]; then
+              base="$(basename "$dir")"
+              # Strip optional suffix from artifact name for filenames
+              name_no_suffix="${base%-Release}"
+              for file in "$dir"/*; do
+                if [ -f "$file" ]; then
+                  filename="$(basename "$file")"
+                  if [[ "$filename" == *.tar.gz ]]; then
+                    ext="tar.gz"
+                  else
+                    ext="${filename##*.}"
+                  fi
+                  fname="sisr-${name_no_suffix#SISR-}"
+                  # Preserve extension (avoid duplicating extension for non-dot cases)
+                  if [[ "$filename" == *.* ]]; then
+                    cp "$file" "release_files/${fname}.${ext}"
+                  else
+                    cp "$file" "release_files/${fname}"
+                  fi
+                fi
+              done
+            fi
+          done
+          ls -la release_files/
+
+      - name: Extract build info
+        id: build_info
+        shell: bash
+        run: |
+          echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "time=$(date +'%H%M')" >> $GITHUB_OUTPUT
+          echo "sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          GIT_VERSION=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --always || echo "")
+          if [[ ! $GIT_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            GIT_VERSION="v0.0.0-${COMMIT_COUNT}-${GITHUB_SHA:0:7}"
+          fi
+          echo "version=$GIT_VERSION" >> $GITHUB_OUTPUT
+          echo "Version from git: $GIT_VERSION"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.build_info.outputs.tag_name }}
+          name: "Release ${{ steps.build_info.outputs.version }}"
+          body: |
+            ## SISR Release ${{ steps.build_info.outputs.version }}
+
+            Release Date: ${{ steps.build_info.outputs.date }} ${{ steps.build_info.outputs.time }}
+
+            ### Changes
+            ${{ needs.generate-changelog.outputs.changelog }}
+          files: release_files/*
+          prerelease: false
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

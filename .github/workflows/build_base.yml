@@ -1,0 +1,137 @@
+name: SISR Build Base
+
+on:
+  workflow_call:
+    inputs:
+      artifact_suffix:
+        required: false
+        type: string
+        default: ""
+        description: "Suffix to add to artifact names"
+      upload_artifacts:
+        required: false
+        type: boolean
+        default: false
+        description: "Whether to upload build artifacts"
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+          cache-dependency-path: |
+            go.sum
+
+      - name: Show Go version
+        run: go version
+
+      - name: Run tests
+        run: make test
+        
+
+  build:
+    name: Build binaries (${{ matrix.target.goos }}/${{ matrix.target.goarch }})
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { goos: linux,   goarch: amd64, ext: "" }
+          - { goos: linux,   goarch: arm64, ext: "" }
+          - { goos: windows, goarch: amd64, ext: ".exe" }
+          - { goos: windows, goarch: arm64, ext: ".exe" }
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+          cache-dependency-path: |
+            go.sum
+
+      - name: Generate Windows version info
+        if: matrix.target.goos == 'windows'
+        run: |
+          VERSION=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --always || echo "v0.0.0-dev")
+          git fetch --tags --force || true
+          if ! echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+'; then
+            VERSION="v0.0.0-dev"
+          fi
+          go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
+          
+          VER_STRIPPED=${VERSION#v}
+          IFS='.-' read -ra PARTS <<< "$VER_STRIPPED"
+          MAJOR=${PARTS[0]:-0}
+          MINOR=${PARTS[1]:-0}
+          PATCH=${PARTS[2]:-0}
+          BUILD=0
+          if [ ${#PARTS[@]} -gt 3 ]; then
+            BUILD_STR="${PARTS[3]}"
+            if [[ "$BUILD_STR" =~ ^[0-9]+$ ]]; then
+              BUILD=$BUILD_STR
+            fi
+          fi
+          if ! [[ "$MAJOR" =~ ^[0-9]+$ && "$MINOR" =~ ^[0-9]+$ && "$PATCH" =~ ^[0-9]+$ && "$BUILD" =~ ^[0-9]+$ ]]; then
+            MAJOR=0; MINOR=0; PATCH=0; BUILD=0;
+          fi
+          
+          jq --arg major "$MAJOR" --arg minor "$MINOR" --arg patch "$PATCH" --arg build "$BUILD" \
+             --arg verStr "$MAJOR.$MINOR.$PATCH.$BUILD" --arg prodVer "$VER_STRIPPED" \
+             '.FixedFileInfo.FileVersion.Major = ($major | tonumber) |
+              .FixedFileInfo.FileVersion.Minor = ($minor | tonumber) |
+              .FixedFileInfo.FileVersion.Patch = ($patch | tonumber) |
+              .FixedFileInfo.FileVersion.Build = ($build | tonumber) |
+              .FixedFileInfo.ProductVersion.Major = ($major | tonumber) |
+              .FixedFileInfo.ProductVersion.Minor = ($minor | tonumber) |
+              .FixedFileInfo.ProductVersion.Patch = ($patch | tonumber) |
+              .FixedFileInfo.ProductVersion.Build = ($build | tonumber) |
+              .StringFileInfo.FileVersion = $verStr |
+              .StringFileInfo.ProductVersion = $prodVer' \
+             versioninfo.json > versioninfo.tmp.json
+          
+          echo "Generating resource.syso for ${{ matrix.target.goarch }}";
+          if [ "${{ matrix.target.goarch }}" = "amd64" ]; then
+            goversioninfo -64 -o cmd/sisr/resource.syso versioninfo.tmp.json
+          elif [ "${{ matrix.target.goarch }}" = "arm64" ]; then
+            # arm64 requires both -arm and -64 flags per goversioninfo flag semantics
+            goversioninfo -arm -64 -o cmd/sisr/resource.syso versioninfo.tmp.json
+          else
+            goversioninfo -o cmd/sisr/resource.syso versioninfo.tmp.json
+          fi
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.target.goos }}
+          GOARCH: ${{ matrix.target.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          VERSION=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --always || echo "v0.0.0-dev")
+          mkdir -p dist
+          EXTRA=""
+          if [ "$GOOS" = "windows" ]; then EXTRA="-H windowsgui"; fi
+          go build -trimpath -ldflags "-s -w $EXTRA -X github.com/Alia5/SISR/internal/codegen/common.Version=${VERSION}" -o dist/sisr-${{ matrix.target.goos }}-${{ matrix.target.goarch }}${{ matrix.target.ext }} ./cmd/sisr
+          ls -la dist
+
+      - name: Upload artifact
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SISR-${{ matrix.target.goos }}-${{ matrix.target.goarch }}${{ inputs.artifact_suffix }}
+          path: dist/sisr-${{ matrix.target.goos }}-${{ matrix.target.goarch }}${{ matrix.target.ext }}
+          if-no-files-found: error

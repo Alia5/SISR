@@ -33,3 +33,9 @@ logs/
 log/
 !*/internal/log
 *.log
+
+
+# Windows version info resources
+resource.syso
+cmd/viiper/resource.syso
+versioninfo.tmp.json

@@ -1,0 +1,116 @@
+name: Dev Snapshot Build
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  calculate-version:
+    name: Calculate Dev Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Calculate version
+        id: version
+        shell: bash
+        run: |
+          GIT_VERSION=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --always || echo "")
+          if [[ ! $GIT_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            GIT_VERSION="v0.0.0-${COMMIT_COUNT}-${GITHUB_SHA:0:7}"
+          fi
+          echo "version=$GIT_VERSION" >> $GITHUB_OUTPUT
+          echo "Calculated version: $GIT_VERSION"
+
+  build:
+    needs: calculate-version
+    uses: ./.github/workflows/build_base.yml
+    with:
+      artifact_suffix: "-Snapshot"
+      upload_artifacts: true
+
+  generate-changelog:
+    name: Generate Changelog
+    needs: build
+    uses: ./.github/workflows/generate-changelog.yml
+    with:
+      mode: snapshot
+
+  create-pre-release:
+    name: Create Pre-Release
+    needs: [build, generate-changelog]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize and rename artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release_files
+          for dir in artifacts/*; do
+            if [ -d "$dir" ]; then
+              echo "Processing artifact: $(basename "$dir")"
+              for file in "$dir"/*; do
+                if [ -f "$file" ]; then
+                  cp "$file" "release_files/$(basename "$file")"
+                fi
+              done
+            fi
+          done
+          ls -la release_files/
+
+      - name: Extract build info
+        id: build_info
+        shell: bash
+        run: |
+          echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "time=$(date +'%H%M')" >> $GITHUB_OUTPUT
+          echo "sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+          GIT_VERSION=$(git describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --always || echo "")
+          if [[ ! $GIT_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+            GIT_VERSION="v0.0.0-${COMMIT_COUNT}-${GITHUB_SHA:0:7}"
+          fi
+          echo "version=$GIT_VERSION" >> $GITHUB_OUTPUT
+          echo "Version from git: $GIT_VERSION"
+
+      - name: Update Dev Snapshot Release
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: dev-snapshot
+          name: "Dev Build ${{ steps.build_info.outputs.version }}"
+          prerelease: true
+          body: |
+            Automated development build.
+
+            Version: ${{ steps.build_info.outputs.version }}
+            Date: ${{ steps.build_info.outputs.date }} ${{ steps.build_info.outputs.time }}
+            Commit: [${{ steps.build_info.outputs.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+
+            ⚠️ These are the latest development builds and may contain bugs or unfinished features.
+
+            ### Changes
+            ${{ needs.generate-changelog.outputs.changelog }}
+          files: |
+            ./release_files/*

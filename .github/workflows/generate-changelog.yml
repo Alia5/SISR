@@ -1,0 +1,45 @@
+name: Generate Changelog
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        required: true
+        type: string
+        description: 'Mode of operation: "release" or "snapshot"'
+      tag_name:
+        required: false
+        type: string
+        description: 'Current tag name (required for release mode)'
+    outputs:
+      changelog:
+        description: "Generated changelog"
+        value: ${{ jobs.generate.outputs.changelog }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.generate_changelog.outputs.changelog }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Changelog
+        id: generate_changelog
+        shell: bash
+        run: |
+          chmod +x .github/scripts/generate-changelog.sh
+          # Determine output file
+          OUTFILE=changelog_output.md
+          if [[ "${{ inputs.mode }}" == "release" ]]; then
+            .github/scripts/generate-changelog.sh "$OUTFILE" "${{ inputs.tag_name }}"
+          else
+            .github/scripts/generate-changelog.sh "$OUTFILE"
+          fi
+          # Set output for workflow
+          echo "changelog<<CHANGELOG_EOF" >> $GITHUB_OUTPUT
+          cat "$OUTFILE" >> $GITHUB_OUTPUT
+          echo "CHANGELOG_EOF" >> $GITHUB_OUTPUT
