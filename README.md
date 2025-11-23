@@ -10,7 +10,7 @@
 
 SISR (pronounced "scissor") is a tool that allows users to redirect Steam Input configurations to a system level, either on localhost or even over the network.
 
-Unlike it's predecessor [GlosSI](https://github.com/Alia5/GlosSI), SISR uses [VIIPER](https://github.com/Alia5/VIIPER) instead of the unmaintained [ViGEm](https://github.com/ViGEm/ViGEmBus) driver, to emulate virtual controllers.  
+Unlike it's predecessor [GlosSI](https://github.com/Alia5/GlosSI), SISR uses [VIIPER](https://github.com/Alia5/VIIPER) _(requiring **USBIP**)_ instead of the unmaintained [ViGEm](https://github.com/ViGEm/ViGEmBus) driver, to emulate virtual controllers.  
 
 > ⚠️ **Highly experimental work in progress.** Everything is subject to change and may or may not work. Expect bugs, crashes, and missing features.
 
