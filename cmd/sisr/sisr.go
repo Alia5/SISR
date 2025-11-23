@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -146,6 +149,34 @@ func (c *sisr) Run(logger *slog.Logger) error {
 	}
 	defer vc.Close()
 
+	var detectedAppId uint32
+	for _, e := range os.Environ() {
+		if strings.Contains(strings.ToLower(e), "steam") {
+			logger.Debug("env", "var", e)
+			if strings.Contains(e, "SteamGameId=") {
+				split := strings.SplitN(e, "=", 2)
+				gameId, err := strconv.ParseUint(split[1], 10, 64)
+				if err != nil {
+					logger.Error("Failed to parse SteamGameId", "error", err)
+				} else {
+					detectedAppId = uint32(gameId >> 32)
+					logger.Info("Detected SteamAppId", "appId", detectedAppId)
+				}
+			}
+		}
+	}
+
+	if detectedAppId != 0 {
+		if err := openSteamURL(fmt.Sprintf("steam://forceinputappid/%d", detectedAppId)); err != nil {
+			logger.Error("Failed to open steam://forceinputappid URL", "error", err)
+		}
+		defer func() {
+			if err := openSteamURL("steam://forceinputappid/0"); err != nil {
+				logger.Error("Failed to reset steam://forceinputappid", "error", err)
+			}
+		}()
+	}
+
 	loop := loop.New(notifyCtx, trayChann, vc)
 	err = loop.Run(window, renderer)
 	if err != nil {
@@ -158,7 +189,7 @@ func (c *sisr) Run(logger *slog.Logger) error {
 }
 
 func findUserConfig(args []string) string {
-	for i := range len(args) {
+	for i := range args {
 		a := args[i]
 		if strings.HasPrefix(a, "--config=") {
 			return a[len("--config="):]
@@ -206,4 +237,17 @@ func createWindow(logger *slog.Logger, fullscreen bool) (*sdl.Window, *sdl.Rende
 	renderer.SetDrawColor(0, 0, 0, 0)
 
 	return window, renderer, nil
+}
+
+func openSteamURL(url string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("cmd", "/c", "start", "", url)
+	case "darwin":
+		cmd = exec.Command("open", url)
+	default:
+		cmd = exec.Command("xdg-open", url)
+	}
+	return cmd.Start()
 }
