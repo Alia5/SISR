@@ -32,26 +32,33 @@ Unlike it's predecessor [GlosSI](https://github.com/Alia5/GlosSI), SISR uses [VI
 
 ## 😭 Mimimi (FAQ)
 
-**"Mimimi, I get doubled controllers"**  
-Turn off "Enable Steam Input for Xbox controllers" in Steam settings.  
+### "Mimimi, I get doubled controllers"
+
+- Turn off "Enable Steam Input for Xbox controllers" in Steam settings.  
 Otherwise Steam will pass through the emulated controller to SISR, which will then create another emulated controller, resulting in duplicates.
 
-**"Mimimi, the game still detects my _real_ PS4/DualSense/whatever controller"**  
-Setup [HidHide](https://github.com/nefarius/HidHide) to hide your physical controllers from games, **RTFM**.  
+### "Mimimi, the game still detects my _real_ PS4/DualSense/whatever controller"
+
+- Setup [HidHide](https://github.com/nefarius/HidHide) to hide your physical controllers from games, **RTFM**.  
 Automatic HidHide integration will (maybe) follow whenever soon™.
 
-**"Mimimi, it doesn't work with my game"**  
-Does the game work with regular Xbox 360 controllers? If yes, file an issue with logs. If no, tough luck.
+### "Mimimi, it doesn't work with my game"
 
-**"Mimimi, where's the GUI?"**  
-It's a system tray app. Right-click the tray icon for options. What more do you want?
+- Does the game work with regular Xbox 360 controllers? If yes, file an issue with logs. If no, tough luck.
 
-**"Mimimi, I want feature XYZ back 😭"**  
-Code it yourself and open up a PR.  
-Alternatively, hire me to do it for you - Rates start at 100€/hour.
+### "Mimimi, where's the GUI?"
 
-**"Mimimi, your code is shit / you're doing it wrong"**  
-Cool story bro. Where's your pull request?
+- It's a system tray app. Right-click the tray icon for options. What more do you want?  
+  You could also run `./sisr --help` ¯\\\_(ツ)\_/¯
+
+### "Mimimi, I want feature XYZ back 😭"
+
+- Code it yourself and open up a PR.  
+  Alternatively, hire me to do it for you - Rates start at 100€/hour.
+
+### "Mimimi, your code is shit / you're doing it wrong"
+
+- Cool story bro. Where's your pull request?
 
 ## 📝 TODO
 
