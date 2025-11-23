@@ -66,6 +66,8 @@ func main() {
 	defer binsdl.Load().Unload()
 	defer sdl.Quit()
 
+	sdl.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1")
+
 	if err := sdl.Init(sdl.INIT_VIDEO | sdl.INIT_GAMEPAD); err != nil {
 		panic(err)
 	}
