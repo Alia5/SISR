@@ -112,12 +112,16 @@ func (c *sisr) Run(logger *slog.Logger) error {
 	var renderer *sdl.Renderer
 	var window *sdl.Window
 
-	if runtime.GOOS == "windows" {
-		if c.platformOpts.Console {
-			if err := showConsole(); err != nil {
-				return err
-			}
+	if runtime.GOOS == "windows" && c.platformOpts.Console {
+		if err := showConsole(); err != nil {
+			logger.Error("Failed to alloc console", "error", err)
 		}
+		// Recreate logger with rebound streams
+		slog.SetDefault(slog.New(logHandler{
+			stdout: slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+			stderr: slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelError}),
+		}))
+		logger = slog.Default()
 	}
 
 	trayChann := tray.Setup(c.Tray)
