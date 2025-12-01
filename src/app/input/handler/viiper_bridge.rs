@@ -1,16 +1,15 @@
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::MutexGuard;
 
 use anyhow::{Result, anyhow};
 use tracing::{info, warn};
 use viiper_client::{DeviceStream, ViiperClient};
 
-use super::State;
 use crate::app::input::device::Device;
 
 pub(super) struct ViiperBridge {
     client: Option<ViiperClient>,
+    // TODO: handle device_disconnect from SERVER
     streams: HashMap<u32, DeviceStream>,
 }
 
@@ -28,14 +27,10 @@ impl ViiperBridge {
         }
     }
 
-    pub fn create_device(
-        &self,
-        device: &mut Device,
-        guard: &mut MutexGuard<'_, State>,
-    ) -> Result<()> {
-        let bus_id = match guard.viiper_bus {
-            Some(id) => id,
-            None => self.create_bus(guard)?,
+    pub fn create_device(&self, device: &mut Device, bus_id: &mut Option<u32>) -> Result<()> {
+        let bus_id = match bus_id {
+            Some(id) => *id,
+            None => self.create_bus(bus_id)?,
         };
 
         let client = self
@@ -79,14 +74,8 @@ impl ViiperBridge {
         Ok(())
     }
 
-    pub fn disconnect_device(&mut self, device_id: u32) {
-        if self.streams.remove(&device_id).is_some() {
-            info!("Disconnected VIIPER device for pad {}", device_id);
-        }
-    }
-
-    pub fn create_bus(&self, guard: &mut MutexGuard<'_, State>) -> Result<u32> {
-        if guard.viiper_bus.is_some() {
+    pub fn create_bus(&self, bus_id: &mut Option<u32>) -> Result<u32> {
+        if bus_id.is_some() {
             warn!("VIIPER bus already created; Recreating");
         }
 
@@ -100,7 +89,15 @@ impl ViiperBridge {
             .map_err(|e| anyhow!("Failed to create VIIPER bus: {}", e))?;
 
         info!("Created VIIPER bus with ID {}", response.bus_id);
-        guard.viiper_bus = Some(response.bus_id);
+        *bus_id = Some(response.bus_id);
         Ok(response.bus_id)
+    }
+
+    pub fn disconnect_device(&mut self, which: u32) {
+        if self.streams.remove(&which).is_some() {
+            info!("Disconnected VIIPER device with ID {}", which);
+        } else {
+            warn!("No VIIPER device found with ID {}", which);
+        }
     }
 }

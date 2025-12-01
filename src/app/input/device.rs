@@ -21,7 +21,7 @@ impl Debug for SDLDevice {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Device {
     pub id: u32,
     pub steam_handle: u64,
@@ -29,6 +29,19 @@ pub struct Device {
     pub sdl_device_count: usize,
     pub viiper_type: String,
     pub viiper_device: Option<viiper_client::types::Device>,
+}
+
+impl Default for Device {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            steam_handle: 0,
+            state: DeviceState::default(),
+            sdl_device_count: 0,
+            viiper_type: "xbox360".to_string(),
+            viiper_device: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default)]

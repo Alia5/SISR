@@ -1,8 +1,6 @@
-use core::net;
 use sdl3::event::EventSender;
 use std::net::ToSocketAddrs;
 use std::process::ExitCode;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tracing::{debug, error, info, warn};
