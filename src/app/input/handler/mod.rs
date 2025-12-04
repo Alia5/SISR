@@ -1,4 +1,5 @@
-mod events;
+mod events_connection;
+mod events_input;
 mod gui;
 mod viiper_bridge;
 
@@ -18,6 +19,7 @@ use winit::event_loop::EventLoopProxy;
 use crate::app::{
     gui::dispatcher::GuiDispatcher,
     input::device::{Device, SDLDevice},
+    steam_utils::BindingEnforcer,
     window::RunnerEvent,
 };
 
@@ -37,6 +39,7 @@ pub struct EventHandler {
 pub(super) struct State {
     devices: Vec<Device>,
     viiper_address: Option<SocketAddr>,
+    binding_enforcer: BindingEnforcer,
 }
 
 impl EventHandler {
@@ -52,6 +55,7 @@ impl EventHandler {
         let state = Arc::new(Mutex::new(State {
             devices: Vec::new(),
             viiper_address,
+            binding_enforcer: BindingEnforcer::new(),
         }));
         let clone_handle = async_handle.clone();
         let res = Self {

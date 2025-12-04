@@ -100,6 +100,40 @@ impl EventHandler {
                 }
             ));
         });
+
+        egui::Window::new("🎮 Steam Bindings").show(ctx, |ui| {
+            let enforcer = &mut state.binding_enforcer;
+
+            ui.label(format!(
+                "Game ID: {}",
+                enforcer
+                    .game_id()
+                    .map(|id| id.to_string())
+                    .unwrap_or("N/A".to_string())
+            ));
+            ui.label(format!(
+                "App ID: {}",
+                enforcer
+                    .app_id()
+                    .map(|id| id.to_string())
+                    .unwrap_or("N/A".to_string())
+            ));
+
+            ui.separator();
+
+            let has_app_id = enforcer.app_id().is_some();
+            let mut active = enforcer.is_active();
+
+            ui.add_enabled_ui(has_app_id, |ui| {
+                if ui.checkbox(&mut active, "Enforce Bindings").changed() {
+                    if active {
+                        enforcer.activate();
+                    } else {
+                        enforcer.deactivate();
+                    }
+                }
+            });
+        });
     }
 
     fn render_properties(
