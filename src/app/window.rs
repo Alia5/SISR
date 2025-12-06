@@ -270,7 +270,8 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                 .expect("Failed to create window"),
         );
 
-        window.set_visible(true);
+        window.set_visible(initially_visible);
+        trace!("Window created, visible: {}", initially_visible);
         let gfx = pollster::block_on(Gfx::new(window.clone()));
 
         self.egui_winit = Some(EguiWinitState::new(
