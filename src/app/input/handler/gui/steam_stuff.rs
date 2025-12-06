@@ -1,16 +1,24 @@
+use std::sync::{Arc, Mutex};
+
 use egui::{Id, RichText, Vec2};
+use sdl3::event::EventSender;
 use tracing::warn;
 
 use crate::app::input::handler::State;
 use crate::app::steam_utils::util::open_steam_url;
 
-pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
+pub fn draw(
+    state: &mut State,
+    _: Arc<Mutex<Option<EventSender>>>,
+    ctx: &egui::Context,
+    open: &mut bool,
+) {
     if !*open {
         return;
     }
 
-    egui::Window::new("🚂 Steam Input Config")
-        .id(Id::new("steam_config"))
+    egui::Window::new("🚂 Steam Stuff")
+        .id(Id::new("steam_stuff"))
         .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
         .default_size(Vec2::new(360.0, 260.0))
         .collapsible(false)

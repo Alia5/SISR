@@ -1,9 +1,13 @@
-use egui::{Id, RichText, Vec2};
+use std::sync::{Arc, Mutex};
 
-use crate::app::input::handler::State;
+use egui::{CollapsingHeader, Id, RichText, Vec2};
+use sdl3::event::EventSender;
+
+use crate::app::gui::dialogs::{self, Dialog, push_dialog};
+use crate::app::input::handler::{HandlerEvent, State};
 use crate::app::input::sdl_device_info::SdlValue;
 
-pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
+pub fn draw(state: &mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>,  ctx: &egui::Context, open: &mut bool) {
     egui::Window::new("🎮 Gamepads")
         .id(Id::new("controller_info"))
         .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
@@ -14,38 +18,126 @@ pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
         .open(open)
         .show(ctx, |ui| {
             egui::ScrollArea::both().auto_shrink(false).show(ui, |ui| {
-                ui.label("Connected Gamepads:");
-                for (_, device) in state.devices.iter() {
+                let mut devices: Vec<_> = state.devices.iter().collect();
+                devices.sort_by_key(|(_, device)| device.id);
+                for (_, device) in devices {
+                    let title = device
+                        .sdl_device_infos
+                        .iter()
+                        .find(|info| info.is_gamepad && info.properties.contains_key("name"))
+                        .and_then(|d| {
+                            d.properties.get("name").and_then(|v| match v {
+                                SdlValue::OptString(s) => s.clone(),
+                                _ => None,
+                            })
+                        });
+                    let title_string = title.unwrap_or_else(|| format!("Device #{}", device.id));
+                    let waker_clone = sdl_waker.clone();
+                    ui.horizontal(move |ui| {
+                        ui.heading(RichText::new(
+                            title_string.clone(),
+                        ));
+                        if device.viiper_connected {
+                            ui.label(RichText::new("🐍").strong());
+                        }
+                        if ui.button("Ignore").clicked() {
+                            let device_id = device.id;
+                            _ = push_dialog(Dialog::new_yes_no(
+                                "Ignore Device", 
+                                format!("Are you sure you want to ignore \"{}\"?\nThe device will only reappear once you restart the application.", title_string),
+                                 move ||{
+                                    waker_clone.lock().expect("sdl_loop does not exist").as_ref().map(|waker| {
+                                        waker.push_custom_event(
+                                            HandlerEvent::IgnoreDeviceEvent {
+                                                device_id
+                                            })
+                                    });
+                                 }, 
+                                 ||{})
+                                );
+                        }
+                    });
+                    ui.horizontal(|ui| {
+                        ui.vertical(|ui| {
+                            ui.group(|ui| {
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Device ID:").strong());
+                                    ui.label(RichText::new(format!("{}", device.id)).weak());
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("SDL IDs:").strong());
+                                    ui.label(
+                                        RichText::new(
+                                            device
+                                                .sdl_ids
+                                                .iter()
+                                                .map(|id| id.to_string())
+                                                .collect::<Vec<_>>()
+                                                .join(", "),
+                                        )
+                                        .weak(),
+                                    );
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Steam Handle:").strong());
+                                    ui.label(
+                                        RichText::new(format!("{}", device.steam_handle)).weak(),
+                                    );
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("SDL Device Count:").strong());
+                                    ui.label(
+                                        RichText::new(format!("{}", device.sdl_device_infos.len()))
+                                            .weak(),
+                                    );
+                                });
+                            });
+                        });
+                        ui.separator();
+                        CollapsingHeader::new(if device.viiper_connected {
+                            "🐍 VIIPER Device 🔗"
+                        } else {
+                            "🐍 VIIPER Device ⛓️‍💥"
+                        })
+                        .id_salt(format!("viiperdev{}", device.id))
+                        .show(ui, |ui| match &device.viiper_device {
+                            Some(viiper_dev) => {
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Connected:").strong());
+                                    ui.label(
+                                        RichText::new(format!("{}", device.viiper_connected))
+                                            .weak(),
+                                    );
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Bus ID:").strong());
+                                    ui.label(
+                                        RichText::new(format!("{}", viiper_dev.bus_id)).weak(),
+                                    );
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Device ID:").strong());
+                                    ui.label(RichText::new(viiper_dev.dev_id.to_string()).weak());
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Type:").strong());
+                                    ui.label(RichText::new(viiper_dev.r#type.to_string()).weak());
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Vendor ID:").strong());
+                                    ui.label(RichText::new(format!("{:?}", viiper_dev.vid)).weak());
+                                });
+                                ui.horizontal_wrapped(|ui| {
+                                    ui.label(RichText::new("Product ID:").strong());
+                                    ui.label(RichText::new(format!("{:?}", viiper_dev.pid)).weak());
+                                });
+                            }
+                            None => {
+                                ui.label("Not connected");
+                            }
+                        });
+                    });
                     ui.group(|ui| {
-                        ui.horizontal_wrapped(|ui| {
-                            ui.label(RichText::new("Device ID:").strong());
-                            ui.label(RichText::new(format!("{}", device.id)).weak());
-                        });
-                        ui.horizontal_wrapped(|ui| {
-                            ui.label(RichText::new("SDL IDs:").strong());
-                            ui.label(
-                                RichText::new(
-                                    device
-                                        .sdl_ids
-                                        .iter()
-                                        .map(|id| id.to_string())
-                                        .collect::<Vec<_>>()
-                                        .join(", "),
-                                )
-                                .weak(),
-                            );
-                        });
-                        ui.horizontal_wrapped(|ui| {
-                            ui.label(RichText::new("Steam Handle:").strong());
-                            ui.label(RichText::new(format!("{}", device.steam_handle)).weak());
-                        });
-                        ui.horizontal_wrapped(|ui| {
-                            ui.label(RichText::new("SDL Device Count:").strong());
-                            ui.label(
-                                RichText::new(format!("{}", device.sdl_device_infos.len())).weak(),
-                            );
-                        });
-
                         for (idx, info) in device.sdl_device_infos.iter().enumerate() {
                             ui.collapsing(
                                 format!(
@@ -63,54 +155,8 @@ pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
                                 },
                             );
                         }
-
-                        ui.collapsing(format!("🐍 VIIPER Device #{}", device.id), |ui| {
-                            match &device.viiper_device {
-                                Some(viiper_dev) => {
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Connected:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{}", device.viiper_connected))
-                                                .weak(),
-                                        );
-                                    });
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Bus ID:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{}", viiper_dev.bus_id)).weak(),
-                                        );
-                                    });
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Device ID:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{}", viiper_dev.dev_id)).weak(),
-                                        );
-                                    });
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Type:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{}", viiper_dev.r#type)).weak(),
-                                        );
-                                    });
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Vendor ID:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{:?}", viiper_dev.vid)).weak(),
-                                        );
-                                    });
-                                    ui.horizontal_wrapped(|ui| {
-                                        ui.label(RichText::new("Product ID:").strong());
-                                        ui.label(
-                                            RichText::new(format!("{:?}", viiper_dev.pid)).weak(),
-                                        );
-                                    });
-                                }
-                                None => {
-                                    ui.label("Not connected");
-                                }
-                            }
-                        });
                     });
+                    ui.separator();
                 }
             });
         });

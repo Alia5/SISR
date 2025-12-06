@@ -214,6 +214,7 @@ impl Dialog {
                             ui.label(&self.message);
                         }
                     });
+                    ui.separator();
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Min), |ui| {
                         let pos_label = self.positive_label.as_deref().unwrap_or("OK");
                         let pos_button =

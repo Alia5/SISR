@@ -1,11 +1,15 @@
+use std::sync::{Arc, Mutex};
+
 use egui::text::{LayoutJob, TextFormat};
 use egui::{Align, Align2, Area, FontId, TextStyle, Vec2};
+use sdl3::event::EventSender;
 use tracing::trace;
 
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::input::handler::State;
 
-type RenderFn = fn(&mut State, &egui::Context, &mut bool);
+type RenderFn =
+    fn(&mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>, &egui::Context, &mut bool);
 
 pub struct BarItem {
     pub title: &'static str,
@@ -38,13 +42,18 @@ impl BottomBar {
                     title: "Steam Stuff",
                     icon: "🚂",
                     open: false,
-                    render: super::steam_config::draw,
+                    render: super::steam_stuff::draw,
                 },
             ],
         }
     }
 
-    pub fn draw(&mut self, state: &mut State, ctx: &egui::Context) {
+    pub fn draw(
+        &mut self,
+        state: &mut State,
+        sdl_waker: Arc<Mutex<Option<EventSender>>>,
+        ctx: &egui::Context,
+    ) {
         Area::new("input_gui_bottom_bar".into())
             .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -16.0))
             .show(ctx, |ui| {
@@ -85,7 +94,7 @@ impl BottomBar {
 
         for item in &mut self.items {
             if item.open {
-                (item.render)(state, ctx, &mut item.open);
+                (item.render)(state, sdl_waker.clone(), ctx, &mut item.open);
             }
         }
     }

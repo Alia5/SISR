@@ -1,3 +1,4 @@
+use std::process::Command;
 use tracing::debug;
 
 pub fn open_steam_url(url: &str) -> Result<(), std::io::Error> {
@@ -5,8 +6,6 @@ pub fn open_steam_url(url: &str) -> Result<(), std::io::Error> {
 
     #[cfg(target_os = "windows")]
     {
-        use std::process::Command;
-
         Command::new("cmd").args(["/c", "start", "", url]).spawn()?;
     }
 
@@ -22,5 +21,3 @@ pub fn open_steam_url(url: &str) -> Result<(), std::io::Error> {
 
     Ok(())
 }
-
-

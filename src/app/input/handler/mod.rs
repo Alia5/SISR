@@ -1,8 +1,11 @@
 mod events_connection;
 mod events_input;
+mod events_misc;
 mod gui;
 mod viiper_bridge;
 
+mod events;
+pub use events::HandlerEvent;
 use viiper_bridge::ViiperBridge;
 pub use viiper_bridge::ViiperEvent;
 
@@ -16,11 +19,13 @@ use sdl3::event::EventSender;
 use tracing::{debug, warn};
 use winit::event_loop::EventLoopProxy;
 
-use crate::app::{input::handler::gui::bottom_bar::BottomBar, steam_utils::binding_enforcer::BindingEnforcer};
 use crate::app::{
     gui::dispatcher::GuiDispatcher,
     input::device::{Device, DeviceState, SDLDevice},
     window::RunnerEvent,
+};
+use crate::app::{
+    input::handler::gui::bottom_bar::BottomBar, steam_utils::binding_enforcer::BindingEnforcer,
 };
 
 pub struct EventHandler {
@@ -69,7 +74,7 @@ impl EventHandler {
             sdl_id_to_device: HashMap::new(),
             next_device_id: 1,
             state: state.clone(),
-            viiper: ViiperBridge::new(viiper_address, sdl_waker, clone_handle),
+            viiper: ViiperBridge::new(viiper_address, sdl_waker.clone(), clone_handle),
         };
         if let Ok(dispatcher_guard) = res.gui_dispatcher.lock()
             && let Some(dispatcher) = &*dispatcher_guard
@@ -80,7 +85,7 @@ impl EventHandler {
                 {
                     let state = &mut *state_guard;
                     let bar = &mut *bar_guard;
-                    EventHandler::on_draw(state, bar, ctx);
+                    EventHandler::on_draw(state, sdl_waker.clone(), bar, ctx);
                 }
             });
         }
@@ -97,7 +102,12 @@ impl EventHandler {
             .map(|r| r.inspect_err(|e| warn!("Failed to request GUI redraw: {}", e)));
     }
 
-    pub(super) fn on_draw(state: &mut State, bottom_bar: &mut BottomBar, ctx: &egui::Context) {
-        bottom_bar.draw(state, ctx);
+    pub(super) fn on_draw(
+        state: &mut State,
+        sdl_waker: Arc<Mutex<Option<EventSender>>>,
+        bottom_bar: &mut BottomBar,
+        ctx: &egui::Context,
+    ) {
+        bottom_bar.draw(state, sdl_waker, ctx);
     }
 }

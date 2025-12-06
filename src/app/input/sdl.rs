@@ -131,7 +131,7 @@ impl InputLoop {
         let _events = match sdl.event() {
             Ok(event_subsystem) => {
                 if let Err(e) =
-                    event_subsystem.register_custom_event::<super::handler::ViiperEvent>()
+                    event_subsystem.register_custom_event::<super::handler::HandlerEvent>()
                 {
                     error!("Failed to register VIIPER disconnect event: {}", e);
                 }
@@ -264,10 +264,17 @@ impl InputLoop {
                     }
                     _ => {
                         if event.is_user_event()
-                            && let Some(viiper_event) =
-                                event.as_user_event_type::<super::handler::ViiperEvent>()
+                            && let Some(handler_event) =
+                                event.as_user_event_type::<super::handler::HandlerEvent>()
                         {
-                            handler.on_viiper_event(viiper_event);
+                            match handler_event {
+                                super::handler::HandlerEvent::ViiperEvent(ve) => {
+                                    handler.on_viiper_event(ve);
+                                }
+                                super::handler::HandlerEvent::IgnoreDeviceEvent { device_id } => {
+                                    handler.ignore_device(device_id);
+                                }
+                            }
                             return Ok(false);
                         }
 

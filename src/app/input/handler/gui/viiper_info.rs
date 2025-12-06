@@ -1,8 +1,16 @@
+use std::sync::{Arc, Mutex};
+
 use egui::{Id, Vec2};
+use sdl3::event::EventSender;
 
 use crate::app::input::handler::State;
 
-pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
+pub fn draw(
+    state: &mut State,
+    _: Arc<Mutex<Option<EventSender>>>,
+    ctx: &egui::Context,
+    open: &mut bool,
+) {
     egui::Window::new("🐍 VIIPER")
         .id(Id::new("viiper_info"))
         .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
@@ -11,6 +19,11 @@ pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
         .resizable(true)
         .open(open)
         .show(ctx, |ui| {
+            let connected = state.devices.iter().any(|(_, d)| d.viiper_device.is_some());
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Connected:").strong());
+                ui.label(egui::RichText::new(if connected { "Yes" } else { "No" }).weak());
+            });
             ui.horizontal_wrapped(|ui| {
                 ui.label(egui::RichText::new("VIIPER Address:").strong());
                 ui.label(
