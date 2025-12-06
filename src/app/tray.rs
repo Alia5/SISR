@@ -4,6 +4,8 @@ use sdl3::event::EventSender;
 #[cfg(windows)]
 use tracing::Span;
 use tracing::{Level, error, event, info, span};
+#[cfg(target_os = "linux")]
+use tracing::{Span, trace};
 use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 use winit::event_loop::EventLoopProxy;

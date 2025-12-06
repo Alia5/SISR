@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
 use tracing::debug;
+#[cfg(windows)]
+use wgpu::Dx12BackendOptions;
 use wgpu::{
-    Backends, CompositeAlphaMode, Device, Dx12BackendOptions, Instance, InstanceDescriptor,
-    PresentMode, Queue, Surface, SurfaceConfiguration, TextureUsages,
+    Backends, CompositeAlphaMode, Device, Instance, InstanceDescriptor, PresentMode, Queue,
+    Surface, SurfaceConfiguration, TextureUsages,
 };
 #[cfg(windows)]
 use wgpu_types::Dx12SwapchainKind;
