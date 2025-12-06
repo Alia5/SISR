@@ -10,6 +10,7 @@ use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 use winit::event_loop::EventLoopProxy;
 
+use crate::app::gui::dialogs::{self, Dialog};
 use crate::app::window::RunnerEvent;
 
 use super::core::App;
@@ -111,6 +112,7 @@ impl TrayContext {
                     };
                     _ = proxy.send_event(event);
                 }
+                return false;
             }
         }
         false

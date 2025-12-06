@@ -6,7 +6,7 @@ use egui::Context;
 use egui_wgpu::Renderer as EguiRenderer;
 use egui_wgpu::ScreenDescriptor;
 use egui_winit::State as EguiWinitState;
-use tracing::{debug, error, trace};
+use tracing::{debug, error, trace, warn};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
@@ -16,8 +16,8 @@ use winit::window::{Window, WindowAttributes, WindowId};
 use winit::platform::windows::WindowAttributesExtWindows;
 
 use crate::app::gui::dispatcher::GuiDispatcher;
-use crate::app::gui::{dark_theme, light_theme};
-use crate::config;
+use crate::app::gui::{self, dark_theme, dialogs, light_theme};
+use crate::config::{self, CONFIG};
 use crate::gfx::Gfx;
 
 pub enum RunnerEvent {
@@ -25,6 +25,8 @@ pub enum RunnerEvent {
     Redraw(),
     ShowWindow(),
     HideWindow(),
+    DialogPushed(),
+    DialogPopped(),
 }
 
 pub struct WindowRunner {
@@ -35,6 +37,7 @@ pub struct WindowRunner {
     egui_renderer: Option<EguiRenderer>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
     winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
+    pre_dialog_window_visible: bool,
 }
 
 impl WindowRunner {
@@ -68,6 +71,10 @@ impl WindowRunner {
             }
         });
 
+        gui::dialogs::REGISTRY
+            .set(dialogs::Registry::new(winit_waker.clone()))
+            .expect("Failed to init dialog registry");
+
         Self {
             window: None,
             gfx: None,
@@ -77,6 +84,13 @@ impl WindowRunner {
             gui_dispatcher: dispatcher,
             // The legend of Zelda: The
             winit_waker,
+            pre_dialog_window_visible: CONFIG
+                .get()
+                .cloned()
+                .expect("Config not set")
+                .window
+                .create
+                .unwrap_or(false),
         }
     }
 
@@ -104,7 +118,7 @@ impl WindowRunner {
         }
     }
 
-    fn build_ui(dispatcher: &GuiDispatcher, ctx: &Context) {
+    fn draw_ui(dispatcher: &GuiDispatcher, ctx: &Context) {
         // egui::Window::new("⚙ EGUI Settings").show(ctx, |ui| {
         //     ctx.settings_ui(ui);
         // });
@@ -124,6 +138,14 @@ impl WindowRunner {
             });
 
         dispatcher.draw(ctx);
+        let Some(registry) = dialogs::REGISTRY.get() else {
+            warn!("Dialog registry not initialized");
+            return;
+        };
+        let dialogs = registry.snapshot_dialogs();
+        for dialog in dialogs {
+            dialog.draw(ctx);
+        }
     }
 
     /// Renders a frame and returns how soon egui wants to repaint (if at all)
@@ -152,7 +174,7 @@ impl WindowRunner {
             if let Ok(guard) = self.gui_dispatcher.lock()
                 && let Some(dispatcher) = &*guard
             {
-                Self::build_ui(dispatcher, ctx);
+                Self::draw_ui(dispatcher, ctx);
             }
         });
         egui_winit.handle_platform_output(window.as_ref(), full_output.platform_output);
@@ -320,6 +342,39 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                     window.set_visible(false);
                 } else {
                     trace!("Window is None, cannot hide");
+                }
+            }
+            RunnerEvent::DialogPushed() => {
+                self.pre_dialog_window_visible = self
+                    .window
+                    .as_ref()
+                    .and_then(|w| w.is_visible())
+                    .unwrap_or(false);
+                if let Some(window) = &self.window {
+                    if !self.pre_dialog_window_visible {
+                        debug!("Dialog pushed to hidden window, Showing window for dialog");
+                        window.set_visible(true);
+                        window.focus_window();
+                    }
+                    trace!("Dialog pushed, requesting redraw");
+                    window.request_redraw();
+                }
+            }
+            RunnerEvent::DialogPopped() => {
+                if let Some(window) = &self.window {
+                    trace!("Dialog popped, requesting redraw");
+                    window.request_redraw();
+                    if !self.pre_dialog_window_visible {
+                        let registry = dialogs::REGISTRY
+                            .get()
+                            .expect("Dialog registry not initialized");
+                        if registry.is_empty() {
+                            debug!(
+                                "No more dialogs and window was previously hidden, hiding window again"
+                            );
+                            window.set_visible(false);
+                        }
+                    }
                 }
             }
         }

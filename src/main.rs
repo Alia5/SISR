@@ -3,7 +3,7 @@
 
 use std::process::ExitCode;
 
-use sisr::logging;
+use sisr::{app::steam_utils, logging};
 use tracing::{error, info, trace};
 
 fn main() -> ExitCode {
@@ -14,7 +14,7 @@ fn main() -> ExitCode {
     }
     info!("Starting SISR...");
 
-    sisr::app::steam_utils::install_cleanup_handlers();
+    steam_utils::binding_enforcer::install_cleanup_handlers();
 
     let config = sisr::config::Config::parse();
     sisr::config::CONFIG.set(config.clone()).unwrap();
