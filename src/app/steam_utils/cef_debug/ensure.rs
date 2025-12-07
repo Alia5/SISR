@@ -60,8 +60,11 @@ pub fn check_enable_file() -> bool {
     false
 }
 
+// ----
+
 // Yup! This code will do for now!
 // Believe or not, this is not LLM generated 🫣
+// Just stop reading!
 pub async fn ensure_cef_enabled(
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
 ) -> (bool, bool) {
@@ -196,6 +199,41 @@ SISR will close now.",
     if *file_create_attempted.lock().unwrap() && !*continue_without.lock().unwrap() {
         info!("CEF debugging enabled, restarting Steam...");
         _ = restart_steam(winit_waker.clone()).await;
+    }
+
+    if check_enable_file() && !*continue_without.lock().unwrap() {
+        info!("checking if CEF debugging is reachable...");
+        for _ in 0..10 {
+            if check_enabled().await {
+                info!("CEF debugging enabled and reachable");
+                return (true, false);
+            }
+        }
+        warn!("CEF debugging enable file present, but CEF debugging not reachable");
+        let winit_waker = winit_waker.clone();
+        std::thread::spawn(move || {
+            let winit_waker = winit_waker.clone();
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            _ = push_dialog(Dialog::new_ok(
+                "CEF debugging not reachable",
+                "CEF debugging is enabled, but SISR could not reach it.
+
+Please make sure Steam is running and nothing is blocking or using connections to localhost:8080.
+(Steam has hardcoded this port, cannot be changed (yet))
+
+SISR will close now.",
+                move || {
+                    let Ok(guard) = winit_waker.lock() else {
+                        panic!("Failed to acquire winit waker lock to quit app after missing steam")
+                    };
+                    let Some(proxy) = &*guard else {
+                        panic!("Winit waker not initialized to quit app after missing steam")
+                    };
+                    _ = proxy.send_event(RunnerEvent::Quit());
+                },
+            ));
+        });
+        tokio::time::sleep(std::time::Duration::from_hours(9999)).await; // wait forever, we are done here
     }
 
     (check_enable_file(), *continue_without.lock().unwrap())
