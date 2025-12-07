@@ -1,6 +1,7 @@
 use std::process::ExitCode;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use tokio::sync::Notify;
 
 use egui::Context;
 use egui_wgpu::Renderer as EguiRenderer;
@@ -37,6 +38,7 @@ pub struct WindowRunner {
     egui_renderer: Option<EguiRenderer>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
     winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
+    window_ready: Arc<Notify>,
     pre_dialog_window_visible: bool,
 }
 
@@ -49,6 +51,7 @@ impl WindowRunner {
     pub fn new(
         winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
         dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
+        window_ready: Arc<Notify>,
     ) -> Self {
         let ctx = Context::default();
 
@@ -84,6 +87,7 @@ impl WindowRunner {
             gui_dispatcher: dispatcher,
             // The legend of Zelda: The
             winit_waker,
+            window_ready,
             pre_dialog_window_visible: CONFIG
                 .get()
                 .cloned()
@@ -313,6 +317,8 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
 
         self.gfx = Some(gfx);
         self.window = Some(window);
+
+        self.window_ready.notify_one();
     }
 
     fn user_event(&mut self, event_loop: &ActiveEventLoop, _event: RunnerEvent) {

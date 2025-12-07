@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex, OnceLock};
 
 use anyhow::Error;
-use egui::{Align2, Vec2};
+use egui::{Align2, AtomExt, RichText, Vec2};
 use tracing::error;
 use winit::event_loop::EventLoopProxy;
 
@@ -196,6 +196,10 @@ impl Dialog {
 
     pub fn draw(&self, ctx: &egui::Context) {
         self.draw_backdrop(ctx);
+
+        let mut frame = egui::Frame::window(&ctx.style());
+        frame.inner_margin = egui::Margin::symmetric(24, 8);
+
         egui::Window::new(egui::WidgetText::from(self.title.clone()))
             .anchor(Align2::CENTER_CENTER, Vec2::ZERO)
             .collapsible(false)
@@ -203,17 +207,23 @@ impl Dialog {
             .title_bar(false)
             .max_size(ctx.available_rect().size() - Vec2::splat(24.0))
             .order(egui::Order::Foreground)
+            .frame(frame)
             .show(ctx, |ui| {
-                ui.vertical_centered(|ui| {
-                    ui.heading(self.title.clone());
-                    ui.separator();
-                    egui::ScrollArea::both().auto_shrink(true).show(ui, |ui| {
-                        if let Some(callback) = &self.draw_callback {
-                            (callback)(ctx);
-                        } else {
-                            ui.label(&self.message);
-                        }
+                ui.vertical(|ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.heading(self.title.clone());
                     });
+                    ui.separator();
+                    egui::ScrollArea::vertical()
+                        .auto_shrink(true)
+                        .show(ui, |ui| {
+                            if let Some(callback) = &self.draw_callback {
+                                (callback)(ctx);
+                            } else {
+                                ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Extend);
+                                ui.label(&self.message);
+                            }
+                        });
                     ui.separator();
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Min), |ui| {
                         let pos_label = self.positive_label.as_deref().unwrap_or("OK");

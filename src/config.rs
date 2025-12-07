@@ -60,6 +60,9 @@ pub struct Config {
     #[command(flatten)]
     pub log: LogOpts,
 
+    #[command(flatten)]
+    pub steam: SteamOpts,
+
     #[serde(skip)]
     #[arg(short, long, action = clap::ArgAction::Count)]
     pub debug: u8,
@@ -121,6 +124,38 @@ pub struct LogFile {
     pub file_level: Option<String>,
 }
 
+#[derive(Parser, Debug, Serialize, Deserialize, Clone)]
+pub struct SteamOpts {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "disable-steam-cef-debug",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "false",
+        env = "SISR_STEAM_CEF_DEBUG_ENABLE",
+        help = "Enable Steam CEF remote debugging (true/false) [default: false]"
+    )]
+    pub cef_debug_disable: Option<bool>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "steam-launch-timeout-secs",
+        value_name = "SECONDS",
+        env = "SISR_STEAM_LAUNCH_TIMEOUT_SECS",
+        help = "Time to wait for Steam to launch in seconds [default: 1]"
+    )]
+    pub steam_launch_timeout_secs: Option<u64>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "steam-path",
+        value_name = "PATH",
+        env = "SISR_STEAM_PATH",
+        help = "Path to Steam (if not autodetect)"
+    )]
+    pub steam_path: Option<PathBuf>,
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -142,6 +177,11 @@ impl Default for Config {
                 .to_string()
                 .into(),
                 log_file: None,
+            },
+            steam: SteamOpts {
+                cef_debug_disable: Some(false),
+                steam_launch_timeout_secs: Some(1),
+                steam_path: None,
             },
             debug: 0,
         }

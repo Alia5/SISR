@@ -3,6 +3,7 @@ use std::net::ToSocketAddrs;
 use std::process::ExitCode;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use tokio::sync::Notify;
 use tracing::{debug, error, info, warn};
 use winit::event_loop::EventLoopProxy;
 
@@ -11,6 +12,7 @@ use super::window::WindowRunner;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::input::{self};
 use crate::app::signals;
+use crate::app::steam_utils::cef_debug::ensure::{ensure_cef_enabled, ensure_steam_running};
 use crate::app::window::RunnerEvent;
 use crate::config;
 
@@ -103,8 +105,18 @@ impl App {
             }
         }
 
-        let mut window_runner =
-            WindowRunner::new(self.winit_waker.clone(), self.gui_dispatcher.clone());
+        let window_ready = Arc::new(Notify::new());
+        self.steam_stuff(
+            async_rt.handle().clone(),
+            self.winit_waker.clone(),
+            window_ready.clone(),
+        );
+
+        let mut window_runner = WindowRunner::new(
+            self.winit_waker.clone(),
+            self.gui_dispatcher.clone(),
+            window_ready,
+        );
         let mut exit_code = window_runner.run();
         Self::shutdown(Some(&self.sdl_waker), Some(&self.winit_waker));
 
@@ -142,6 +154,27 @@ impl App {
             _ = proxy.send_event(RunnerEvent::Quit());
         }
         tray::shutdown();
+    }
+
+    fn steam_stuff(
+        &self,
+        async_handle: tokio::runtime::Handle,
+        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
+        window_ready: Arc<Notify>,
+    ) {
+        async_handle.spawn(async move {
+            window_ready.notified().await;
+            let running = ensure_steam_running(winit_waker.clone()).await;
+            if !running {
+                error!("Steam ensure process failed, shutting down app");
+                App::shutdown(None, Some(&winit_waker));
+            }
+            let (cef_enabled, continue_without) = ensure_cef_enabled(winit_waker.clone()).await;
+            if !cef_enabled && !continue_without {
+                error!("CEF enable process failed, shutting down app");
+                App::shutdown(None, Some(&winit_waker));
+            }
+        });
     }
 }
 
