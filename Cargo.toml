@@ -30,6 +30,9 @@ ron = "0.12"
 directories = "6.0"
 reqwest = "0.12.24"
 sysinfo = { version = "0.37.2", features = ["windows", "serde"] }
+tokio-tungstenite = "0.28.0"
+futures-util = "0.3.31"
+serde_json = "1.0.145"
 
 
 [target."cfg(windows)".dependencies]

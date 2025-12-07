@@ -10,9 +10,11 @@ use winit::event_loop::EventLoopProxy;
 use super::tray;
 use super::window::WindowRunner;
 use crate::app::gui::dispatcher::GuiDispatcher;
-use crate::app::input::{self};
+use crate::app::input::{self, sdl};
 use crate::app::signals;
+use crate::app::steam_utils::cef_debug;
 use crate::app::steam_utils::cef_debug::ensure::{ensure_cef_enabled, ensure_steam_running};
+use crate::app::steam_utils::cef_ws::WebSocketServer;
 use crate::app::window::RunnerEvent;
 use crate::config;
 
@@ -109,6 +111,7 @@ impl App {
         self.steam_stuff(
             async_rt.handle().clone(),
             self.winit_waker.clone(),
+            self.sdl_waker.clone(),
             window_ready.clone(),
         );
 
@@ -160,9 +163,10 @@ impl App {
         &self,
         async_handle: tokio::runtime::Handle,
         winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
+        sdl_waker: Arc<Mutex<Option<EventSender>>>,
         window_ready: Arc<Notify>,
     ) {
-        async_handle.spawn(async move {
+        async_handle.clone().spawn(async move {
             window_ready.notified().await;
             let running = ensure_steam_running(winit_waker.clone()).await;
             if !running {
@@ -173,6 +177,23 @@ impl App {
             if !cef_enabled && !continue_without {
                 error!("CEF enable process failed, shutting down app");
                 App::shutdown(None, Some(&winit_waker));
+            }
+            if cef_enabled && !continue_without {
+                info!("Starting WebSocket server...");
+                let server = WebSocketServer::new().await;
+                match server {
+                    Ok(server) => {
+                        let port = server.port();
+                        info!("WebSocket server started on port {}", port);
+                        server.run(async_handle, winit_waker, sdl_waker);
+                        cef_debug::inject::set_ws_server_port(port);
+
+
+                    }
+                    Err(e) => {
+                        error!("Failed to start WebSocket server: {}", e);
+                    }
+                }
             }
         });
     }

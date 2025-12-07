@@ -1,6 +1,6 @@
 use std::{
     process::Command,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, OnceLock},
 };
 
 use tokio::runtime::Handle;
@@ -16,7 +16,10 @@ use crate::{
     config::CONFIG,
 };
 
+pub static CEF_DEBUG_PORT: OnceLock<u16> = OnceLock::new();
+
 pub async fn check_enabled() -> bool {
+    CEF_DEBUG_PORT.get_or_init(|| 8080);
     // http://localhost:8080/json/list <- tab list json / must contain "Steam" stuff.
     // TODO: Configurable port
     // NOTE: Steam itself does not provide a configurable port
