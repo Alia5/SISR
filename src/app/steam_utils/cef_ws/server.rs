@@ -20,13 +20,12 @@ use super::messages::WsResponse;
 type BroadcastSender = mpsc::UnboundedSender<Message>;
 
 pub struct WebSocketServer {
-    listener: TcpListener,
     port: u16,
     connections: Arc<Mutex<Vec<BroadcastSender>>>,
 }
 
 impl WebSocketServer {
-    pub async fn new() -> Result<Self> {
+    pub async fn new() -> Result<(Self, TcpListener)> {
         let listener = TcpListener::bind("127.0.0.1:0")
             .await
             .context("Failed to bind WebSocket server to random port")?;
@@ -38,11 +37,13 @@ impl WebSocketServer {
 
         info!("CEF Debug WebSocket server bound to port {}", port);
 
-        Ok(Self {
+        Ok((
+            Self {
+                port,
+                connections: Arc::new(Mutex::new(Vec::new())),
+            },
             listener,
-            port,
-            connections: Arc::new(Mutex::new(Vec::new())),
-        })
+        ))
     }
 
     pub fn port(&self) -> u16 {
@@ -74,21 +75,21 @@ impl WebSocketServer {
 
     pub fn run(
         self,
+        listener: TcpListener,
         handle: tokio::runtime::Handle,
         winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
         sdl_waker: Arc<Mutex<Option<sdl3::event::EventSender>>>,
     ) {
-        let server = Arc::new(self);
-        let connections = server.connections.clone();
-        let port = server.port;
+        let connections = self.connections.clone();
+        let port = self.port;
 
-        super::broadcast::set_server(server.clone());
+        super::broadcast::set_server(Arc::new(self));
 
         handle.spawn(async move {
             info!("CEF Debug WebSocket server listening on port {}", port);
 
             loop {
-                match server.listener.accept().await {
+                match listener.accept().await {
                     Ok((stream, addr)) => {
                         debug!("New CEF Debug WebSocket connection from: {}", addr);
                         let winit_waker = winit_waker.clone();
@@ -146,6 +147,7 @@ impl WebSocketServer {
         let handler = Handler::new(winit_waker, sdl_waker);
 
         let (broadcast_tx, mut broadcast_rx) = mpsc::unbounded_channel();
+        let broadcast_tx_clone = broadcast_tx.clone();
 
         if let Ok(mut conns) = connections.lock() {
             conns.push(broadcast_tx);
@@ -210,6 +212,11 @@ impl WebSocketServer {
                     }
                 }
             }
+        }
+
+        if let Ok(mut conns) = connections.lock() {
+            conns.retain(|sender| !sender.same_channel(&broadcast_tx_clone));
+            debug!("Unregistered WebSocket connection. Total: {}", conns.len());
         }
 
         info!("CEF Debug WebSocket connection closed with {}", addr);

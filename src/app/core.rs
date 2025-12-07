@@ -182,10 +182,10 @@ impl App {
                 info!("Starting WebSocket server...");
                 let server = WebSocketServer::new().await;
                 match server {
-                    Ok(server) => {
+                    Ok((server, listener)) => {
                         let port = server.port();
                         info!("WebSocket server started on port {}", port);
-                        server.run(async_handle, winit_waker, sdl_waker);
+                        server.run(listener, async_handle, winit_waker, sdl_waker);
                         cef_debug::inject::set_ws_server_port(port);
 
 
