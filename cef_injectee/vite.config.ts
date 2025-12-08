@@ -23,18 +23,14 @@ export default defineConfig({
             output: {
                 entryFileNames: "[name].js",
                 chunkFileNames: "[name].js",
-                manualChunks: (id) => {
+                manualChunks: (_) => {
                     // Force every import inlined
                     return undefined;
                 },
 
-                // IIFE is not supported using multiple entry points, mimimi
-                // let's make it happen regardless...
-
-                // TODO: does this break sourcemaps?
-                // Aw whatever
-                banner: "(function() {",
-                footer: "})();",
+                // Lets make our own IIFEs, with blackjack and hookers (and return values!)
+                intro: "(function() {\nlet __res;\n",
+                outro: "return __res;})();",
             },
         }
     }

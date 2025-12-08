@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 
 use crate::app::steam_utils::cef_debug::ensure::CEF_DEBUG_PORT;
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use serde::{Deserialize, Serialize};
 use tracing::trace;
 
@@ -41,7 +41,17 @@ pub async fn inject(tab_title: &str, payload: &str) -> Result<String> {
         .cloned()
         .expect("WebSocket server port not set");
 
+    let mut tab_title = tab_title.to_string();
     let tabs = list_tabs().await?;
+    // TODO: needs better handling, but for now, inject into the first overlay-tab we can find
+    // as it is likely the most recent anyway
+    if tab_title == "Overlay" {
+        tab_title = tabs
+            .iter()
+            .find(|t| t.title.contains("Overlay"))
+            .map(|t| t.title.clone())
+            .ok_or_else(|| anyhow::anyhow!("Overlay tab not found"))?;
+    }
     let tab = tabs
         .iter()
         .find(|t| t.title == tab_title)
@@ -105,10 +115,7 @@ pub async fn inject(tab_title: &str, payload: &str) -> Result<String> {
                 return Ok(value.to_string());
             }
 
-            Err(anyhow::anyhow!(
-                "Unexpected response format from CEF debugger:\n{}",
-                serde_json::to_string_pretty(&result)?
-            ))
+            Ok("undefined".to_string())
         } else {
             Err(anyhow::anyhow!("Unexpected WebSocket message type"))
         }

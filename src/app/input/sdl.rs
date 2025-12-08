@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 use crate::app::{
@@ -79,6 +80,7 @@ pub struct InputLoop {
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
     async_handle: tokio::runtime::Handle,
+    continuous_redraw: Arc<AtomicBool>,
 }
 
 impl InputLoop {
@@ -87,12 +89,14 @@ impl InputLoop {
         winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
         gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
         async_handle: tokio::runtime::Handle,
+        continuous_redraw: Arc<AtomicBool>,
     ) -> Self {
         Self {
             sdl_waker,
             winit_waker,
             gui_dispatcher,
             async_handle,
+            continuous_redraw,
         }
     }
 
@@ -196,6 +200,7 @@ impl InputLoop {
             self.async_handle.clone(),
             joystick_subsystem,
             gamepad_subsystem,
+            self.continuous_redraw.clone(),
         );
         trace!("SDL loop starting");
 
@@ -279,6 +284,12 @@ impl InputLoop {
                                     device_id,
                                 } => {
                                     handler.disconnect_viiper_device(device_id);
+                                }
+                                super::handler::HandlerEvent::CefDebugReady { port } => {
+                                    handler.on_cef_debug_ready(port);
+                                }
+                                super::handler::HandlerEvent::OverlayStateChanged { open } => {
+                                    handler.on_overlay_state_changed(open);
                                 }
                             }
                             return Ok(false);

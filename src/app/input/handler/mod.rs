@@ -12,7 +12,7 @@ pub use viiper_bridge::ViiperEvent;
 use std::{
     collections::HashMap,
     net::SocketAddr,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, atomic::AtomicBool},
 };
 
 use sdl3::event::EventSender;
@@ -45,6 +45,9 @@ pub(super) struct State {
     devices: HashMap<u64, Device>,
     viiper_address: Option<SocketAddr>,
     binding_enforcer: BindingEnforcer,
+    cef_debug_port: Option<u16>,
+    steam_overlay_open: bool,
+    window_continuous_redraw: Arc<AtomicBool>,
 }
 
 impl EventHandler {
@@ -56,11 +59,15 @@ impl EventHandler {
         async_handle: tokio::runtime::Handle,
         sdl_joystick: sdl3::JoystickSubsystem,
         sdl_gamepad: sdl3::GamepadSubsystem,
+        window_continuous_redraw: Arc<AtomicBool>,
     ) -> Self {
         let state = Arc::new(Mutex::new(State {
             devices: HashMap::new(),
             viiper_address,
             binding_enforcer: BindingEnforcer::new(),
+            cef_debug_port: None,
+            steam_overlay_open: false,
+            window_continuous_redraw: window_continuous_redraw.clone(),
         }));
         let bottom_bar = Arc::new(Mutex::new(BottomBar::new()));
         let clone_handle = async_handle.clone();

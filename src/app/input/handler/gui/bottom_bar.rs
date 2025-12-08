@@ -130,6 +130,9 @@ impl BottomBar {
         for item in &mut self.items {
             if item.open {
                 (item.render)(state, sdl_waker.clone(), ctx, &mut item.open);
+                if !item.open {
+                    state_changed = true;
+                }
             }
         }
 

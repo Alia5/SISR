@@ -5,4 +5,6 @@ pub enum HandlerEvent {
     IgnoreDevice { device_id: u64 },
     ConnectViiperDevice { device_id: u64 },
     DisconnectViiperDevice { device_id: u64 },
+    CefDebugReady { port: u16 },
+    OverlayStateChanged { open: bool },
 }

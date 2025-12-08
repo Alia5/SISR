@@ -1,15 +1,17 @@
 use sdl3::event::EventSender;
 use std::net::ToSocketAddrs;
 use std::process::ExitCode;
+use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tokio::sync::Notify;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info, trace, warn};
 use winit::event_loop::EventLoopProxy;
 
 use super::tray;
 use super::window::WindowRunner;
 use crate::app::gui::dispatcher::GuiDispatcher;
+use crate::app::input::handler::HandlerEvent;
 use crate::app::input::{self, sdl};
 use crate::app::signals;
 use crate::app::steam_utils::cef_debug;
@@ -47,12 +49,16 @@ impl App {
         let sdl_waker = self.sdl_waker.clone();
         let winit_waker_for_sdl = self.winit_waker.clone();
         let dispatcher = self.gui_dispatcher.clone();
+        let continuous_redraw = Arc::new(AtomicBool::new(
+            self.cfg.window.continous_draw.unwrap_or(false),
+        ));
 
         let input_loop = Arc::new(Mutex::new(Some(input::sdl::InputLoop::new(
             sdl_waker,
             winit_waker_for_sdl,
             dispatcher,
             async_rt.handle().clone(),
+            continuous_redraw.clone(),
         ))));
 
         let should_create_window = self.cfg.window.create.unwrap_or(true);
@@ -119,6 +125,7 @@ impl App {
             self.winit_waker.clone(),
             self.gui_dispatcher.clone(),
             window_ready,
+            continuous_redraw,
         );
         let mut exit_code = window_runner.run();
         Self::shutdown(Some(&self.sdl_waker), Some(&self.winit_waker));
@@ -185,10 +192,19 @@ impl App {
                     Ok((server, listener)) => {
                         let port = server.port();
                         info!("WebSocket server started on port {}", port);
-                        server.run(listener, async_handle, winit_waker, sdl_waker);
+                        server.run(listener, async_handle, winit_waker, sdl_waker.clone());
                         cef_debug::inject::set_ws_server_port(port);
 
-
+                        let Ok(sdl_waker) = sdl_waker.lock() else {
+                            error!("Failed to lock SDL waker to notify CEF debug readiness");
+                            return;
+                        };
+                        sdl_waker.as_ref().and_then(|sender| {
+                            trace!("Notifying SDL input handler of CEF debug readiness");
+                            sender
+                                .push_custom_event(HandlerEvent::CefDebugReady { port })
+                                .ok()
+                        });
                     }
                     Err(e) => {
                         error!("Failed to start WebSocket server: {}", e);

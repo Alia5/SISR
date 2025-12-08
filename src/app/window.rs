@@ -1,13 +1,14 @@
 use std::process::ExitCode;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio::sync::Notify;
 
 use egui::Context;
 use egui_wgpu::Renderer as EguiRenderer;
 use egui_wgpu::ScreenDescriptor;
 use egui_winit::State as EguiWinitState;
-use tracing::{debug, error, trace, warn};
+use tracing::{debug, error, info, trace, warn};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
@@ -40,6 +41,7 @@ pub struct WindowRunner {
     winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
     window_ready: Arc<Notify>,
     pre_dialog_window_visible: bool,
+    continuous_redraw: Arc<AtomicBool>,
 }
 
 impl WindowRunner {
@@ -52,6 +54,7 @@ impl WindowRunner {
         winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
         dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
         window_ready: Arc<Notify>,
+        continuous_redraw: Arc<AtomicBool>,
     ) -> Self {
         let ctx = Context::default();
 
@@ -95,6 +98,7 @@ impl WindowRunner {
                 .window
                 .create
                 .unwrap_or(false),
+            continuous_redraw,
         }
     }
 
@@ -152,7 +156,6 @@ impl WindowRunner {
         }
     }
 
-    /// Renders a frame and returns how soon egui wants to repaint (if at all)
     fn render(&mut self) -> Option<Duration> {
         let (Some(gfx), Some(window), Some(egui_winit), Some(egui_renderer)) = (
             &self.gfx,
@@ -386,8 +389,50 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         }
     }
 
+    fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
+        if !self.continuous_redraw.load(Ordering::Relaxed) {
+            return;
+        }
+
+        static LAST_FRAME_TIME: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+        let last_time = LAST_FRAME_TIME.load(Ordering::Relaxed);
+        if last_time != 0 {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64;
+            let elapsed = now.saturating_sub(last_time);
+            let frame_time = if self.window.as_ref().map(|w| w.has_focus()).unwrap_or(false) {
+                16
+            } else {
+                33
+            };
+            if elapsed < frame_time {
+                std::thread::sleep(Duration::from_millis(frame_time - elapsed));
+            }
+        }
+
+        LAST_FRAME_TIME.store(
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as u64,
+            Ordering::Relaxed,
+        );
+
+        if let Some(repaint_after) = self.render()
+            && let Some(window) = self.window.as_ref()
+            && repaint_after < Duration::MAX
+        {
+            window.request_redraw();
+        }
+    }
+
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
-        if matches!(event, WindowEvent::RedrawRequested) {
+        if !self.continuous_redraw.load(Ordering::Relaxed)
+            && matches!(event, WindowEvent::RedrawRequested)
+        {
             if let Some(repaint_after) = self.render()
                 && let Some(window) = self.window.as_ref()
                 && repaint_after < Duration::MAX
@@ -433,6 +478,11 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             WindowEvent::Resized(size) => {
                 if let Some(gfx) = &mut self.gfx {
                     gfx.resize(size.width, size.height);
+                }
+            }
+            WindowEvent::RedrawRequested => {
+                if let Some(window) = &self.window {
+                    window.request_redraw();
                 }
             }
             _ => {}

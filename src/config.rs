@@ -92,6 +92,16 @@ pub struct WindowOpts {
         help = "Create a fullscreen window [default: true]"
     )]
     pub fullscreen: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "window-continous-draw",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "false",
+        env = "SISR_WINDOW_CONTINOUS_DRAW",
+        help = "Enable continous redraw (true/false) [default: false]"
+    )]
+    pub continous_draw: Option<bool>,
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
@@ -167,6 +177,7 @@ impl Default for Config {
             window: WindowOpts {
                 create: Some(false),
                 fullscreen: Some(true),
+                continous_draw: Some(false),
             },
             log: LogOpts {
                 level: if cfg!(debug_assertions) {
