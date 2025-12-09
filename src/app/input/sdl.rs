@@ -257,7 +257,8 @@ impl InputLoop {
                         tracing::event!(parent: span, Level::INFO, event = ?event, "Quit event received");
                         return Ok(true);
                     }
-                    Event::JoyDeviceAdded { .. } | Event::ControllerDeviceAdded { .. } => {
+                    /*Event::JoyDeviceAdded { .. } |*/
+                     Event::ControllerDeviceAdded { .. } => {
                         handler.on_pad_added(&event);
                         *redraw = true;
                     }
@@ -266,6 +267,9 @@ impl InputLoop {
                         *redraw = true;
                     }
                     _ => {
+                        if event.is_joy() {
+                            // ignore joysticks for now
+                        }
                         if event.is_user_event()
                             && let Some(handler_event) =
                                 event.as_user_event_type::<super::handler::HandlerEvent>()
