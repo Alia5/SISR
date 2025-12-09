@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 // TODO: don't force this via src file. (do rustflags in CI)
 
-use std::process::ExitCode;
+use std::{env, process::ExitCode};
 
 use sisr::{app::steam_utils, logging};
 use tracing::{error, info, trace};
@@ -43,6 +43,16 @@ fn main() -> ExitCode {
     #[cfg(windows)]
     {
         sisr::win_console::alloc();
+    }
+
+    unsafe {
+        // TODO: does this do anything?
+        env::set_var("SteamStreamingVideo", "0");
+        env::set_var("SteamStreaming", "0");
+
+        // this specific SDL_Hint doesn't work when Steam is injected.
+        // Envar does...
+        env::set_var("SDL_GAMECONTROLLER_IGNORE_DEVICES", "");
     }
 
     info!("Starting SISR...");

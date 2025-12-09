@@ -8,6 +8,20 @@ use super::EventHandler;
 impl EventHandler {
     // Refresh all tracked gamepads when SDL signals UPDATE_COMPLETE (comes in as Unknown).
     pub fn on_update_complete(&mut self, which: u32) {
+        let Ok(guard) = self.state.lock() else {
+            error!(
+                "Failed to acquire event handler state lock to handle update complete for SDL ID {}",
+                which
+            );
+            return;
+        };
+        if guard.steam_overlay_open {
+            trace!(
+                "Skipping gamepad state update on SDL ID {} due to Steam overlay being open",
+                which
+            );
+            return;
+        }
         let Some((device_id, input_state)) = self.sdl_id_to_device.get_mut(&which) else {
             trace!("No tracked device for SDL ID {} on update complete", which);
             return;

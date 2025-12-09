@@ -1,7 +1,10 @@
 use tracing::{debug, error, info, warn};
 
 use crate::{
-    app::steam_utils::{cef_debug, util::launched_via_steam},
+    app::{
+        gui::dialogs::{Dialog, push_dialog},
+        steam_utils::{cef_debug, util::launched_via_steam},
+    },
     config::CONFIG,
 };
 
@@ -87,19 +90,46 @@ impl EventHandler {
         guard.cef_debug_port = Some(port);
         self.request_redraw();
         // TODO: ready CEF debug when manually injecting overlay, patch this check, then
+        let cont_redraw = guard.window_continuous_redraw.clone();
         if launched_via_steam() {
-            self.async_handle.spawn(async move {
-                match cef_debug::inject::inject(
-                    "Overlay",
-                    str::from_utf8(cef_debug::payloads::OVERLAY_STATE_NOTIFIER)
-                        .expect("Failed to convert overlay notifier payload to string"),
-                )
-                .await
-                {
-                    Ok(_) => info!("Successfully injected CEF overlay state notifier"),
-                    Err(e) => warn!("Failed to inject CEF overlay state notifier: {}", e),
-                }
-            });
+            if !cont_redraw.load(std::sync::atomic::Ordering::Relaxed) {
+                self.async_handle.spawn(async move {
+                    match cef_debug::inject::inject(
+                        "Overlay",
+                        str::from_utf8(cef_debug::payloads::OVERLAY_STATE_NOTIFIER)
+                            .expect("Failed to convert overlay notifier payload to string"),
+                    )
+                    .await
+                    {
+                        Ok(_) => info!("Successfully injected CEF overlay state notifier"),
+                        Err(e) => {
+                            error!("Failed to inject CEF overlay state notifier: {}", e);
+                            _ = push_dialog(Dialog::new_yes_no(
+                                "Failed to init Steam overlay notifier",
+                                format!(
+                                    "SISR was not able to initialize the overlay notifier.
+You may experience a non working Steam Overlay, unless you enable the \"Continous Redraw\" option.
+This can cause higher CPU/GPU usage.
+Enable continous redraw now?
+
+\nError: {}",
+                                    e
+                                ),
+                                move || {
+                                    cont_redraw.store(true, std::sync::atomic::Ordering::Relaxed);
+                                },
+                                || {},
+                            ));
+                        }
+                    }
+                });
+            } else {
+                debug!(
+                    "Skipping CEF overlay notifier injection due to continuous draw being enabled"
+                );
+            }
+        } else {
+            debug!("Not launched via Steam; skipping CEF overlay notifier injection");
         }
     }
 
