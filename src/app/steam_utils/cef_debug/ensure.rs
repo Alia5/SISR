@@ -212,6 +212,7 @@ SISR will close now.",
                 info!("CEF debugging enabled and reachable");
                 return (true, false);
             }
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
         warn!("CEF debugging enable file present, but CEF debugging not reachable");
         let winit_waker = winit_waker.clone();
