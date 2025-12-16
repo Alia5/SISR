@@ -72,6 +72,11 @@ Automatic HidHide integration will (maybe) follow whenever soon™.
 - **Nope.**  
    Just add SISR multiple times as non-Steam game (this time **without** `--marker` launch option) and launch that ;)
 
+### "Mimimi port 8080 is blocked/used"
+
+- Thank Valve for that.  
+  As do other popular tools, SISR uses the CEF-Debugging option provided by Steam, and Valve decided to default to port 8080, not easily changeable via a config-file.
+
 ### "Mimimi, USBIP is slow, mimimi VIIPER also uses TCP mimimi. This causes input lag"
 
 - **Nope.**  
@@ -85,7 +90,8 @@ Automatic HidHide integration will (maybe) follow whenever soon™.
 
 ### "Mimimi, your code is shit / you're doing it wrong"
 
-- Cool story bro. Where's your pull request?
+- Cool story bro. Where's your pull request?  
+  I do this in my spare time; it's better to have something that provides value than whatever elitist kind of mental masturbation.
 
 ## 📝 TODO
 
@@ -109,3 +115,4 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
+
