@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use std::rc::Rc;
 
 use sdl3::event::EventSender;
 use tracing::{Level, error, event, info, span, warn, trace};
@@ -18,6 +19,9 @@ const ICON_BYTES: &[u8] = include_bytes!("../../assets/icon.ico");
 
 #[cfg(windows)]
 static TRAY_THREAD_ID: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+#[cfg(target_os = "linux")]
+static GTK_QUIT_REQUESTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 pub enum TrayMenuEvent {
     Quit,
@@ -179,8 +183,12 @@ pub fn shutdown() {
 
     #[cfg(target_os = "linux")]
     {
-        gtk::main_quit();
-        trace!("Called gtk::main_quit()");
+        GTK_QUIT_REQUESTED.store(true, std::sync::atomic::Ordering::SeqCst);
+        glib::idle_add(|| {
+            gtk::main_quit();
+            glib::ControlFlow::Break
+        });
+        trace!("Set GTK quit flag and scheduled main_quit");
     }
 
     #[cfg(target_os = "macos")]
@@ -250,9 +258,12 @@ fn run_platform(
         return;
     }
 
-    let ctx = Arc::new(TrayContext::new(sdl_waker, winit_waker, window_visible, async_handle));
-
-    glib::idle_add_local(move || {
+    let ctx = Rc::new(TrayContext::new(sdl_waker, winit_waker, window_visible, async_handle));
+    glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
+        if GTK_QUIT_REQUESTED.load(std::sync::atomic::Ordering::SeqCst) {
+            gtk::main_quit();
+            return glib::ControlFlow::Break;
+        }
         if ctx.handle_events() {
             gtk::main_quit();
             return glib::ControlFlow::Break;
