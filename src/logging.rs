@@ -7,7 +7,7 @@ use std::{
 
 use tracing::{Level, Subscriber, level_filters::LevelFilter};
 use tracing_subscriber::{
-    Layer, Registry, fmt,
+    Layer, Registry, fmt, filter::Targets,
     layer::{Context, SubscriberExt},
     reload,
 };
@@ -25,8 +25,13 @@ pub fn setup() {
         LevelFilter::INFO
     };
 
+    let targets = Targets::new()
+        .with_default(LevelFilter::TRACE);
+
     let (stderr_filter, stderr_handle) = reload::Layer::new(initial_level);
-    let stderr_layer = fmt::layer().with_writer(std::io::stderr);
+    let stderr_layer = fmt::layer()
+        .with_writer(std::io::stderr)
+        .with_filter(targets.clone());
 
     let sinks: SinkList = Arc::new(RwLock::new(Vec::new()));
     let buffer = Arc::new(Mutex::new(Vec::new()));
@@ -41,7 +46,8 @@ pub fn setup() {
         sinks: sinks.clone(),
         fmt_layer,
         buffer,
-    };
+    }
+    .with_filter(targets);
 
     let subscriber = Registry::default()
         .with(stderr_filter)

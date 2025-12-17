@@ -54,11 +54,12 @@ impl EventHandler {
                         "Received non-gamepad/joystick event in on_pad_event: {:?}",
                         event
                     );
+                    #[allow(clippy::single_match)]
                     return;
                 }
                 // handle all other events and just "update gamepad"
                 // instead of duplicating code for every shit"
-                trace!("GamepadHandler: Pad event: {:?}", event);
+                // trace!("GamepadHandler: Pad event: {:?}", event);
             }
         }
     }
