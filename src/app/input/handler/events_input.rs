@@ -1,10 +1,11 @@
+use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use sdl3::event::Event;
 use tracing::{debug, error, trace, warn};
-use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 
 use crate::app::input::{device::SDLDevice, handler::ViiperEvent};
 
 use super::EventHandler;
+use super::viiper_bridge::StreamCommand;
 
 impl EventHandler {
     // Refresh all tracked gamepads when SDL signals UPDATE_COMPLETE (comes in as Unknown).
@@ -34,7 +35,10 @@ impl EventHandler {
             })
         {
             input_state.update_from_sdl_gamepad(gamepad);
-            self.viiper.update_device_state(device_id, input_state);
+            self.viiper.update_device_state(
+                *device_id,
+                StreamCommand::SendXbox360Input(input_state.input.clone()),
+            );
         } else {
             warn!("No tracked gamepad for SDL ID {} on update complete", which);
         }
@@ -43,6 +47,50 @@ impl EventHandler {
         match event {
             Event::Unknown { .. } => {
                 trace!("Unknown gamepad event: {:?}", event);
+            }
+            Event::ControllerButtonDown { which, button, .. } => {
+                // trigger only on A-down, while LB+RB+Back are held.
+                if *button != sdl3::gamepad::Button::South {
+                    return;
+                }
+
+                let Some((device_id, _)) = self.sdl_id_to_device.get(which) else {
+                    return;
+                };
+                let Ok(guard) = self.state.lock() else {
+                    return;
+                };
+                let Some(dev) = guard.devices.get(device_id) else {
+                    return;
+                };
+                if dev.steam_handle == 0 {
+                    return;
+                }
+                drop(guard);
+
+                let Some(devs) = self.sdl_devices.get(which) else {
+                    return;
+                };
+                let Some(gp) = devs.iter().find_map(|d| match d {
+                    SDLDevice::Gamepad(gp) => Some(gp),
+                    _ => None,
+                }) else {
+                    return;
+                };
+
+                if gp.button(sdl3::gamepad::Button::LeftShoulder)
+                    && gp.button(sdl3::gamepad::Button::RightShoulder)
+                    && gp.button(sdl3::gamepad::Button::Back)
+                {
+                    trace!("UI toggle controller chord detected on SDL ID {}", which);
+                    if let Ok(guard) = self.winit_waker.lock()
+                        && let Some(proxy) = guard.as_ref()
+                        && let Err(e) =
+                            proxy.send_event(crate::app::window::RunnerEvent::ToggleUi())
+                    {
+                        warn!("Failed to toggle UI via gamepad chord: {e}");
+                    }
+                }
             }
             _ => {
                 if event.is_joy() {
@@ -91,9 +139,10 @@ impl EventHandler {
                             .any(|(_, d)| d.steam_handle != 0 && d.viiper_connected);
                         if !has_any_steam_viiper
                             && let Ok(mut enforcer) = binding_enforcer().lock()
-                                && enforcer.is_active() {
-                                    enforcer.deactivate();
-                                }
+                            && enforcer.is_active()
+                        {
+                            enforcer.deactivate();
+                        }
                     }
                 }
             }
@@ -109,6 +158,7 @@ impl EventHandler {
                     warn!("Received created event for unknown device ID {}", device_id);
                     return;
                 };
+
                 device.viiper_device = Some(viiper_device);
                 self.viiper.connect_device(device);
                 self.request_redraw();
@@ -134,10 +184,11 @@ impl EventHandler {
                         .any(|(_, d)| d.steam_handle != 0 && d.viiper_connected);
                     if has_any_steam_viiper
                         && let Ok(mut enforcer) = binding_enforcer().lock()
-                            && !enforcer.is_active() {
-                                enforcer.activate();
-                            }
+                        && !enforcer.is_active()
+                    {
+                        enforcer.activate();
                     }
+                }
 
                 self.request_redraw();
             }

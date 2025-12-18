@@ -6,7 +6,7 @@ use figment::{
     providers::{Format, Json, Serialized, Toml, Yaml},
 };
 use serde::{Deserialize, Serialize};
-use tracing::debug;
+use tracing::{debug, warn};
 
 pub static CONFIG: sync::OnceLock<Config> = sync::OnceLock::new();
 
@@ -53,6 +53,18 @@ pub struct Config {
         help = "VIIPER API-server address [default: localhost:3242]"
     )]
     pub viiper_address: Option<String>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "keyboard-mouse-emulation",
+        visible_alias = "kbm",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        env = "SISR_KBM_EMULATION",
+        help = "Enable keyboard/mouse emulation (true/false) [default: false]"
+    )]
+    pub kbm_emulation: Option<bool>,
 
     #[command(flatten)]
     pub window: WindowOpts,
@@ -179,6 +191,7 @@ impl Default for Config {
             console: Some(false),
             tray: Some(true),
             viiper_address: Some("localhost:3242".to_string()),
+            kbm_emulation: Some(false),
             window: WindowOpts {
                 create: Some(false),
                 fullscreen: Some(true),
@@ -257,7 +270,7 @@ impl Config {
             });
         }
 
-        match cfg
+        let mut res: Config = match cfg
             .merge({
                 match &cli_args.config_file_path {
                     None => Figment::new(),
@@ -276,6 +289,22 @@ impl Config {
             Err(e) => {
                 panic!("Failed to parse configuration: {}", e);
             }
+        };
+
+        if let Some(addr) = &res.viiper_address
+            && res.kbm_emulation.unwrap_or(false)
+            && let Ok(socket_addr) = addr.parse::<std::net::SocketAddr>()
+            && socket_addr.ip().is_loopback()
+        {
+            warn!(
+                "KB/M emulation is not supported when connecting to a VIIPER server on localhost/loopback. Disabling KB/M emulation."
+            );
+            res = Config {
+                kbm_emulation: Some(false),
+                ..res
+            };
         }
+
+        res
     }
 }

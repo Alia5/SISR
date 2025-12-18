@@ -7,7 +7,9 @@ use std::{
 
 use tracing::{Level, Subscriber, level_filters::LevelFilter};
 use tracing_subscriber::{
-    Layer, Registry, fmt, filter::Targets,
+    Layer, Registry,
+    filter::Targets,
+    fmt,
     layer::{Context, SubscriberExt},
     reload,
 };
@@ -26,7 +28,8 @@ pub fn setup() {
     };
 
     let targets = Targets::new()
-        .with_default(LevelFilter::TRACE);
+        .with_default(LevelFilter::TRACE)
+        .with_target("calloop", LevelFilter::DEBUG);
 
     let (stderr_filter, stderr_handle) = reload::Layer::new(initial_level);
     let stderr_layer = fmt::layer()

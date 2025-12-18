@@ -76,12 +76,17 @@ impl App {
             self.cfg.window.continous_draw.unwrap_or(false),
         ));
 
+        let kbm_emulation_enabled = Arc::new(AtomicBool::new(
+            self.cfg.kbm_emulation.unwrap_or(false),
+        ));
+
         let input_loop = Arc::new(Mutex::new(Some(input::sdl::InputLoop::new(
             sdl_waker,
             winit_waker_for_sdl,
             dispatcher,
             async_rt.handle().clone(),
             continuous_redraw.clone(),
+            kbm_emulation_enabled.clone(),
         ))));
 
         let should_create_window = self.cfg.window.create.unwrap_or(true);
@@ -92,12 +97,14 @@ impl App {
             let winit_waker_for_tray = self.winit_waker.clone();
             let window_visible_for_tray = window_visible.clone();
             let handle_for_tray = async_rt.handle().clone();
+            let kbm_emulation_enabled_for_tray = kbm_emulation_enabled.clone();
             Some(thread::spawn(move || {
                 tray::run(
                     sdl_waker_for_tray,
                     winit_waker_for_tray,
                     window_visible_for_tray,
                     handle_for_tray,
+                    kbm_emulation_enabled_for_tray,
                 );
             }))
         } else {
@@ -148,9 +155,11 @@ impl App {
 
         let mut window_runner = WindowRunner::new(
             self.winit_waker.clone(),
+            self.sdl_waker.clone(),
             self.gui_dispatcher.clone(),
             window_ready,
             continuous_redraw,
+            kbm_emulation_enabled.clone(),
         );
 
         let mut exit_code = window_runner.run();

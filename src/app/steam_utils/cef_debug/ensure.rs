@@ -127,6 +127,7 @@ Steam needs to be restarted.\n\n",
                     + "Enable and restart Steam now?",
                 move || {
                     let file_path = steam_path.join(".cef-enable-remote-debugging");
+                    #[allow(unused)]
                     let exe = std::env::current_exe().unwrap();
 
                     debug!(

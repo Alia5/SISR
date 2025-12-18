@@ -5137,9 +5137,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "viiper-client"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51f6e705400b03ed426bffc93ea2b6691d9ebc3db9d0a90aca9dc20a38608918"
+version = "0.0.1-dev"
 dependencies = [
  "lazy_static",
  "serde",

@@ -81,6 +81,7 @@ pub struct InputLoop {
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
     async_handle: tokio::runtime::Handle,
     continuous_redraw: Arc<AtomicBool>,
+    kbm_emulation_enabled: Arc<AtomicBool>,
 }
 
 impl InputLoop {
@@ -90,6 +91,7 @@ impl InputLoop {
         gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
         async_handle: tokio::runtime::Handle,
         continuous_redraw: Arc<AtomicBool>,
+        kbm_emulation_enabled: Arc<AtomicBool>,
     ) -> Self {
         Self {
             sdl_waker,
@@ -97,6 +99,7 @@ impl InputLoop {
             gui_dispatcher,
             async_handle,
             continuous_redraw,
+            kbm_emulation_enabled,
         }
     }
 
@@ -201,7 +204,9 @@ impl InputLoop {
             joystick_subsystem,
             gamepad_subsystem,
             self.continuous_redraw.clone(),
+            self.kbm_emulation_enabled.clone(),
         );
+
         trace!("SDL loop starting");
 
         let mut sdl_event: SDL_Event = unsafe { std::mem::zeroed() };
@@ -227,7 +232,6 @@ impl InputLoop {
         }
     }
 
-    /// Returns Ok(true) to quit, Ok(false) to continue, Err(()) on fatal error
     fn process_one(
         &self,
         sdl_event: &mut SDL_Event,
@@ -257,6 +261,7 @@ impl InputLoop {
                         tracing::event!(parent: span, Level::INFO, event = ?event, "Quit event received");
                         return Ok(true);
                     }
+
                     /*Event::JoyDeviceAdded { .. } |*/
                     Event::ControllerDeviceAdded { .. } => {
                         handler.on_pad_added(&event);
@@ -295,6 +300,20 @@ impl InputLoop {
                                 super::handler::HandlerEvent::OverlayStateChanged { open } => {
                                     handler.on_overlay_state_changed(open);
                                 }
+                                super::handler::HandlerEvent::SetKbmEmulationEnabled {
+                                    enabled,
+                                } => {
+                                    handler.set_kbm_emulation_enabled(enabled);
+                                }
+                                super::handler::HandlerEvent::KbmKeyEvent(ev) => {
+                                    handler.on_kbm_key_event(ev);
+                                }
+                                super::handler::HandlerEvent::KbmPointerEvent(ev) => {
+                                    handler.on_kbm_pointer_event(ev);
+                                }
+                                super::handler::HandlerEvent::KbmReleaseAll() => {
+                                    handler.on_kbm_release_all();
+                                }
                             }
                             return Ok(false);
                         }
@@ -325,5 +344,5 @@ impl InputLoop {
         }
     }
 
-    fn on_draw(ctx: &egui::Context) {}
+    fn on_draw(_ctx: &egui::Context) {}
 }

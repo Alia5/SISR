@@ -1,17 +1,23 @@
+use std::net::ToSocketAddrs;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+
+#[cfg(target_os = "linux")]
 use std::rc::Rc;
 
 use sdl3::event::EventSender;
-use tracing::{Level, error, event, info, span, warn, trace};
 use tracing::Span;
+use tracing::{Level, error, event, info, span, trace, warn};
 use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 use winit::event_loop::EventLoopProxy;
 
-use crate::app::window::RunnerEvent;
-use crate::app::window::ICON_BYTES;
+use crate::app::input::handler::HandlerEvent;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::util::open_controller_config;
+use crate::app::window::ICON_BYTES;
+use crate::app::window::RunnerEvent;
+use crate::config::CONFIG;
 use tokio::runtime::Handle;
 
 use super::core::App;
@@ -20,7 +26,8 @@ use super::core::App;
 static TRAY_THREAD_ID: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
 
 #[cfg(target_os = "linux")]
-static GTK_QUIT_REQUESTED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static GTK_QUIT_REQUESTED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
 
 pub enum TrayMenuEvent {
     Quit,
@@ -36,6 +43,9 @@ struct TrayContext {
     open_config_id: MenuId,
     force_config_item: CheckMenuItem,
     force_config_id: MenuId,
+    kbm_emulation_item: Option<CheckMenuItem>,
+    kbm_emulation_id: Option<MenuId>,
+    kbm_emulation_enabled: Arc<AtomicBool>,
     window_visible: Arc<Mutex<bool>>,
     sdl_waker: Arc<Mutex<Option<EventSender>>>,
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
@@ -48,6 +58,7 @@ impl TrayContext {
         winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
         window_visible: Arc<Mutex<bool>>,
         async_handle: Handle,
+        kbm_emulation_enabled: Arc<AtomicBool>,
     ) -> Self {
         let icon = load_icon();
         let menu = Menu::new();
@@ -63,14 +74,43 @@ impl TrayContext {
         menu.append(&toggle_window_item)
             .expect("Failed to add toggle window item");
 
-        let has_app_id = binding_enforcer().lock().ok().and_then(|e| e.app_id()).is_some();
+        let has_app_id = binding_enforcer()
+            .lock()
+            .ok()
+            .and_then(|e| e.app_id())
+            .is_some();
         let open_config_item = MenuItem::new("Steam Controllerconfig", has_app_id, None);
         let open_config_id = open_config_item.id().clone();
-        menu.append(&open_config_item).expect("Failed to add open configurator item");
+        menu.append(&open_config_item)
+            .expect("Failed to add open configurator item");
 
         let force_config_item = CheckMenuItem::new("Force Controllerconfig", true, false, None);
         let force_config_id = force_config_item.id().clone();
-        menu.append(&force_config_item).expect("Failed to add force config item");
+        menu.append(&force_config_item)
+            .expect("Failed to add force config item");
+
+        let initial_kbm_enabled = kbm_emulation_enabled.load(Ordering::Relaxed);
+
+        let (kbm_emulation_item, kbm_emulation_id) = {
+            let viiper_is_loopback = CONFIG
+                .get()
+                .and_then(|c| c.viiper_address.as_ref())
+                .and_then(|addr_str| addr_str.to_socket_addrs().ok())
+                .and_then(|mut addrs| addrs.next())
+                .map(|addr| addr.ip().is_loopback())
+                .unwrap_or(true);
+
+            if !viiper_is_loopback {
+                let item =
+                    CheckMenuItem::new("Keyboard/mouse emulation", true, initial_kbm_enabled, None);
+                let id = item.id().clone();
+                menu.append(&item)
+                    .expect("Failed to add kb/m emulation item");
+                (Some(item), Some(id))
+            } else {
+                (None, None)
+            }
+        };
 
         let quit_item = MenuItem::new("Quit", true, None);
         let quit_id = quit_item.id().clone();
@@ -92,6 +132,9 @@ impl TrayContext {
             open_config_id,
             force_config_item,
             force_config_id,
+            kbm_emulation_item,
+            kbm_emulation_id,
+            kbm_emulation_enabled,
             window_visible,
             sdl_waker,
             winit_waker,
@@ -106,6 +149,11 @@ impl TrayContext {
         } else {
             warn!("Failed to acquire binding enforcer lock to update open configurator menu item");
         }
+
+        if let Some(item) = &self.kbm_emulation_item {
+            item.set_checked(self.kbm_emulation_enabled.load(Ordering::Relaxed));
+        }
+
         if let Ok(event) = MenuEvent::receiver().try_recv() {
             if event.id == self.quit_id {
                 info!("Quit requested from tray menu");
@@ -144,10 +192,11 @@ impl TrayContext {
             }
             if event.id == self.open_config_id {
                 if let Ok(guard) = binding_enforcer().lock()
-                    && let Some(app_id) = guard.app_id() {
-                        let handle = self.async_handle.clone();
-                        handle.spawn(open_controller_config(app_id));
-                    }
+                    && let Some(app_id) = guard.app_id()
+                {
+                    let handle = self.async_handle.clone();
+                    handle.spawn(open_controller_config(app_id));
+                }
                 return false;
             }
             if event.id == self.force_config_id {
@@ -157,6 +206,22 @@ impl TrayContext {
                     } else {
                         guard.activate();
                     }
+                }
+                return false;
+            }
+
+            if let Some(kbm_id) = &self.kbm_emulation_id
+                && event.id == *kbm_id
+                && let Some(item) = &self.kbm_emulation_item
+            {
+                let enabled = !self.kbm_emulation_enabled.load(Ordering::Relaxed);
+                self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
+                item.set_checked(enabled);
+
+                if let Ok(guard) = self.sdl_waker.lock()
+                    && let Some(sender) = guard.as_ref()
+                {
+                    _ = sender.push_custom_event(HandlerEvent::SetKbmEmulationEnabled { enabled });
                 }
                 return false;
             }
@@ -202,9 +267,17 @@ pub fn run(
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
     window_visible: Arc<Mutex<bool>>,
     async_handle: Handle,
+    kbm_emulation_enabled: Arc<AtomicBool>,
 ) {
     let span = span!(Level::INFO, "tray");
-    run_platform(span, sdl_waker, winit_waker, window_visible, async_handle);
+    run_platform(
+        span,
+        sdl_waker,
+        winit_waker,
+        window_visible,
+        async_handle,
+        kbm_emulation_enabled,
+    );
 }
 
 #[cfg(windows)]
@@ -214,6 +287,7 @@ fn run_platform(
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
     window_visible: Arc<Mutex<bool>>,
     async_handle: Handle,
+    kbm_emulation_enabled: Arc<AtomicBool>,
 ) {
     use windows_sys::Win32::System::Threading::GetCurrentThreadId;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -223,7 +297,13 @@ fn run_platform(
     let thread_id = unsafe { GetCurrentThreadId() };
     TRAY_THREAD_ID.store(thread_id, std::sync::atomic::Ordering::SeqCst);
 
-    let ctx = TrayContext::new(sdl_waker, winit_waker, window_visible, async_handle);
+    let ctx = TrayContext::new(
+        sdl_waker,
+        winit_waker,
+        window_visible,
+        async_handle,
+        kbm_emulation_enabled,
+    );
 
     loop {
         if ctx.handle_events() {
@@ -251,13 +331,20 @@ fn run_platform(
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
     window_visible: Arc<Mutex<bool>>,
     async_handle: Handle,
+    kbm_emulation_enabled: Arc<AtomicBool>,
 ) {
     if gtk::init().is_err() {
         event!(parent: &span, Level::ERROR, "Failed to initialize GTK for tray icon");
         return;
     }
 
-    let ctx = Rc::new(TrayContext::new(sdl_waker, winit_waker, window_visible, async_handle));
+    let ctx = Rc::new(TrayContext::new(
+        sdl_waker,
+        winit_waker,
+        window_visible,
+        async_handle,
+        kbm_emulation_enabled,
+    ));
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         if GTK_QUIT_REQUESTED.load(std::sync::atomic::Ordering::SeqCst) {
             gtk::main_quit();

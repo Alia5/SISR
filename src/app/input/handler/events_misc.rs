@@ -1,9 +1,10 @@
-
 use tracing::{debug, error, info, warn};
+
+use std::sync::atomic::Ordering;
 
 use crate::{
     app::{
-        gui::dialogs::{Dialog, push_dialog},
+        gui::dialogs::{self, Dialog, push_dialog},
         steam_utils::{cef_debug, util::launched_via_steam},
     },
     config::CONFIG,
@@ -12,6 +13,114 @@ use crate::{
 use super::EventHandler;
 
 impl EventHandler {
+    pub fn set_kbm_emulation_enabled(&mut self, enabled: bool) {
+        let Ok(mut guard) = self.state.lock() else {
+            error!(
+                "Failed to acquire event handler state lock to set kbm emulation enabled={}",
+                enabled
+            );
+            return;
+        };
+
+        if guard.kbm_emulation_enabled == enabled {
+            return;
+        }
+
+        guard.kbm_emulation_enabled = enabled;
+        self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
+        info!("KB/M emulation toggled: {}", enabled);
+
+        if let Ok(guard_proxy) = self.winit_waker.lock()
+            && let Some(proxy) = guard_proxy.as_ref()
+            && let Err(e) =
+                proxy.send_event(crate::app::window::RunnerEvent::SetKbmCursorGrab(enabled))
+        {
+            warn!("Failed to notify window about KB/M cursor grab toggle: {e}");
+        }
+
+        // When enabling, show a single OK dialog. On OK we enter capture mode.
+        if enabled {
+            const TITLE: &str = "KB/M emulation";
+            let already_open = dialogs::REGISTRY
+                .get()
+                .map(|r| r.snapshot_dialogs().iter().any(|d| d.title == TITLE))
+                .unwrap_or(false);
+
+            if !already_open {
+                let winit_waker = self.winit_waker.clone();
+                let msg = "KB/M emulation enabled.\n\n\
+UI will be hidden and the cursor will be captured when you enter capture mode.\n\n\
+Toggle UI/capture:\n\
+  Keyboard: Ctrl+Shift+Alt+S\n\
+  Gamepad:  LB+RB+Back+A";
+                _ = push_dialog(Dialog::new_ok(TITLE, msg, move || {
+                    if let Ok(guard) = winit_waker.lock()
+                        && let Some(proxy) = guard.as_ref()
+                        && let Err(e) =
+                            proxy.send_event(crate::app::window::RunnerEvent::EnterCaptureMode())
+                    {
+                        warn!("Failed to enter capture mode after KB/M OK: {e}");
+                    }
+                }))
+                .inspect_err(|e| warn!("Failed to push KB/M emulation dialog: {e}"));
+            }
+        }
+
+        guard.kbm_keyboard_modifiers = 0;
+        guard.kbm_keyboard_keys.clear();
+        guard.kbm_mouse_buttons = 0;
+
+        if enabled {
+            let has_keyboard = guard.devices.values().any(|d| d.viiper_type == "keyboard");
+            let has_mouse = guard.devices.values().any(|d| d.viiper_type == "mouse");
+
+            if !has_keyboard {
+                let keyboard_id = self.next_device_id;
+                self.next_device_id += 1;
+
+                let keyboard_device = crate::app::input::device::Device {
+                    id: keyboard_id,
+                    viiper_type: "keyboard".to_string(),
+                    ..Default::default()
+                };
+
+                self.viiper.create_device(&keyboard_device);
+                guard.devices.insert(keyboard_id, keyboard_device);
+            }
+
+            if !has_mouse {
+                let mouse_id = self.next_device_id;
+                self.next_device_id += 1;
+
+                let mouse_device = crate::app::input::device::Device {
+                    id: mouse_id,
+                    viiper_type: "mouse".to_string(),
+                    ..Default::default()
+                };
+
+                self.viiper.create_device(&mouse_device);
+                guard.devices.insert(mouse_id, mouse_device);
+            }
+        } else {
+            let ids: Vec<u64> = guard
+                .devices
+                .iter()
+                .filter_map(|(id, d)| {
+                    if d.viiper_type == "keyboard" || d.viiper_type == "mouse" {
+                        Some(*id)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            for id in ids {
+                self.viiper.remove_device(id);
+                guard.devices.remove(&id);
+            }
+        }
+    }
+
     pub fn ignore_device(&mut self, device_id: u64) {
         let Ok(mut guard) = self.state.lock() else {
             error!(
@@ -90,7 +199,6 @@ impl EventHandler {
         };
         guard.cef_debug_port = Some(port);
         self.request_redraw();
-        // TODO: ready CEF debug when manually injecting overlay, patch this check, then
         let cont_redraw = guard.window_continuous_redraw.clone();
         if launched_via_steam() {
             if !cont_redraw.load(std::sync::atomic::Ordering::Relaxed) {

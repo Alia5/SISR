@@ -23,7 +23,8 @@ sdl3 = { version = "0.16.2", features = ["hidapi"] }
 ctrlc = { version = "3.5.1", features = ["termination"] }
 tray-icon = "0.21.2"
 image = "0.25.9"
-viiper-client = { version = "0.2", features = ["async"] }
+# viiper-client = { version = "0.2", features = ["async"] }
+viiper-client = { path = "../VIIPER/clients/rust", features = ["async"] }
 anyhow = "1.0.100"
 tokio = { version = "1", features = ["rt-multi-thread", "sync"] }
 ron = "0.12"
@@ -36,13 +37,14 @@ serde_json = "1.0.145"
 new-vdf-parser = "0.2.0"
 libloading = "0.9.0"
 
-
 [target."cfg(windows)".dependencies]
 windows-sys = { version = "0.61.2", features = [
     "Win32_Foundation",
     "Win32_System_Console",
+    "Win32_System_LibraryLoader",
     "Win32_System_Pipes",
     "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
     "Win32_UI_WindowsAndMessaging",
 ] }
 enable-ansi-support = "0.3.1"

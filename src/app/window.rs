@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -8,17 +9,19 @@ use egui::Context;
 use egui_wgpu::Renderer as EguiRenderer;
 use egui_wgpu::ScreenDescriptor;
 use egui_winit::State as EguiWinitState;
+use sdl3::event::EventSender;
 use tracing::{debug, error, trace, warn};
 use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
+use winit::event::{DeviceEvent, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
-use winit::window::{Window, WindowAttributes, WindowId};
+use winit::window::{CursorGrabMode, Window, WindowAttributes, WindowId};
 
 #[cfg(windows)]
 use winit::platform::windows::WindowAttributesExtWindows;
 
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::gui::{dark_theme, dialogs, light_theme};
+use crate::app::input::{handler::HandlerEvent, kbm_events, kbm_winit_map};
 use crate::config::{self, CONFIG};
 use crate::gfx::Gfx;
 
@@ -31,6 +34,9 @@ pub enum RunnerEvent {
     HideWindow(),
     DialogPushed(),
     DialogPopped(),
+    ToggleUi(),
+    EnterCaptureMode(),
+    SetKbmCursorGrab(bool),
 }
 
 pub struct WindowRunner {
@@ -41,9 +47,14 @@ pub struct WindowRunner {
     egui_renderer: Option<EguiRenderer>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
     winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
+    sdl_waker: Arc<Mutex<Option<EventSender>>>,
     window_ready: Arc<Notify>,
     pre_dialog_window_visible: bool,
     continuous_redraw: Arc<AtomicBool>,
+    last_cursor_pos: Option<(f64, f64)>,
+    kbm_emulation_enabled: Arc<AtomicBool>,
+    ui_visible: bool,
+    modifiers: winit::keyboard::ModifiersState,
 }
 
 impl WindowRunner {
@@ -54,9 +65,11 @@ impl WindowRunner {
 
     pub fn new(
         winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
+        sdl_waker: Arc<Mutex<Option<EventSender>>>,
         dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
         window_ready: Arc<Notify>,
         continuous_redraw: Arc<AtomicBool>,
+        kbm_emulation_enabled: Arc<AtomicBool>,
     ) -> Self {
         let ctx = Context::default();
 
@@ -88,6 +101,7 @@ impl WindowRunner {
             gui_dispatcher: dispatcher,
             // The legend of Zelda: The
             winit_waker,
+            sdl_waker,
             window_ready,
             pre_dialog_window_visible: CONFIG
                 .get()
@@ -97,6 +111,33 @@ impl WindowRunner {
                 .create
                 .unwrap_or(false),
             continuous_redraw,
+            last_cursor_pos: None,
+            kbm_emulation_enabled: kbm_emulation_enabled.clone(),
+            ui_visible: !kbm_emulation_enabled.load(Ordering::Relaxed),
+            modifiers: Default::default(),
+        }
+    }
+
+    fn try_push_kbm_event(&self, ev: HandlerEvent) {
+        let Ok(guard) = self.sdl_waker.lock() else {
+            return;
+        };
+        let Some(sender) = guard.as_ref() else {
+            return;
+        };
+        if let Err(e) = sender.push_custom_event(ev) {
+            trace!("Failed to push KBM custom event to SDL: {e}");
+        }
+    }
+
+    fn map_mouse_button(button: winit::event::MouseButton) -> Option<u8> {
+        match button {
+            winit::event::MouseButton::Left => Some(1),
+            winit::event::MouseButton::Middle => Some(2),
+            winit::event::MouseButton::Right => Some(3),
+            winit::event::MouseButton::Back => Some(4),
+            winit::event::MouseButton::Forward => Some(5),
+            winit::event::MouseButton::Other(n) => u8::try_from(n).ok(),
         }
     }
 
@@ -144,6 +185,9 @@ impl WindowRunner {
             });
 
         dispatcher.draw(ctx);
+    }
+
+    fn draw_dialogs(ctx: &Context) {
         let Some(registry) = dialogs::REGISTRY.get() else {
             warn!("Dialog registry not initialized");
             return;
@@ -176,11 +220,14 @@ impl WindowRunner {
         let raw_input = egui_winit.take_egui_input(window.as_ref());
 
         let full_output = self.egui_ctx.run(raw_input, |ctx| {
-            if let Ok(guard) = self.gui_dispatcher.lock()
+            if self.ui_visible
+                && let Ok(guard) = self.gui_dispatcher.lock()
                 && let Some(dispatcher) = &*guard
             {
                 Self::draw_ui(dispatcher, ctx);
             }
+
+            Self::draw_dialogs(ctx);
         });
         egui_winit.handle_platform_output(window.as_ref(), full_output.platform_output);
 
@@ -265,6 +312,30 @@ impl WindowRunner {
 }
 
 impl ApplicationHandler<RunnerEvent> for WindowRunner {
+    fn device_event(
+        &mut self,
+        _event_loop: &ActiveEventLoop,
+        _device_id: winit::event::DeviceId,
+        event: DeviceEvent,
+    ) {
+        if self.ui_visible {
+            return;
+        }
+        if !self.kbm_emulation_enabled.load(Ordering::Relaxed) {
+            return;
+        }
+
+        if let DeviceEvent::MouseMotion { delta: (dx, dy) } = event {
+            let dx = dx as f32;
+            let dy = dy as f32;
+            if dx != 0.0 || dy != 0.0 {
+                self.try_push_kbm_event(HandlerEvent::KbmPointerEvent(
+                    kbm_events::KbmPointerEvent::motion(dx, dy),
+                ));
+            }
+        }
+    }
+
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if self.window.is_some() {
             return;
@@ -277,14 +348,13 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             .create
             .unwrap_or(false);
 
-        let icon = image::load_from_memory(ICON_BYTES)
-            .ok()
-            .and_then(|img| {
-                let rgba = img.into_rgba8();
-                let (w, h) = rgba.dimensions();
-                winit::window::Icon::from_rgba(rgba.into_raw(), w, h).ok()
-            });
+        let icon = image::load_from_memory(ICON_BYTES).ok().and_then(|img| {
+            let rgba = img.into_rgba8();
+            let (w, h) = rgba.dimensions();
+            winit::window::Icon::from_rgba(rgba.into_raw(), w, h).ok()
+        });
 
+        #[allow(unused_mut)]
         let mut window_attrs = WindowAttributes::default()
             .with_title("SISR")
             .with_inner_size(winit::dpi::LogicalSize::new(1280.0, 720.0))
@@ -295,7 +365,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         #[cfg(windows)]
         {
             window_attrs = window_attrs.with_taskbar_icon(icon);
-            
+
             if window_attrs.transparent {
                 trace!("Disabling redirection bitmap for transparency on Windows");
                 window_attrs = window_attrs.with_no_redirection_bitmap(true);
@@ -330,6 +400,16 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         self.gfx = Some(gfx);
         self.window = Some(window);
 
+        if !self.ui_visible
+            && let Some(window) = &self.window
+            && self.kbm_emulation_enabled.load(Ordering::Relaxed)
+        {
+            // clippy.....
+            if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                warn!("Failed to confine cursor to window: {e}");
+            }
+        }
+
         self.window_ready.notify_one();
     }
 
@@ -349,17 +429,73 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                     debug!("showing window");
                     window.set_visible(true);
                     window.focus_window();
+                    if !self.ui_visible && self.kbm_emulation_enabled.load(Ordering::Relaxed) {
+                        // fuck clippy, there's a difference
+                        if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                            warn!("Failed to confine cursor to window: {e}");
+                        }
+                    }
+
                     window.request_redraw();
                 } else {
-                    trace!("Window is None, cannot show");
+                    error!("Window is None, cannot show");
                 }
             }
             RunnerEvent::HideWindow() => {
                 if let Some(window) = &self.window {
                     debug!("hiding window");
+                    _ = window.set_cursor_grab(CursorGrabMode::None);
                     window.set_visible(false);
                 } else {
-                    trace!("Window is None, cannot hide");
+                    error!("Window is None, cannot hide");
+                }
+            }
+            RunnerEvent::ToggleUi() => {
+                let Some(window) = &self.window else {
+                    return;
+                };
+
+                let kbm_emu_enabled = self.kbm_emulation_enabled.load(Ordering::Relaxed);
+
+                if self.ui_visible {
+                    self.ui_visible = false;
+                    if kbm_emu_enabled {
+                        // screw clippy
+                        if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                            warn!("Failed to confine cursor to window: {e}");
+                        }
+                    }
+                } else {
+                    self.ui_visible = true;
+                    _ = window.set_cursor_grab(CursorGrabMode::None);
+                    self.try_push_kbm_event(HandlerEvent::KbmReleaseAll());
+                }
+
+                window.request_redraw();
+            }
+            RunnerEvent::EnterCaptureMode() => {
+                let Some(window) = &self.window else {
+                    return;
+                };
+                self.ui_visible = false;
+                if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                    warn!("Failed to confine cursor to window: {e}");
+                }
+                window.request_redraw();
+            }
+            RunnerEvent::SetKbmCursorGrab(enabled) => {
+                self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
+
+                let Some(window) = &self.window else {
+                    return;
+                };
+                if window.is_visible() == Some(false) {
+                    return;
+                }
+                if !self.ui_visible {
+                    _ = window.set_cursor_grab(CursorGrabMode::None);
+                } else if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                    warn!("Failed to confine cursor to window: {e}");
                 }
             }
             RunnerEvent::DialogPushed() => {
@@ -457,21 +593,22 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             return;
         }
 
-        let mut egui_consumed = false;
-
-        if let (Some(egui_winit), Some(window)) = (&mut self.egui_winit, &self.window) {
-            let response = egui_winit.on_window_event(window.as_ref(), &event);
-            if response.repaint {
-                window.request_redraw();
+        if self.ui_visible {
+            let mut egui_consumed = false;
+            if let (Some(egui_winit), Some(window)) = (&mut self.egui_winit, &self.window) {
+                let response = egui_winit.on_window_event(window.as_ref(), &event);
+                if response.repaint {
+                    window.request_redraw();
+                }
+                egui_consumed = response.consumed;
             }
-            egui_consumed = response.consumed;
+            if egui_consumed {
+                trace!("egui consumed the event: {:?}", event);
+                return;
+            }
         }
 
-        if egui_consumed {
-            return;
-        }
-
-        match event {
+        match &event {
             WindowEvent::CloseRequested => {
                 if let Some(storage_path) = Self::get_storage_path() {
                     if let Some(parent) = storage_path.parent() {
@@ -497,6 +634,91 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             WindowEvent::RedrawRequested => {
                 if let Some(window) = &self.window {
                     window.request_redraw();
+                }
+            }
+            _ => {}
+        }
+
+        let capture_forward =
+            !self.ui_visible && self.kbm_emulation_enabled.load(Ordering::Relaxed);
+
+        match event {
+            WindowEvent::ModifiersChanged(mods) => {
+                self.modifiers = mods.state();
+            }
+            WindowEvent::KeyboardInput { event, .. } => {
+                use winit::event::ElementState;
+                use winit::keyboard::PhysicalKey;
+
+                if matches!(event.state, ElementState::Pressed)
+                    && let PhysicalKey::Code(code) = event.physical_key
+                    && code == winit::keyboard::KeyCode::KeyS
+                    && self.modifiers.control_key()
+                    && self.modifiers.shift_key()
+                    && self.modifiers.alt_key()
+                {
+                    trace!("Toggle UI keybinding pressed");
+                    let Some(window) = &self.window else {
+                        return;
+                    };
+                    if self.ui_visible {
+                        self.ui_visible = false;
+                        if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                            warn!("Failed to confine cursor to window: {e}");
+                        }
+                    } else {
+                        self.ui_visible = true;
+                        _ = window.set_cursor_grab(CursorGrabMode::None);
+                        self.try_push_kbm_event(HandlerEvent::KbmReleaseAll());
+                    }
+                    window.request_redraw();
+                    return;
+                }
+
+                if let PhysicalKey::Code(code) = event.physical_key
+                    && let Some(scancode) = kbm_winit_map::keycode_to_sdl_scancode(code)
+                {
+                    let down = matches!(event.state, ElementState::Pressed);
+                    if capture_forward {
+                        self.try_push_kbm_event(HandlerEvent::KbmKeyEvent(
+                            kbm_events::KbmKeyEvent { scancode, down },
+                        ));
+                    }
+                } else {
+                    warn!("Unmapped key event: {:?}", event.physical_key);
+                }
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                let (x, y) = (position.x, position.y);
+                self.last_cursor_pos = Some((x, y));
+            }
+            WindowEvent::CursorLeft { .. } => {
+                self.last_cursor_pos = None;
+            }
+            WindowEvent::MouseInput { state, button, .. } => {
+                use winit::event::ElementState;
+
+                if let Some(btn) = Self::map_mouse_button(button) {
+                    let down = matches!(state, ElementState::Pressed);
+                    if capture_forward {
+                        self.try_push_kbm_event(HandlerEvent::KbmPointerEvent(
+                            kbm_events::KbmPointerEvent::button(btn, down),
+                        ));
+                    }
+                }
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                use winit::event::MouseScrollDelta;
+
+                let (wheel_x, wheel_y) = match delta {
+                    MouseScrollDelta::LineDelta(x, y) => (x, y),
+                    MouseScrollDelta::PixelDelta(pos) => (pos.x as f32, pos.y as f32),
+                };
+
+                if (wheel_x != 0.0 || wheel_y != 0.0) && capture_forward {
+                    self.try_push_kbm_event(HandlerEvent::KbmPointerEvent(
+                        kbm_events::KbmPointerEvent::wheel(wheel_x, wheel_y),
+                    ));
                 }
             }
             _ => {}
