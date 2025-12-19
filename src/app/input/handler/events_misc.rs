@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 use crate::{
     app::{
         gui::dialogs::{self, Dialog, push_dialog},
-        steam_utils::cef_debug,
+        steam_utils::{cef_debug, util::launched_via_steam},
     },
     config::CONFIG,
 };
@@ -199,14 +199,15 @@ Toggle UI/capture:\n\
         };
         guard.cef_debug_port = Some(port);
         self.request_redraw();
-        if !launched_via_steam() {
-            debug!("Launched via Steam, skipping CEF overlay notifier injection");
-            return;
-            // TODO: FIXME!
-        }
+
         let cont_redraw = guard.window_continuous_redraw.clone();
         if !cont_redraw.load(std::sync::atomic::Ordering::Relaxed) {
             self.async_handle.spawn(async move {
+                if !launched_via_steam() {
+                    debug!("NOT launched via Steam, delaying CEF overlay notifier injection");
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                    // TODO: FIXME!
+                }
                 match cef_debug::inject::inject(
                     "Overlay",
                     str::from_utf8(cef_debug::payloads::OVERLAY_STATE_NOTIFIER)
