@@ -24,7 +24,7 @@ use crate::app::steam_utils::util::{
 };
 use crate::app::window::RunnerEvent;
 use crate::app::{gui, signals, steam_utils};
-use crate::config;
+use crate::config::{self, CONFIG};
 
 pub struct App {
     cfg: config::Config,
@@ -36,7 +36,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         Self {
-            cfg: config::CONFIG.get().cloned().expect("Config not set"),
+            cfg: CONFIG.read().expect("Failed to read CONFIG").as_ref().cloned().expect("Config not set"),
             sdl_waker: Arc::new(Mutex::new(None)),
             winit_waker: Arc::new(Mutex::new(None)),
             gui_dispatcher: Arc::new(Mutex::new(None)),

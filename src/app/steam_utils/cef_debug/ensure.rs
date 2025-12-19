@@ -325,13 +325,11 @@ SISR will now quit",
             debug!("Steam is not running, waiting for start...");
         }
         if !*dialog_open.lock().unwrap() {
-            for _ in 0..CONFIG
-                .get()
-                .unwrap()
-                .steam
-                .steam_launch_timeout_secs
-                .unwrap_or(1)
-            {
+            let timeout_secs = CONFIG.read()
+                .ok()
+                .and_then(|c| c.as_ref().map(|cfg| cfg.steam.steam_launch_timeout_secs.unwrap_or(1)))
+                .unwrap_or(1);
+            for _ in 0..timeout_secs {
                 if crate::app::steam_utils::util::steam_running() {
                     info!("Steam is running");
                     return true;

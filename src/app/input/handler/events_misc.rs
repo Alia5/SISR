@@ -5,7 +5,7 @@ use std::sync::atomic::Ordering;
 use crate::{
     app::{
         gui::dialogs::{self, Dialog, push_dialog},
-        steam_utils::{cef_debug, util::launched_via_steam},
+        steam_utils::cef_debug,
     },
     config::CONFIG,
 };
@@ -243,8 +243,16 @@ Enable continous redraw now?
 
     pub fn on_overlay_state_changed(&mut self, open: bool) {
         debug!("Steam overlay state changed event received: {}", open);
-        if CONFIG.get().unwrap().window.continous_draw.unwrap() {
-            debug!("Ignoring overlay state change due to continuous draw being enabled");
+        let continous_draw_in_config = CONFIG
+            .read()
+            .ok()
+            .and_then(|c| {
+                c.as_ref()
+                    .map(|cfg| cfg.window.continous_draw.unwrap_or(false))
+            })
+            .unwrap_or(false);
+        if continous_draw_in_config {
+            debug!("Ignoring overlay state change due to continuous draw being enabled in config");
             return;
         }
 

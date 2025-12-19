@@ -8,6 +8,7 @@ use tracing::trace;
 use tracing::warn;
 
 use crate::app::steam_utils::cef_debug;
+use crate::config::CONFIG;
 
 static STEAM_PATH: OnceLock<Option<PathBuf>> = OnceLock::new();
 static LAUNCHED_VIA_STEAM: OnceLock<bool> = OnceLock::new();
@@ -45,9 +46,10 @@ pub fn open_steam_url(url: &str) -> Result<(), std::io::Error> {
 }
 
 pub fn steam_path() -> Option<PathBuf> {
-    if let Some(cfg_path) = crate::config::CONFIG
-        .get()
-        .and_then(|cfg| cfg.steam.steam_path.clone())
+    if let Some(cfg_path) = CONFIG
+        .read()
+        .ok()
+        .and_then(|c| c.as_ref().and_then(|cfg| cfg.steam.steam_path.clone()))
     {
         trace!("Using configured Steam path: {}", cfg_path.display());
         return Some(cfg_path);
@@ -134,39 +136,40 @@ pub fn active_user_id() -> Option<u32> {
             let registry_vdf = steam_path.parent().map(|p| p.join("registry.vdf"));
             if let Some(ref vdf_path) = registry_vdf
                 && vdf_path.exists()
-                    && let Ok(content) = std::fs::read_to_string(vdf_path) {
-                        for line in content.lines() {
-                            let trimmed = line.trim();
-                            if trimmed.starts_with("\"ActiveUser\"") {
-                                let parts: Vec<&str> = trimmed.split('"').collect();
-                                if parts.len() >= 4
-                                    && let Ok(user_id) = parts[3].parse::<u32>()
-                                        && user_id != 0 {
-                                            trace!(
-                                                "Found active Steam user ID from registry.vdf: {}",
-                                                user_id
-                                            );
-                                            return Some(user_id);
-                                        }
-                            }
+                && let Ok(content) = std::fs::read_to_string(vdf_path)
+            {
+                for line in content.lines() {
+                    let trimmed = line.trim();
+                    if trimmed.starts_with("\"ActiveUser\"") {
+                        let parts: Vec<&str> = trimmed.split('"').collect();
+                        if parts.len() >= 4
+                            && let Ok(user_id) = parts[3].parse::<u32>()
+                            && user_id != 0
+                        {
+                            trace!("Found active Steam user ID from registry.vdf: {}", user_id);
+                            return Some(user_id);
                         }
                     }
+                }
+            }
             let userdata_path = steam_path.join("userdata");
             if userdata_path.exists()
-                && let Ok(entries) = std::fs::read_dir(&userdata_path) {
-                    for entry in entries.flatten() {
-                        if entry.path().is_dir()
-                            && let Some(name) = entry.file_name().to_str()
-                                && let Ok(user_id) = name.parse::<u32>()
-                                    && user_id != 0 {
-                                        trace!(
-                                            "Found possibly active Steam user ID from userdata directory: {}",
-                                            user_id
-                                        );
-                                        return Some(user_id);
-                                    }
+                && let Ok(entries) = std::fs::read_dir(&userdata_path)
+            {
+                for entry in entries.flatten() {
+                    if entry.path().is_dir()
+                        && let Some(name) = entry.file_name().to_str()
+                        && let Ok(user_id) = name.parse::<u32>()
+                        && user_id != 0
+                    {
+                        trace!(
+                            "Found possibly active Steam user ID from userdata directory: {}",
+                            user_id
+                        );
+                        return Some(user_id);
                     }
                 }
+            }
         }
     }
 
@@ -421,15 +424,19 @@ pub fn try_set_marker_steam_env() -> anyhow::Result<()> {
 }
 
 pub async fn open_controller_config(app_id: u32) {
-
     if cef_debug::ensure::check_enabled().await {
         if cef_debug::inject::inject(
-            "SharedJSContext", 
-            format!("SteamClient.Input.OpenDesktopConfigurator({});", app_id).as_str()
-        ).await.is_ok() {
+            "SharedJSContext",
+            format!("SteamClient.Input.OpenDesktopConfigurator({});", app_id).as_str(),
+        )
+        .await
+        .is_ok()
+        {
             return;
         }
-        tracing::warn!("Failed to open Steam Input Configurator via CEF injection, falling back to steam:// URL");
+        tracing::warn!(
+            "Failed to open Steam Input Configurator via CEF injection, falling back to steam:// URL"
+        );
     }
 
     let steam_url = format!("steam://controllerconfig/{}", app_id);

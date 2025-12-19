@@ -102,7 +102,11 @@ impl WindowRunner {
             }
         });
 
-        let cfg = CONFIG.get().cloned().expect("Config not set");
+        let cfg = CONFIG
+            .read()
+            .ok()
+            .and_then(|c| c.as_ref().cloned())
+            .expect("Config not set");
         Self {
             window: None,
             gfx: None,
@@ -115,8 +119,9 @@ impl WindowRunner {
             sdl_waker,
             window_ready,
             pre_dialog_window_visible: CONFIG
-                .get()
-                .cloned()
+                .read()
+                .ok()
+                .and_then(|c| c.as_ref().cloned())
                 .expect("Config not set")
                 .window
                 .create
@@ -437,9 +442,10 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         if self.window.is_some() {
             return;
         }
-        let initially_visible = config::CONFIG
-            .get()
-            .cloned()
+        let initially_visible = CONFIG
+            .read()
+            .ok()
+            .and_then(|c| c.as_ref().cloned())
             .expect("Config not set")
             .window
             .create

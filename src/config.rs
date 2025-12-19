@@ -8,7 +8,7 @@ use figment::{
 use serde::{Deserialize, Serialize};
 use tracing::{debug, warn};
 
-pub static CONFIG: sync::OnceLock<Config> = sync::OnceLock::new();
+pub static CONFIG: sync::RwLock<Option<Config>> = sync::RwLock::new(None);
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
 #[command(version, about, long_about = None)]

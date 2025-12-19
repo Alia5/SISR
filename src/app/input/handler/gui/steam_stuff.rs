@@ -5,8 +5,9 @@ use sdl3::event::EventSender;
 use tracing::warn;
 
 use crate::app::input::handler::State;
-use crate::app::steam_utils::util::{launched_via_steam, open_controller_config};
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
+use crate::app::steam_utils::util::{launched_via_steam, open_controller_config};
+use crate::config::CONFIG;
 
 pub fn draw(
     state: &mut State,
@@ -89,6 +90,11 @@ pub fn draw(
                     state
                         .window_continuous_redraw
                         .store(continuous, Ordering::Relaxed);
+                    if let Ok(mut config_guard) = CONFIG.write()
+                        && let Some(cfg) = config_guard.as_mut()
+                    {
+                        cfg.window.continous_draw = Some(continuous);
+                    }
                 }
 
                 ui.separator();
