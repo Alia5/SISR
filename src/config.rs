@@ -49,6 +49,7 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[arg(
         long = "viiper-address",
+        visible_alias = "va",
         env = "SISR_VIIPER_ADDRESS",
         help = "VIIPER API-server address [default: localhost:3242]"
     )]
@@ -111,6 +112,7 @@ pub struct WindowOpts {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[arg(
         long = "window-continous-draw",
+        visible_alias = "wcd",
         value_name = "BOOL",
         num_args = 0..=1,
         default_missing_value = "false",
