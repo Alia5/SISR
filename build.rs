@@ -153,23 +153,20 @@ fn fetch_viiper_binary() {
         .and_then(|v| v.get("metadata"))
         .and_then(|v| v.get("viiper"));
 
-    let fetch_prelease = viiper
+    let fetch_prerelease = viiper
         .and_then(|v| v.get("fetch_prelease"))
         .and_then(|v| v.as_bool())
         .unwrap_or(false);
 
-    if !fetch_prelease {
-        return;
-    }
-
     let min_version = viiper
         .and_then(|v| v.get("viiper-version"))
         .and_then(|v| v.as_str())
-        .unwrap_or("0.0.0")
+        .unwrap_or_else(|| panic!("package.metadata.viiper.viiper-version must be set"))
         .trim();
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_else(|_| "unknown".into());
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_else(|_| "unknown".into());
+    let target_triple = env::var("TARGET").unwrap_or_else(|_| "unknown".into());
 
     let is_windows = target_os == "windows";
     let asset_name = match (target_os.as_str(), target_arch.as_str()) {
@@ -185,38 +182,26 @@ fn fetch_viiper_binary() {
         }
     };
 
-    let requested_tag = if min_version.starts_with('v') {
+    let tag_name = if fetch_prerelease {
+        "dev-snapshot".to_string()
+    } else if min_version.starts_with('v') {
         min_version.to_string()
     } else {
         format!("v{min_version}")
     };
 
-    let release = github_release_by_tag_or_fallback(&requested_tag);
-    let tag_name = release
-        .get("tag_name")
-        .and_then(|v| v.as_str())
-        .unwrap_or("<unknown>");
-
-    let url = release
-        .get("assets")
-        .and_then(|a| a.as_array())
-        .and_then(|assets| {
-            assets
-                .iter()
-                .find(|a| a.get("name").and_then(|n| n.as_str()) == Some(asset_name))
-        })
-        .and_then(|a| a.get("browser_download_url"))
-        .and_then(|u| u.as_str())
-        .unwrap_or_else(|| {
-            panic!("VIIPER release '{tag_name}' does not contain expected asset '{asset_name}'.")
-        });
+    let url = format!(
+        "https://github.com/Alia5/VIIPER/releases/download/{tag}/{asset}",
+        tag = tag_name,
+        asset = asset_name
+    );
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR"));
     let cache_dir = out_dir.join("viiper");
     let _ = fs::create_dir_all(&cache_dir);
 
     let downloaded_path = cache_dir.join(asset_name);
-    let version_marker = cache_dir.join(format!("{}.marker", sanitize_filename(tag_name)));
+    let version_marker = cache_dir.join(format!("{}.marker", sanitize_filename(&tag_name)));
     if downloaded_path.exists() && version_marker.exists() {
         // Cached.
     } else {
@@ -230,8 +215,8 @@ fn fetch_viiper_binary() {
             }
         }
 
-        download_to_file(url, &downloaded_path);
-        let _ = fs::write(&version_marker, tag_name);
+        download_to_file(&url, &downloaded_path);
+        let _ = fs::write(&version_marker, &tag_name);
 
         #[cfg(unix)]
         {
@@ -248,7 +233,7 @@ fn fetch_viiper_binary() {
     let target_dir = env::var("CARGO_TARGET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| manifest_dir.join("target"));
-    let bin_dir = target_dir.join(&profile);
+    let bin_dir = target_dir.join(&target_triple).join(&profile);
     let _ = fs::create_dir_all(&bin_dir);
     let dest_path = bin_dir.join(if is_windows { "viiper.exe" } else { "viiper" });
     fs::copy(&downloaded_path, &dest_path)
@@ -260,59 +245,6 @@ fn fetch_viiper_binary() {
         asset_name,
         dest_path.display()
     );
-}
-
-fn github_release_by_tag_or_fallback(requested_tag: &str) -> serde_json::Value {
-    let tag_url = format!(
-        "https://api.github.com/repos/Alia5/VIIPER/releases/tags/{}",
-        requested_tag
-    );
-    match github_get_json(&tag_url) {
-        Ok(v) => return v,
-        Err(ureq::Error::StatusCode(404)) => {}
-        Err(e) => {
-            panic!("Failed to fetch VIIPER release by tag '{requested_tag}': {e}");
-        }
-    }
-
-    let list_url = "https://api.github.com/repos/Alia5/VIIPER/releases";
-    let releases = github_get_json(list_url)
-        .unwrap_or_else(|e| panic!("Failed to fetch VIIPER releases list: {e}"));
-    let arr = releases
-        .as_array()
-        .unwrap_or_else(|| panic!("Unexpected VIIPER releases response (not an array)"));
-
-    let mut newest_prerelease: Option<serde_json::Value> = None;
-    let mut newest_stable: Option<serde_json::Value> = None;
-
-    for r in arr {
-        let prerelease = r
-            .get("prerelease")
-            .and_then(|p| p.as_bool())
-            .unwrap_or(false);
-        if prerelease && newest_prerelease.is_none() {
-            newest_prerelease = Some(r.clone());
-        }
-        if !prerelease && newest_stable.is_none() {
-            newest_stable = Some(r.clone());
-        }
-        if newest_prerelease.is_some() && newest_stable.is_some() {
-            break;
-        }
-    }
-
-    newest_prerelease
-        .or(newest_stable)
-        .unwrap_or_else(|| panic!("No VIIPER releases found"))
-}
-
-fn github_get_json(url: &str) -> Result<serde_json::Value, ureq::Error> {
-    let mut resp = ureq::get(url)
-        .header("User-Agent", "SISR-build-script")
-        .header("Accept", "application/vnd.github+json")
-        .call()?;
-
-    resp.body_mut().read_json::<serde_json::Value>()
 }
 
 fn download_to_file(url: &str, path: &PathBuf) {
