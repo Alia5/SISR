@@ -24,7 +24,7 @@ use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::gui::{dark_theme, dialogs, light_theme};
 use crate::app::input::{handler::HandlerEvent, kbm_events, kbm_winit_map};
-use crate::config::{self, CONFIG};
+use crate::config::CONFIG;
 use crate::gfx::Gfx;
 
 pub const ICON_BYTES: &[u8] = include_bytes!("../../assets/icon.ico");
@@ -71,6 +71,7 @@ impl WindowRunner {
             .map(|proj_dirs| proj_dirs.data_dir().join("egui_memory.ron"))
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
         sdl_waker: Arc<Mutex<Option<EventSender>>>,
