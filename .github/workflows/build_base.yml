@@ -197,6 +197,23 @@ jobs:
                     fi
                   fi
 
+                  # Include VIIPER server binary
+                  if [ "${{ matrix.target.os }}" = "windows-latest" ]; then
+                    CANDIDATE1="target/${{ matrix.target.rust_target }}/release/viiper${{ matrix.target.ext }}"
+                    CANDIDATE2="target/release/viiper${{ matrix.target.ext }}"
+                  else
+                    CANDIDATE1="target/${{ matrix.target.rust_target }}/release/viiper"
+                    CANDIDATE2="target/release/viiper"
+                  fi
+
+                  if [ -f "$CANDIDATE1" ]; then
+                    cp "$CANDIDATE1" dist/package/
+                    echo "Included VIIPER binary from $CANDIDATE1"
+                  elif [ -f "$CANDIDATE2" ]; then
+                    cp "$CANDIDATE2" dist/package/
+                    echo "Included VIIPER binary from $CANDIDATE2"
+                  fi
+
                   ls -la dist/package
 
             - name: Create archive
