@@ -81,13 +81,8 @@ jobs:
               uses: softprops/action-gh-release@v1
               with:
                   tag_name: ${{ steps.build_info.outputs.tag_name }}
-                  name: "Release ${{ steps.build_info.outputs.version }}"
+                  name: "SISR ${{ steps.build_info.outputs.version }}"
                   body: |
-                      ## SISR Release ${{ steps.build_info.outputs.version }}
-
-                      Release Date: ${{ steps.build_info.outputs.date }} ${{ steps.build_info.outputs.time }}
-
-                      ### Changes
                       ${{ needs.generate-changelog.outputs.changelog }}
                   files: release_files/*
                   prerelease: false
