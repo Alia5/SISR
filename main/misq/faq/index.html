@@ -310,7 +310,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../guides/todo1.md" class="md-tabs__link">
+        <a href="../../guides/overview/" class="md-tabs__link">
           
   
   
@@ -794,14 +794,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/todo1.md" class="md-nav__link">
+      <a href="../../guides/overview/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    TODO1
+    Overview
   
 
     
@@ -822,14 +822,70 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/todo2.md" class="md-nav__link">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    TODO2
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/glossi_like/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GlosSI like usage
   
 
     
@@ -948,6 +1004,28 @@
     <span class="md-ellipsis">
       
         Where's the GUI?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-would-i-use-this-over-steam-input-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why would I use this over Steam Input directly?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why would I want to use this instead of directly using USBIP/VirtualHere to forward controllers?
       
     </span>
   </a>
@@ -1160,6 +1238,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#why-would-i-use-this-over-steam-input-directly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why would I use this over Steam Input directly?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why would I want to use this instead of directly using USBIP/VirtualHere to forward controllers?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#what-is-usbip" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1232,7 +1332,46 @@
 <li><strong>If</strong> the window runs <strong>as overlay</strong> press <strong><code>Ctrl+Shift+Alt+S</code></strong>
   or <strong><code>LB+RB+BACK+A</code></strong> (<em>A button needs to be pressed last</em>) to toggle UI visibility.</li>
 </ul>
-<p>You can also run <code>sisr --help</code> to see all CLI options.</p>
+<p>You can also run <code>sisr --help</code> to see all CLI options</p>
+<h2 id="why-would-i-use-this-over-steam-input-directly">Why would I use this over Steam Input directly?</h2>
+<p>SISR can be used to circumvent issues with games and applications that
+do not support Steam Input or otherwise pose challenges, like (but not limited to):</p>
+<ul>
+<li>Games with aggressive anti-cheat systems</li>
+<li>Emulators</li>
+<li>Windows Store games/apps</li>
+<li>Games with broken Steam Input support</li>
+</ul>
+<p>You can also use SISR to "tunnel"/forward
+Steam Input configurations over the network to other machines, including Keyboard/Mouse.  </p>
+<p>This makes it possible to use devices like a Steam Deck as a dedicated controller
+without the need to stream the entire game</p>
+<h2 id="why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers">Why would I want to use this instead of <em>directly</em> using USBIP/VirtualHere to forward controllers?</h2>
+<p>Diretly forwarding the Steam Decks (or similar devices) inputs via USBIP/VirtualHere comes with significant drawbacks:</p>
+<ul>
+<li>The forwarded device is entirely "removed" from the host machine  <ul>
+<li>You cannot use the device on the host machine at all while it's forwarded</li>
+<li>There may be no way to "exit" the forwarding on the host machine without additional input devices or remote access,
+you have to disconnect the USBIP/VirtualHere session from the client side<br />
+This can be especially problematic if the host machine is a Steam Deck...</li>
+</ul>
+</li>
+<li>USBIP on Windows specifically does not <em>currently</em> work with the Steam Decks built-in controller</li>
+<li>VirtualHere is closed-source and requires a paid license for more than a single device</li>
+<li>I have personally experienced significant latency and input issues
+  when using VirtualHere specifically on long gaming sessions</li>
+<li>On the Steam Deck (or similar devices), the Touchscreens inputs cannot be forwarded via USBIP/VirtualHere at all</li>
+</ul>
+<p>SISR circumvents all of these issues by:</p>
+<ul>
+<li>Forwarding Steams Virtual Controllers instead of the physical device</li>
+<li>Forward additional Keyboard/Mouse devices alongside the controllers</li>
+<li>Providing "<em>an out</em>" using it's dedicated shortcut/controller chord (<strong><code>CTRL+SHIFT+ALT+S</code></strong>, <strong><code>LB+RB+BACK+A</code></strong>)
+  to toggle the UI visibility and stop/start forwarding</li>
+<li>Being fully open-source and free to use<br />
+   Even if a feature is not supported, everyone can grab the source-code
+   of any part in the chain (except Steam itself) and implement it 😉</li>
+</ul>
 <h2 id="what-is-usbip">What is USBIP?</h2>
 <p><strong>USBIP</strong> is a protocol for tunneling USB devices over TCP/IP<br />
 It allows a USB device on one machine to appear on another machine over the network (or localhost).</p>

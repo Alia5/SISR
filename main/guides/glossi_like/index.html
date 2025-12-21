@@ -13,6 +13,10 @@
       
       
       
+        <link rel="prev" href="../networked/">
+      
+      
+        <link rel="next" href="../../misq/troubleshooting/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>Main - SISR Documentation</title>
+        <title>GlosSI like usage - SISR Documentation</title>
       
     
     
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#changelog-for-development-version" class="md-skip">
+        <a href="#glossi-like-usage" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Main
+              GlosSI like usage
             
           </span>
         </div>
@@ -302,11 +306,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../guides/overview/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
           
   
   
@@ -382,7 +388,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../" class="md-tabs__link">
+      <a href="../../changelog/" class="md-tabs__link">
         
   
   
@@ -731,28 +737,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -770,7 +779,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -788,7 +797,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -844,7 +853,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/networked/" class="md-nav__link">
+      <a href="../networked/" class="md-nav__link">
         
   
   
@@ -869,10 +878,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guides/glossi_like/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -888,6 +906,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -1050,7 +1069,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   
@@ -1087,25 +1106,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#changelog-for-development-version" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Changelog for Development Version
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -1125,11 +1127,50 @@
   
 
 
-  <h1>Main</h1>
-
-<h2 id="changelog-for-development-version">Changelog for Development Version</h2>
-<p>Changes since v0.1.0:</p>
-<p>No changes yet.</p>
+<h1 id="glossi-like-usage">🎮 GlosSI like usage</h1>
+<p>SISR can be used in a similar manner to GloSC/GlosSI, by creating a Steam shortcut
+that launches SISR with a Steam overlay window<br />
+This allows you to have an infinite number of different Steam Input configurations<br />
+It also provides a combined SISR/Steam overlay window for easy access to Steam features</p>
+<hr />
+<div class="admonition warning inline end">
+<p class="admonition-title">Marker shortcut</p>
+<p>You should <strong>not</strong> re-use the <em>"SISR Marker"</em> shortcut or add the <code>--marker</code> launch option here!</p>
+</div>
+<ul>
+<li>Add SISR as a non-Steam game in your Steam library<br />
+      Provide the following flags as launch options  <ul>
+<li><code>-w -f</code><br />
+  <sup>show-window, fullscreen</sup><br />
+<br /></li>
+</ul>
+</li>
+</ul>
+<div class="admonition tip inline end">
+<p class="admonition-title">Multiple Configurations</p>
+<p>You can add SISR multiple times as non-Steam game to have multiple different Steam Input configurations available!</p>
+</div>
+<ul>
+<li>Launch the newly created shortcut from Steam<br />
+    This will start SISR and create a combined SISR/Steam overlay and create the emulated controllers</li>
+</ul>
+<p><br /></p>
+<ul>
+<li>Launch any game or application <strong>outside of Steam</strong>  </li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Touch/Radial menus</p>
+<p>By default, SISR will <strong>not</strong> draw continuously, which prevents touch/radial menus from showing up<br />
+To make touch/radial menus show up, you can add the <code>--wcd</code> launch option to enable continuous drawing  </p>
+<p>This can also circumvent issues with the Steam overlay not showing up correctly.</p>
+<p><strong>Do note that this may increase CPU/GPU usage</strong> and
+can potentially negatively affect gaming performance on lower end systems</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">No Game Launching</p>
+<p>Unlike GloSC/GlosSI, SISR does <strong>not</strong> launch games for you!<br />
+You have to launch the game/application yourself, <strong>outside of Steam</strong>.</p>
+</div>
 
 
 
