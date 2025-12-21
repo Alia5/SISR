@@ -1,0 +1,106 @@
+name: Deploy Documentation
+
+on:
+    push:
+        branches:
+            - main
+        tags:
+            - "v*.*.*"
+
+permissions:
+    contents: write
+
+jobs:
+    deploy-docs:
+        name: Deploy Documentation
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Configure Git
+              run: |
+                  git config user.name github-actions[bot]
+                  git config user.email github-actions[bot]@users.noreply.github.com
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: 3.x
+
+            - name: Install dependencies
+              run: |
+                  pip install mkdocs-material mike
+
+            - name: Generate changelog for main
+              if: github.ref == 'refs/heads/main'
+              run: |
+                  chmod +x .github/scripts/generate-changelog.sh
+                  .github/scripts/generate-changelog.sh docs/changelog/main.md
+                  # Build changelog index page with links to all versions
+                  mkdir -p docs/changelog
+                  {
+                    echo "# Changelog"
+                    echo
+                    echo "## Unreleased"
+                    echo
+                    echo "- [Development Version (main)](./main/)"
+                    echo
+                    echo "## Released Versions"
+                    echo
+                  } > docs/changelog/index.md
+
+                  # List all version tags and link to their changelog pages
+                  git tag -l 'v*.*.*' --sort=-version:refname | while read tag; do
+                    VERSION=${tag#v}
+                    echo "- [Version $VERSION](../../$VERSION/changelog/$VERSION/)" >> docs/changelog/index.md
+                  done
+
+            - name: Deploy main version (main)
+              if: github.ref == 'refs/heads/main'
+              run: |
+                  mike deploy --push --update-aliases main latest
+
+            - name: Generate changelog for tagged version
+              if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                  chmod +x .github/scripts/generate-changelog.sh
+                  TAG_NAME=${GITHUB_REF#refs/tags/}
+                  VERSION=${TAG_NAME#v}
+                  .github/scripts/generate-changelog.sh "docs/changelog/$VERSION.md" "$TAG_NAME"
+                  # Build changelog index page with links to all versions
+                  mkdir -p docs/changelog
+                  {
+                    echo "# Changelog"
+                    echo
+                    echo "## Unreleased"
+                    echo
+                    echo "- [Development Version (main)](../../latest/changelog/main/)"
+                    echo
+                    echo "## Released Versions"
+                    echo
+                  } > docs/changelog/index.md
+
+                  # List all version tags and link to their changelog pages
+                  git tag -l 'v*.*.*' --sort=-version:refname | while read tag; do
+                    VER=${tag#v}
+                    echo "- [Version $VER](../../$VER/changelog/$VER/)" >> docs/changelog/index.md
+                  done
+
+            - name: Deploy tagged version
+              if: startsWith(github.ref, 'refs/tags/')
+              run: |
+                  TAG_NAME=${GITHUB_REF#refs/tags/}
+                  VERSION=${TAG_NAME#v}
+
+                  # Check if this is a pre-release (contains -, alpha, beta, rc)
+                  if [[ "$VERSION" =~ - ]]; then
+                    echo "Deploying pre-release version: $VERSION"
+                    mike deploy --push "$VERSION"
+                  else
+                    echo "Deploying stable version: $VERSION"
+                    mike deploy --push --update-aliases "$VERSION" stable
+                    mike set-default --push stable
+                  fi

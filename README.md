@@ -1,4 +1,4 @@
-<img src="SISR.svg" align="right" width="128"/>
+<img src="docs/SISR.svg" align="right" width="128"/>
 <br />
 
 [![Build Status](https://github.com/alia5/SISR/actions/workflows/snapshots.yml/badge.svg)](https://github.com/alia5/SISR/actions/workflows/snapshots.yml)
@@ -12,28 +12,48 @@
 
 **S**team **I**nput **S**ystem **R**edirector
 
-SISR (pronounced "scissor") is a tool that allows users to redirect Steam Input configurations to a system level, either on localhost or even over the network.
+SISR (pronounced "scissor") redirects Steam Input configurations to the system level (localhost or network).  
 
-Unlike it's predecessor [GlosSI](https://github.com/Alia5/GlosSI), SISR uses [VIIPER](https://github.com/Alia5/VIIPER) _(requiring **USBIP**)_ instead of the unmaintained [ViGEm](https://github.com/ViGEm/ViGEmBus) driver, to emulate virtual controllers.  
+It can be used to circumvent issues with games and applications that
+do not support Steam Input or otherwise pose challenges, like (but not limited to):
+
+- Games with aggressive anti-cheat systems
+- Emulators
+- Windows Store games/apps
+- Games with broken Steam Input support
+
+SISR can also be used to "tunnel"/forward Steam Input configurations over the network to other machines, including Keyboard/Mouse.  
+This makes it possible to use devices like a Steam Deck as a dedicated controller without the need to stream the entire game.
+
+The emulated controllers (and Keyboard/Mouse) are indistinguishable from real hardware and show up at system level.  
+SISR achieves this by utilizing [VIIPER](https://github.com/Alia5/VIIPER) (requires **USBIP**).  
+Unlike its predecessor [GlosSI](https://github.com/Alia5/GlosSI), it does not use the unmaintained [ViGEm](https://github.com/ViGEm/ViGEmBus) driver.
 
 > ⚠️ **Highly experimental work in progress.** Everything is subject to change and may or may not work.  
 Expect bugs, crashes, and missing features.
 
-## Still here? 🤔 Okay here's how to get it running
+## ✨🛣️ Features / Roadmap
 
-1. Make sure you have USBIP setup on your system  
-    - On Windows, install [USBIP-Win2](https://github.com/OSSign/vadimgrn--usbip-win2/releases)  
-    (use the latest **Pre**-Release)
-    - On Linux, install the `usbip` package (or whatever package includes this on whatever you are running) and load the `vhci-hcd` kernel modules
-2. Start Steam
-3. Start a [VIIPER](https://github.com/Alia5/VIIPER) server on your system  
-   Use the latest **Pre**-Release, and use the CLI.
-4. Start SISR. ¯\\\_(ツ)_/¯  
-    - If the automatic first time setup does not work (probable, as it's just a series of warnings and error dialogs ;P):
-      1. Create an empty file names `.cef-enable-remote-debugging` in **your steam installation directory** (e.g. `C:\Program Files (x86)\Steam` / `~/.steam/steam`)
-      2. Add SISR as a non-Steam game in your Steam library  
-       Set the launch options of that shortcut to `--marker`
-      3. Restart Steam, then restart SISR
+- ✅ Steam Input redirection to system level (localhost or network)  
+    - Indistinguishable from real hardware
+- ✅ Xbox 360 controller emulation
+- ✅ Keyboard/Mouse emulation (only in network scenarios)  
+    - Allows use of devices like the Steam Deck as dedicated controller
+- ✅ Flexible configuration (CLI, config files, environment variables)
+- ✅ Multi-platform support (Windows, Linux)
+- ✅ Multiple operation modes
+    - Standalone background service
+    - Steam overlay window mode
+- 🚧 PS4 controller emulation
+- 🚧 Xbox One controller emulation
+- 🚧 Generic controller emulation
+- 🚧 Gyro Passthrough
+- 🚧 Bundling multiple devices into a single controller
+- 🚧 Automatic HidHide integration
+
+## How to get it running
+
+Read the [documentation](https://alia5.github.io/SISR/)!
 
 ## 😭 Mimimi (FAQ)
 
@@ -91,9 +111,11 @@ Automatic HidHide integration will (maybe) follow whenever soon™.
 ### "Mimimi, your code is shit / you're doing it wrong"
 
 - Cool story bro. Where's your pull request?  
-  I do this in my spare time; it's better to have something that provides value than whatever elitist kind of mental masturbation.
+  I do this in my spare time; it's better to have something that provides value than whatever elitist kind of mental masturbation you're after.
 
-## 📝 TODO
+## 📝 Contributing
+
+PRs welcome! See [GitHub Issues](https://github.com/Alia5/SISR/issues) for open tasks.
 
 ## 📄 License
 
@@ -115,4 +137,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ```
-

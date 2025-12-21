@@ -161,8 +161,8 @@ pub struct SteamOpts {
         value_name = "BOOL",
         num_args = 0..=1,
         default_missing_value = "false",
-        env = "SISR_STEAM_CEF_DEBUG_ENABLE",
-        help = "Enable Steam CEF remote debugging (true/false) [default: false]"
+        env = "SISR_STEAM_CEF_DEBUG_DISABLE",
+        help = "Disable Steam CEF remote debugging (true/false) [default: false]"
     )]
     pub cef_debug_disable: Option<bool>,
 

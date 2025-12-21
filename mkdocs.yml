@@ -1,0 +1,73 @@
+site_name: SISR Documentation
+site_description: Steam Input System Redirector - Documentation
+site_author: Peter Repukat
+repo_name: Alia5/SISR
+repo_url: https://github.com/Alia5/SISR
+
+theme:
+  name: material
+  logo: sisr.svg
+  palette: 
+    - scheme: default
+      primary: blue grey
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: black
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+extra:
+  version:
+    provider: mike
+    default: stable
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascript/downloads.js
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+
+nav:
+  - Home: index.md
+  - Downloads: downloads/index.md
+  - Installation:
+    - Installation: getting-started/installation.md
+    - USBIP: getting-started/usbip.md
+  - Configuration:
+    - Configuration: config/config.md
+    - CLI Reference: config/cli.md
+  - Guides:
+    - TODO1: guides/todo1.md
+    - TODO2: guides/todo2.md
+  - Troubleshooting: misq/troubleshooting.md
+  - FAQ: misq/faq.md
+  - Development:
+    - Building: dev/building.md
+  - Changelog: changelog/
