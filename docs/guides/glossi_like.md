@@ -26,6 +26,11 @@ It also provides a combined SISR/Steam overlay window for easy access to Steam f
 
 - Launch any game or application **outside of Steam**  
 
+!!! tip "SISR overlay"
+    If you want to exit SISR or change settings while in-game,
+    you can toggle the SISR overlay by using the keyboard-shortcut or controller-chord  
+    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`**)
+
 !!! info "Touch/Radial menus"
     By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  
     To make touch/radial menus show up, you can add the `--wcd` launch option to enable continuous drawing  

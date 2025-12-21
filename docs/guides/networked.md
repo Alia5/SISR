@@ -92,6 +92,11 @@ USBIP and VIIPER are not required, only SISR itself
 <br />
 <br />
 
+!!! tip "SISR overlay"
+    If you want to stop/start forwarding or change settings while in-game,
+    you can toggle the SISR overlay by using the keyboard-shortcut or controller-chord  
+    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`**)
+
 !!! info "Flatpak"
     There will (_hopefully_) be a Flatpak version of SISR available soon™  
 
