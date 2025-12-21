@@ -38,7 +38,7 @@ for both Windows and Linux.
     In a PowerShell run
 
     ```powershell
-    irm https://alia5.github.io/VIIPER/install.ps1 | iex
+    irm https://alia5.github.io/VIIPER/stable/install.ps1 | iex
     ```
 
     This will
@@ -56,7 +56,7 @@ for both Windows and Linux.
     In a terminal run
 
     ```bash
-    curl -fsSL https://alia5.github.io/VIIPER/install.sh | sh
+    curl -fsSL https://alia5.github.io/VIIPER/stable/install.sh | sh
     ```
 
     This will

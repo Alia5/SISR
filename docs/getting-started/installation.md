@@ -20,7 +20,7 @@
     Linux requires VIIPER as a system service:
 
     ```bash
-    curl -fsSL https://alia5.github.io/VIIPER/install.sh | sh
+    curl -fsSL https://alia5.github.io/VIIPER/stable/install.sh | sh
     ```
 
     This will install VIIPER, and run it as a systemd service.
