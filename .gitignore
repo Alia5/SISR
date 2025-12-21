@@ -46,3 +46,6 @@ coverage/
 .env
 .env.*
 !.env.example
+
+*.AppImage
+AppDir/

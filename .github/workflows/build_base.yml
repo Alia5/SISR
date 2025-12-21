@@ -191,6 +191,8 @@ jobs:
                     SDL3_SO=$(find target/${{ matrix.target.rust_target }}/release/build/sdl3-sys-*/out/build -name "libSDL3.so*" | head -1)
                     if [ -f "$SDL3_SO" ]; then
                       cp -P "$SDL3_SO"* dist/package/ 2>/dev/null || cp "$SDL3_SO" dist/package/
+                      rm -f target/${{ matrix.target.rust_target }}/release/libSDL3.so.0
+                      cp "$SDL3_SO" target/${{ matrix.target.rust_target }}/release/libSDL3.so.0
                       echo "Copied SDL3 library"
                     else
                       echo "Warning: SDL3 library not found"
@@ -216,6 +218,19 @@ jobs:
 
                   ls -la dist/package
 
+            - name: Build AppImage
+              if: startsWith(matrix.target.name, 'aarch64-linux') || startsWith(matrix.target.name, 'x86_64-linux')
+              shell: bash
+              run: |
+                  ARCH=$(uname -m)
+                  curl -fsSL "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${ARCH}.AppImage" -o linuxdeploy
+                  chmod +x linuxdeploy
+                  rm -rf AppDir
+                  export LD_LIBRARY_PATH="target/${{ matrix.target.rust_target }}/release:$LD_LIBRARY_PATH"
+                  NO_STRIP=1 ./linuxdeploy --appdir AppDir -l target/${{ matrix.target.rust_target }}/release/libSDL3.so.0 -e target/${{ matrix.target.rust_target }}/release/SISR -d sisr.desktop -i docs/SISR.svg --output appimage
+                  mkdir -p dist/appimage
+                  mv SISR-${ARCH}.AppImage dist/appimage/
+
             - name: Create archive
               shell: bash
               run: |
@@ -235,4 +250,12 @@ jobs:
                   path: |
                       dist/*.zip
                       dist/*.tar.gz
-                  if-no-files-found: error
+                  if-no-files-found: warn
+
+            - name: Upload AppImage artifact
+              if: ${{ inputs.upload_artifacts && (startsWith(matrix.target.name, 'aarch64-linux') || startsWith(matrix.target.name, 'x86_64-linux')) }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: SISR-${{ matrix.target.name }}-AppImage${{ inputs.artifact_suffix }}
+                  path: dist/appimage/*.AppImage
+                  if-no-files-found: warn

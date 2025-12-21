@@ -238,7 +238,11 @@ fn get_case_insensitive<'a>(
 pub fn shortcuts_has_sisr_marker(shortcuts_path: &PathBuf) -> u32 {
     let shortcuts = open_shortcuts_vdf(shortcuts_path);
     trace!("Parsed shortcuts.vdf: {:?}", shortcuts);
-    let running_executable_path = std::env::current_exe().unwrap_or_default();
+    let running_executable_path = std::env::var("APPIMAGE")
+        .ok()
+        .and_then(|p| std::path::PathBuf::from(p).canonicalize().ok())
+        .or_else(|| std::env::current_exe().ok())
+        .unwrap_or_default();
     let running_path_str = running_executable_path
         .to_str()
         .unwrap_or_default()
@@ -276,15 +280,17 @@ pub fn shortcuts_has_sisr_marker(shortcuts_path: &PathBuf) -> u32 {
 }
 
 pub async fn create_sisr_marker_shortcut() -> anyhow::Result<u32> {
-    let payload = format!(
-        "var SISR_PATH = `{}`;\n",
-        std::env::current_exe()
-            .unwrap_or_default()
-            .to_str()
-            .unwrap_or_default()
-            .replace("\\", "/")
-    ) + str::from_utf8(cef_debug::payloads::CREATE_MARKER_SHORTCUT)
-        .expect("Failed to convert create marker shortcut payload to string");
+    let exe_path = std::env::var("APPIMAGE")
+        .ok()
+        .or_else(|| {
+            std::env::current_exe()
+                .ok()
+                .and_then(|p| p.to_str().map(String::from))
+        })
+        .unwrap_or_default();
+    let payload = format!("var SISR_PATH = `{}`;\n", exe_path.replace("\\", "/"))
+        + str::from_utf8(cef_debug::payloads::CREATE_MARKER_SHORTCUT)
+            .expect("Failed to convert create marker shortcut payload to string");
     match cef_debug::inject::inject("SharedJSContext", &payload).await {
         Ok(result) => {
             debug!("Create SISR marker shortcut result: {}", result);

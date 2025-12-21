@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SISR
+Comment=Steam Input System Redirector
+Exec=SISR
+Icon=SISR
+Categories=Utility;Game;
+Terminal=false
