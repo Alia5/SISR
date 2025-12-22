@@ -34,7 +34,7 @@ Steps to reproduce the behavior:
 Please attach log files! By default, logs are written to:
 
 - Windows: %APPDATA%\SISR\data\SISR.log
-- Linux: ~/.local/share/SISR/SISR.log
+- Linux: ~/.local/share/sisr/SISR.log
 
 ## Environment
 
