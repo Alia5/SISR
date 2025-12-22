@@ -3,6 +3,7 @@
 set -e
 
 SISR_VERSION="dev-snapshot"
+VIIPER_VERSION="dev-snapshot"
 
 REPO="Alia5/SISR"
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
@@ -161,8 +162,6 @@ fi
 
 echo ""
 echo "Installing VIIPER..."
-
-VIIPER_VERSION="0.3.1"
 
 echo "Installing VIIPER version: $VIIPER_VERSION"
 if curl -fsSL "https://alia5.github.io/VIIPER/${VIIPER_VERSION}/install.sh" | sh; then
