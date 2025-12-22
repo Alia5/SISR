@@ -37,6 +37,9 @@ Steam Input configurations over the network to other machines, including Keyboar
 This makes it possible to use devices like a Steam Deck as a dedicated controller
 without the need to stream the entire game
 
+!!! info
+    That said, if you do not have issues with Steam Input directly, you probably should not use SISR at all 😉
+
 ## Why would I want to use this instead of _directly_ using USBIP/VirtualHere to forward controllers?
 
 Diretly forwarding the Steam Decks (or similar devices) inputs via USBIP/VirtualHere comes with significant drawbacks:
