@@ -1,5 +1,14 @@
 # 🎮 GlosSI like usage
 
+??? tip "For existing GlosSI users"
+    If you are used to GloSC/GlosSI, you may know that GlosSI "required"
+    you to create a Steam shortcut to it for each game/application you wanted to use it with.
+
+    SISR is not exactly designed like this, but it can be used in a similar manner.
+
+    However, SISR does **not** launch games for you!  
+    You have to launch the game/application yourself, **outside of Steam**.
+
 SISR can be used in a similar manner to GloSC/GlosSI, by creating a Steam shortcut
 that launches SISR with a Steam overlay window  
 This allows you to have an infinite number of different Steam Input configurations  
@@ -29,7 +38,7 @@ It also provides a combined SISR/Steam overlay window for easy access to Steam f
 !!! tip "SISR overlay"
     If you want to exit SISR or change settings while in-game,
     you can toggle the SISR overlay by using the keyboard-shortcut or controller-chord  
-    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`**)
+    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`** _"A" button needs to be pressed last_)
 
 !!! info "Touch/Radial menus"
     By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  

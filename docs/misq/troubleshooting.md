@@ -54,11 +54,11 @@ Does the game work with regular, real, Xbox 360 controllers?
 
 ### I have toggled the UI but now I can't get rid of it
 
-- Press **`Ctrl+Shift+Alt+S`** or **`LB+RB+BACK+A`** (_A button needs to be pressed last_) again to toggle UI visibility
+- Press **`Ctrl+Shift+Alt+S`** or **`LB+RB+BACK+A`** (_"A" button needs to be pressed last_) again to toggle UI visibility
 
 ### My mouse is captured by the overlay and I can't interact with other windows
 
-- Press **`Ctrl+Shift+Alt+S`** or **`LB+RB+BACK+A`** (_A button needs to be pressed last_) to toggle UI visibility
+- Press **`Ctrl+Shift+Alt+S`** or **`LB+RB+BACK+A`** (_"A" button needs to be pressed last_) to toggle UI visibility
 
 ## 🐍 VIIPER Issues
 

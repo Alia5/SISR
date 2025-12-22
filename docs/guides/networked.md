@@ -15,11 +15,23 @@ An explanation on why this can be preferable over other solutions can be found i
 ## Receiving Machine (e.g. Gaming PC)
 
 On the machine that will receive the forwarded controllers/Keyboard/Mouse (e.g. your Gaming PC)
-you will not need to install SISR itself, only it's dependencies
+you will not need to install SISR itself, only it's dependencies, USBIP and VIIPER
+
+!!! tip
+    If the receiving machine runs on 🐧 Linux
+    **and** you have previosly installed SISR,
+    you can skip the installation steps detauled here
+
+    If the receiving machine runs on 🪟 Windows
+    it is **strongly recommended** to use the VIIPER installation script **after** installing SISR on the receiving machine, to get a permanent VIIPER service setup 
 
 ### USBIP
 
 Refer to the [USBIP setup guide](../getting-started/usbip.md)
+
+!!! tip "SISR previously setup"
+    If you have previously installed SISR on the receiving machine,
+    USBIP should already be setup correctly
 
 ### VIIPER
 
@@ -48,8 +60,10 @@ for both Windows and Linux.
     - Start the VIIPER server immediately
   
     !!! warning "USBIP not included"
-        The install scripts do not install/setup USBIP.
+        The VIIPER install script does not install/setup USBIP.
         Make sure a USBIP-client is installed and configured before installing VIIPER.
+
+        The SISR install script should include everything you need, though
 
 === "Linux"
 
@@ -66,8 +80,10 @@ for both Windows and Linux.
     - Enables and starts the VIIPER service immediately
 
     !!! warning "USBIP not included"
-        The install scripts do not install/setup USBIP.
+        The VIIPER install script does not install/setup USBIP.
         Make sure a USBIP-client is installed and configured before installing VIIPER.
+
+        The SISR install script should include everything you need, though
 
 Refer to the [VIIPER documentation](https://alia5.github.io/VIIPER/) for more details and information
 
@@ -97,4 +113,4 @@ USBIP and VIIPER are not required, only SISR itself
 !!! tip "SISR overlay"
     If you want to stop/start forwarding or change settings while in-game,
     you can toggle the SISR overlay by using the keyboard-shortcut or controller-chord  
-    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`**)
+    (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`** (_"A" button needs to be pressed last_))
