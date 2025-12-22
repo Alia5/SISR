@@ -1534,8 +1534,11 @@ You need to manually install the prerequisites and keep SISR in a <strong>stable
 <h3 id="usbip">🔌 USBIP</h3>
 <p><strong>READ AND FOLLOW</strong>: <a href="../usbip/">USBIP Installation</a></p>
 <h3 id="viiper">⚙️ VIIPER</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux</label><label for="__tabbed_1_2">Windows</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">Linux</label></div>
 <div class="tabbed-content">
+<div class="tabbed-block">
+<p>VIIPER is bundled with SISR. No separate installation required</p>
+</div>
 <div class="tabbed-block">
 <p>Linux requires VIIPER as a system service:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://alia5.github.io/VIIPER/stable/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
@@ -1543,27 +1546,23 @@ You need to manually install the prerequisites and keep SISR in a <strong>stable
 <p>This will install VIIPER, and run it as a systemd service.</p>
 <p>For more details, see the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a>.</p>
 </div>
-<div class="tabbed-block">
-<p>VIIPER is bundled with SISR. No separate installation required.</p>
 </div>
 </div>
-</div>
+<p>.</p>
 <h2 id="getting-sisr-running">🚀 Getting SISR running</h2>
 <h3 id="download-sisr">📦 Download SISR</h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Linux</label><label for="__tabbed_2_2">Windows</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Windows</label><label for="__tabbed_2_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Download the AppImage for your architecture from the <a href="../../downloads/">Downloads</a> page:</p>
-<ul>
-<li><code>SISR-x86_64.AppImage</code> for 64-bit Intel/AMD systems</li>
-<li><code>SISR-aarch64.AppImage</code> for ARM64 systems</li>
-</ul>
-<p>Make it executable:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>SISR-x86_64.AppImage
-</code></pre></div>
+<p>Download the zip archive for your architecture from the <a href="../../downloads/">Downloads</a> page and extract it to a permanent location  </p>
+<p>A permanent location is important as SISR creates a marker shortcut in Steam that points to it's location</p>
 </div>
 <div class="tabbed-block">
-<p>Download the zip archive for your architecture from the <a href="../../downloads/">Downloads</a> page and extract it to a permanent location</p>
+<p>Download the AppImage for your architecture from the <a href="../../downloads/">Downloads</a> page
+and make it executable</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>SISR-x86_64.AppImage
+</code></pre></div>
+<p>Move the file to a permanent location, this is important as SISR creates a marker shortcut in Steam that points to it's location</p>
 </div>
 </div>
 </div>
