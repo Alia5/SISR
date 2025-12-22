@@ -11,6 +11,16 @@ SISR runs as a **system tray application** by default.
 
 You can also run `sisr --help` to see all CLI options
 
+## I don't like the system tray app behavior, can I run it as a normal windowed application?
+
+Yes, you can!  
+Launch SISR with `-w --window-fullscreen false` to show the window at startup and disable fullscreen behavior
+
+## I don't like the chosen overlay shortcut/controller chord, can I change it?
+
+You do realize Steam Input can remap controller buttons/shortcuts, right?  
+You're smart, you can figure it out 😜
+
 ## Why would I use this over Steam Input directly?
 
 SISR can be used to circumvent issues with games and applications that
