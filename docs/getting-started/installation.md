@@ -172,7 +172,9 @@ Once you have the prerequisites installed, run SISR and follow the dialogs 😉
     SISR uses this shortcut to manage the Steam Input configuration for the emulated controllers and is required for operation  
 
     You can have other launch options as well, just make sure that only **a single** shortcut to SISR with the `--marker` argument exists in your Steam library.  
-    You can even add multiple SISR shortcuts without `--marker` if you want to have different Steam Input configurations for different games/setups, but those will only work if those shortcuts are launched from Steam directly.
+    
+    You can even add multiple SISR shortcuts without `--marker` if you want to have different Steam Input configurations for different games/setups, but those will only work if those shortcuts are launched from Steam directly.  
+    See the [GlosSI like usage](../guides/glossi_like.md) guide for more details
 
 Post installation, when running SISR, it should be visible in your system tray
 and your controller(s) should be available on a system level.  
