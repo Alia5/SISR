@@ -51,7 +51,7 @@ Expect bugs, crashes, and missing features.
 - 🚧 Bundling multiple devices into a single controller
 - 🚧 Automatic HidHide integration
 
-## DOcumentation / FAQ / Help
+## Documentation / FAQ / Help
 
 Read the [documentation](https://alia5.github.io/SISR/)!
 
