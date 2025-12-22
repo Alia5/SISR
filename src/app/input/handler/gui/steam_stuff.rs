@@ -6,7 +6,9 @@ use tracing::warn;
 
 use crate::app::input::handler::State;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
-use crate::app::steam_utils::util::{launched_via_steam, open_controller_config};
+use crate::app::steam_utils::util::{
+    launched_in_steam_game_mode, launched_via_steam, open_controller_config,
+};
 use crate::config::CONFIG;
 
 pub fn draw(
@@ -110,19 +112,30 @@ pub fn draw(
                                 return;
                             };
 
-                            if ui.checkbox(&mut active, "Force Config").changed() {
-                                if active {
-                                    enforcer.activate_with_appid(app_id);
-                                } else {
-                                    enforcer.deactivate();
+                            let launched_in_game_mode = launched_in_steam_game_mode();
+                            ui.add_enabled_ui(!launched_in_game_mode, |ui| {
+                                if launched_in_game_mode {
+                                    ui.label(
+                                        RichText::new(
+                                            "Will not force config: Launched in Steam Gaming Mode",
+                                        )
+                                        .weak(),
+                                    );
                                 }
-                            }
-                            ui.style_mut().spacing.button_padding = Vec2::new(12.0, 6.0);
-                            let btn = Button::new("🛠 Open Configurator").selected(true);
-                            if ui.add(btn).clicked() {
-                                state.async_handle.spawn(open_controller_config(app_id));
-                            }
-                            ui.reset_style();
+                                if ui.checkbox(&mut active, "Force Config").changed() {
+                                    if active {
+                                        enforcer.activate_with_appid(app_id);
+                                    } else {
+                                        enforcer.deactivate();
+                                    }
+                                }
+                                ui.style_mut().spacing.button_padding = Vec2::new(12.0, 6.0);
+                                let btn = Button::new("🛠 Open Configurator").selected(true);
+                                if ui.add(btn).clicked() {
+                                    state.async_handle.spawn(open_controller_config(app_id));
+                                }
+                                ui.reset_style();
+                            });
                         });
                         ui.separator();
                     },

@@ -1,7 +1,10 @@
-use tracing::{debug, error, info, warn};
 use std::sync::{Arc, Mutex, OnceLock};
+use tracing::{debug, error, info, warn};
 
-use crate::app::{signals, steam_utils::util::open_steam_url};
+use crate::app::{
+    signals,
+    steam_utils::util::{launched_in_steam_game_mode, open_steam_url},
+};
 
 #[derive(Debug)]
 pub struct BindingEnforcer {
@@ -54,6 +57,11 @@ impl BindingEnforcer {
             warn!("Cannot activate Steam binding enforcement: no AppId detected");
             return;
         };
+
+        if launched_in_steam_game_mode() {
+            info!("Skipping overlay enforcement: Launched in Steam Game Mode");
+            return;
+        }
 
         let url = format!("steam://forceinputappid/{}", app_id);
         match open_steam_url(&url) {

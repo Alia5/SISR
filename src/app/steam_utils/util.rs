@@ -12,16 +12,35 @@ use crate::config::CONFIG;
 
 static STEAM_PATH: OnceLock<Option<PathBuf>> = OnceLock::new();
 static LAUNCHED_VIA_STEAM: OnceLock<bool> = OnceLock::new();
+static LAUNCHED_IN_STEAM_GAME_MODE: OnceLock<bool> = OnceLock::new();
 static OVERLAY_LIB: RwLock<Option<libloading::Library>> = RwLock::new(None);
 
 pub fn init() {
     let launched_via_steam = std::env::var("SteamGameId").is_ok();
     LAUNCHED_VIA_STEAM.set(launched_via_steam).ok();
     debug!("Launched via Steam: {}", launched_via_steam);
+
+    let launched_in_steam_game_mode = if launched_via_steam {
+        std::env::var("GAMESCOPE_WAYLAND_DISPLAY").is_ok()
+    } else {
+        false
+    };
+
+    LAUNCHED_IN_STEAM_GAME_MODE
+        .set(launched_in_steam_game_mode)
+        .ok();
+    debug!(
+        "Launched in Steam Game Mode: {}",
+        launched_in_steam_game_mode
+    );
 }
 
 pub fn launched_via_steam() -> bool {
     *LAUNCHED_VIA_STEAM.get().unwrap_or(&false)
+}
+
+pub fn launched_in_steam_game_mode() -> bool {
+    *LAUNCHED_IN_STEAM_GAME_MODE.get().unwrap_or(&false)
 }
 
 pub fn open_steam_url(url: &str) -> Result<(), std::io::Error> {
