@@ -198,7 +198,7 @@ and that the SISR executable is located at a stable path that does not change be
 
 ## ➡️ Next steps
 
-- Checkout the [Guides](../guides/overview/) for different usage scenarios
+- Checkout the [Guides](../guides/overview.md) for different usage scenarios
 - Check [Configuration](../config/config.md) and [CLI Reference](../config/cli.md)
 - Check the [Troubleshooting](../misq/troubleshooting.md) section
 - Read the [FAQ](../misq/faq.md)
