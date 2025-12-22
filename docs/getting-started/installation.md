@@ -43,7 +43,7 @@ that should setup everything you need to get started with SISR quickly
         - **Latest _pre_-release (development snapshot):**  
         `irm https://alia5.github.io/SISR/main/install.ps1 | iex`
 
-    Continue with [Post-Installation](#-post-installation)
+    ➡️ Continue with [Post-Installation](#-post-installation)
 
 === "🐧 Linux"
 
@@ -76,7 +76,7 @@ that should setup everything you need to get started with SISR quickly
         - **Latest _pre_-release (development snapshot):**  
         `curl -fsSL https://alia5.github.io/SISR/main/install.sh | sh`
 
-    Continue with [Post-Installation](#-post-installation)
+    ➡️ Continue with [Post-Installation](#-post-installation)
 
 ## 📖 Manual Installation
 
