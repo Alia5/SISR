@@ -651,40 +651,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🪟 Windows
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linux" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🐧 Linux
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🐧 Linux">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ubuntudebian" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🟠 Ubuntu/Debian
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#arch-linux" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -694,8 +660,19 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#ubuntudebian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟠 Ubuntu/Debian
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linux-kernel-module-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -737,11 +714,6 @@
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1253,40 +1225,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🪟 Windows
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linux" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🐧 Linux
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🐧 Linux">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ubuntudebian" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🟠 Ubuntu/Debian
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#arch-linux" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1296,8 +1234,19 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#ubuntudebian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟠 Ubuntu/Debian
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linux-kernel-module-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1346,11 +1295,6 @@
     </nav>
   
 </li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
     </ul>
   
@@ -1373,7 +1317,9 @@
 
 
 <h1 id="usbip">🔌 USBIP</h1>
-<h2 id="windows">🪟 Windows</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">🪟 Windows</label><label for="__tabbed_1_2">🐧 Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <p><a href="https://github.com/vadimgrn/usbip-win2">usbip-win2</a> is by far the most complete implementation of USBIP for Windows (comes with a <strong>SIGNED</strong> kernel mode driver).</p>
 <p><strong>Install and done 😉</strong></p>
 <div class="admonition warning">
@@ -1384,15 +1330,22 @@ You can safely remove this CA after installation using <code>certmgr.msc</code> 
 <a href="https://github.com/OSSign/vadimgrn--usbip-win2/releases">OSSign repository</a>, which has this issue fixed already.<br />
 <em>Note</em> that the installer does not work, only the driver <code>.cat,.inf,.sys</code> files.</p>
 </div>
-<h2 id="linux">🐧 Linux</h2>
-<h3 id="ubuntudebian">🟠 Ubuntu/Debian</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>linux-tools-generic
-</code></pre></div>
-<p><a href="https://manpages.ubuntu.com/manpages/noble/man8/usbip.8.html">Ubuntu USBIP Manual</a></p>
+</div>
+<div class="tabbed-block">
 <h3 id="arch-linux">🏹 Arch Linux</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>usbip
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>usbip
 </code></pre></div>
 <p><a href="https://wiki.archlinux.org/title/USB/IP">Arch Wiki: USBIP</a></p>
+<details class="tip">
+<summary>Steam OS users</summary>
+<p>If you are installing SISR on Steam OS, you have to switch to the desktop mode and enable write access to the root filesystem first:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>steamos-readonly<span class="w"> </span>disable
+</code></pre></div>
+</details>
+<h3 id="ubuntudebian">🟠 Ubuntu/Debian</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>linux-tools-generic
+</code></pre></div>
+<p><a href="https://manpages.ubuntu.com/manpages/noble/man8/usbip.8.html">Ubuntu USBIP Manual</a></p>
 <h3 id="linux-kernel-module-setup">🧩 Linux Kernel Module Setup</h3>
 <div class="admonition info">
 <p class="admonition-title">USBIP Client Requirement</p>
@@ -1401,17 +1354,20 @@ Most Linux distributions include this module but don't load it automatically.</p
 </div>
 <h4 id="one-time-setup">🧷 One-Time Setup</h4>
 <p>To load the module automatically on boot:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;vhci-hcd&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/modules-load.d/vhci-hcd.conf
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>vhci-hcd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;vhci-hcd&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/modules-load.d/vhci-hcd.conf
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>vhci-hcd
 </code></pre></div>
 <h4 id="manual-loading">🔄 Manual Loading</h4>
 <p>To load the module for the current session only:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>vhci-hcd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>modprobe<span class="w"> </span>vhci-hcd
 </code></pre></div>
 <h4 id="verification">🔎 Verification</h4>
 <p>Check if the module is loaded:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vhci_hcd
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>lsmod<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vhci_hcd
 </code></pre></div>
+</div>
+</div>
+</div>
 
 
 
