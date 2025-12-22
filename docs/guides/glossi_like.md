@@ -42,7 +42,7 @@ It also provides a combined SISR/Steam overlay window for easy access to Steam f
 
 !!! info "Touch/Radial menus"
     By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  
-    To make touch/radial menus show up, you can add the `--wcd` launch option to enable continuous drawing  
+    To make touch/radial menus show up, you can add the `--wcd true` launch option to enable continuous drawing  
 
     This can also circumvent issues with the Steam overlay not showing up correctly.
 

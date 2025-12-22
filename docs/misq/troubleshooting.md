@@ -46,7 +46,7 @@ Does the game work with regular, real, Xbox 360 controllers?
 ### Touch/Radial menus do not work
 
 By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  
-To make touch/radial menus show up, you can add the `--wcd` launch option to enable continuous drawing  
+To make touch/radial menus show up, you can add the `--wcd true` launch option to enable continuous drawing  
 
 This can also circumvent issues with the Steam overlay not showing up correctly.
 

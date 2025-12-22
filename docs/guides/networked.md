@@ -105,7 +105,7 @@ USBIP and VIIPER are not required, only SISR itself
 
 - Add SISR as a non-Steam game in your Steam library  
       Provide the following flags as launch options  
-      - `-w -f --wcd --kbm --viiper-address <RECEIVING_MACHINE_IP>:3242`  
+      - `-w -f --wcd true --kbm true --viiper-address <RECEIVING_MACHINE_IP>:3242`  
       <sup>show-window, fullscreen, continuous drawing, keyboard/mouse emulation, other machine address</sup>  
 <br />
 
