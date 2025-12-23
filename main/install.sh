@@ -3,7 +3,7 @@
 set -e
 
 SISR_VERSION="dev-snapshot"
-VIIPER_VERSION="0.3.1"
+VIIPER_VERSION="dev-snapshot"
 
 REPO="Alia5/SISR"
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
@@ -103,63 +103,6 @@ if [ -f /etc/os-release ]; then
             fi
         fi
     fi
-fi
-
-echo ""
-echo "Checking USBIP installation..."
-
-if command -v usbip >/dev/null ; then
-    echo "USBIP already installed"
-else
-    echo "USBIP not found. Installing..."
-    
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        
-        case "$ID" in
-            arch|manjaro)
-                echo "Installing USBIP via pacman..."
-                sudo pacman -S --noconfirm usbip || echo "Warning: USBIP installation failed" 
-                ;;
-            ubuntu|debian|pop)
-                echo "Installing USBIP via apt..."
-                sudo apt update
-                sudo apt install -y linux-tools-generic || echo "Warning: USBIP installation failed" 
-                ;;
-            fedora|rhel|centos)
-                echo "Installing USBIP via dnf..."
-                sudo dnf install -y usbip || echo "Warning: USBIP installation failed" 
-                ;;
-            *)
-                echo "Warning: Unknown distribution. Please install USBIP manually." 
-                echo "See: https://alia5.github.io/SISR/getting-started/usbip/" 
-                ;;
-        esac
-    fi
-fi
-
-echo "Checking vhci_hcd kernel module..."
-if lsmod | grep -q vhci_hcd; then
-    echo "vhci_hcd module is already loaded"
-else
-    echo "Loading vhci_hcd kernel module..."
-    if sudo modprobe vhci_hcd; then
-        echo "vhci_hcd module loaded"
-    else
-        echo "Warning: Could not load vhci_hcd module" 
-    fi
-fi
-
-MODULES_CONF="/etc/modules-load.d/sisr.conf"
-if ! lsmod | grep -q vhci_hcd; then
-    echo "Configuring vhci_hcd to load at boot..."
-    if echo "vhci_hcd" | sudo tee "$MODULES_CONF" >/dev/null; then
-        echo "Module persistence configured: $MODULES_CONF"
-    else
-        echo "Warning: Could not configure module persistence" 
-    fi
-else
-    echo "vhci_hcd module is already loaded, skipping autoload configuration"
 fi
 
 echo ""

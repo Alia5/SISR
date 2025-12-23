@@ -1595,9 +1595,13 @@ that should setup everything you need to get started with SISR quickly</p>
 <p>The script will:</p>
 <ul>
 <li>Download and install (or update) SISR to <code>%LOCALAPPDATA%\SISR\SISR.exe</code></li>
-<li>Install (or update) the bundled VIIPER server to <code>%LOCALAPPDATA%\SISR\viiper.exe</code></li>
+<li>Download and install VIIPER
+  Using the <a href="https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script">VIIPER install script</a> to
+  <code>%LOCALAPPDATA%\VIIPER\viiper.exe</code><ul>
 <li>Setup the USBIP-Win2 driver<br />
   <sup>Driver only, not the full USBIP-Win2 package</sup></li>
+</ul>
+</li>
 <li>Enable Steam CEF remote debugging</li>
 <li>Create Desktop and Start Menu shortcuts</li>
 </ul>
@@ -1628,11 +1632,13 @@ that should setup everything you need to get started with SISR quickly</p>
 <p>The script will:</p>
 <ul>
 <li>Download and install SISR to <code>~/.local/share/SISR/SISR.AppImage</code></li>
+<li>Download and install VIIPER as a systemd service<br />
+  Using the <a href="https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script">VIIPER install script</a><ul>
 <li>Attempt to setup USBIP (installation of required packages)</li>
 <li>Load the required <code>vhci-hcd</code> kernel module<br />
   And setup automatic loading on boot</li>
-<li>Download and install VIIPER as a systemd service<br />
-  Using the <a href="https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script">VIIPER install script</a></li>
+</ul>
+</li>
 <li>Enable Steam CEF remote debugging</li>
 <li>Create a Launcher entry for SISR  </li>
 </ul>
@@ -1670,18 +1676,22 @@ that should setup everything you need to get started with SISR quickly</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Windows</label><label for="__tabbed_2_2">Linux</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>VIIPER is bundled with SISR. No separate installation required</p>
+<p>VIIPER is bundled with SISR.No separate installation required  </p>
+<p>That said, for networked scenarios it's easier to install VIIPER as a standalone service using the <a href="https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script">VIIPER install script</a></p>
+<p>In a powerShell run</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">irm </span><span class="n">https</span><span class="p">://</span><span class="n">alia5</span><span class="p">.</span><span class="n">github</span><span class="p">.</span><span class="n">io</span><span class="p">/</span><span class="n">VIIPER</span><span class="p">/</span><span class="n">stable</span><span class="p">/</span><span class="n">install</span><span class="p">.</span><span class="n">ps1</span> <span class="p">|</span> <span class="nb">iex</span>
+</code></pre></div>
 </div>
 <div class="tabbed-block">
 <p>Linux requires VIIPER as a system service:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://alia5.github.io/VIIPER/stable/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://alia5.github.io/VIIPER/stable/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
 </code></pre></div>
 <p>This will install VIIPER, and run it as a systemd service.</p>
 <p>For more details, see the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a></p>
 <details class="tip">
 <summary>Steam OS users</summary>
 <p>If you are installing SISR on Steam OS, you have to switch to the desktop mode and enable write access to the root filesystem first:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>steamos-readonly<span class="w"> </span>disable
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>steamos-readonly<span class="w"> </span>disable
 </code></pre></div>
 </details>
 </div>
@@ -1698,7 +1708,7 @@ that should setup everything you need to get started with SISR quickly</p>
 <div class="tabbed-block">
 <p>Download the AppImage for your architecture from the <a href="../../downloads/">Downloads</a> page
 and make it executable</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>SISR-x86_64.AppImage
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>SISR-x86_64.AppImage
 </code></pre></div>
 <p>Move the file to a permanent location, this is important as SISR creates a marker shortcut in Steam that points to it's location</p>
 </div>

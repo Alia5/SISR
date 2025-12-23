@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $sisrVersion = "dev-snapshot"
-$viiperVersion = "0.3.1"
+$viiperVersion = "dev-snapshot"
 
 $repo = "Alia5/SISR"
 $apiUrl = "https://api.github.com/repos/$repo/releases/latest"
@@ -79,73 +79,16 @@ try {
     Write-Host "Extracted SISR to $installDir" -ForegroundColor Green
     
     Write-Host ""
-    Write-Host "Checking USBIP drivers..." -ForegroundColor Cyan
-    
-    $driverInstalled = Get-PnpDevice -Class USB -ErrorAction SilentlyContinue | 
-    Where-Object { $_.FriendlyName -like '*usbip*' }
-    
-    $needsReboot = $false
-    
-    if (-not $driverInstalled) {
-        Write-Host "USBIP drivers not found. Installing..." -ForegroundColor Yellow
-        Write-Host "This requires administrator privileges." -ForegroundColor Yellow
-        
-        $driverUrl = "https://github.com/OSSign/vadimgrn--usbip-win2/releases/download/0.9.7.5-preview"
-        $driverFiles = @(
-            "usbip2_filter.cat",
-            "usbip2_filter.inf",
-            "usbip2_filter.sys",
-            "usbip2_ude.cat",
-            "usbip2_ude.inf",
-            "usbip2_ude.sys"
-        )
-        
-        $driverDir = Join-Path $tempDir "usbip_drivers"
-        New-Item -ItemType Directory -Path $driverDir -Force | Out-Null
-        
-        foreach ($file in $driverFiles) {
-            Write-Host "  Downloading $file..." -ForegroundColor Cyan
-            $fileUrl = "$driverUrl/$file"
-            $filePath = Join-Path $driverDir $file
-            try {
-                Invoke-WebRequest -Uri $fileUrl -OutFile $filePath -ErrorAction Stop
-            }
-            catch {
-                Write-Host "  Warning: Failed to download $file - $($_.Exception.Message)" -ForegroundColor Yellow
-            }
-        }
-        
-        $filterInf = Join-Path $driverDir "usbip2_filter.inf"
-        $udeInf = Join-Path $driverDir "usbip2_ude.inf"
-        
-        if ((Test-Path $filterInf) -and (Test-Path $udeInf)) {
-            Write-Host "Installing USBIP drivers (UAC prompt will appear)..." -ForegroundColor Yellow
-            
-            $installScript = @"
-Set-Location '$driverDir'
-pnputil.exe /add-driver usbip2_filter.inf /install
-pnputil.exe /add-driver usbip2_ude.inf /install
-"@
-            
-            try {
-                Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile", "-Command", $installScript -Wait
-                Write-Host "USBIP drivers installed successfully" -ForegroundColor Green
-                $needsReboot = $true
-            }
-            catch {
-                Write-Host "Warning: Failed to install USBIP drivers - $($_.Exception.Message)" -ForegroundColor Yellow
-                Write-Host "You may need to install usbip-win2 manually from:" -ForegroundColor Yellow
-                Write-Host "  https://github.com/OSSign/vadimgrn--usbip-win2/releases" -ForegroundColor Yellow
-            }
-        }
-        else {
-            Write-Host "Warning: Could not download all required driver files" -ForegroundColor Yellow
-            Write-Host "Please install usbip-win2 manually from:" -ForegroundColor Yellow
-            Write-Host "  https://github.com/OSSign/vadimgrn--usbip-win2/releases" -ForegroundColor Yellow
-        }
+    Write-Host "Installing VIIPER version: $viiperVersion" -ForegroundColor Cyan
+    $viiperScript = Join-Path $tempDir "viiper-install.ps1"
+    try {
+        Invoke-WebRequest -Uri "https://alia5.github.io/VIIPER/$viiperVersion/install.ps1" -OutFile $viiperScript -ErrorAction Stop
+        & powershell -ExecutionPolicy Bypass -File $viiperScript
+        Write-Host "VIIPER installed successfully" -ForegroundColor Green
     }
-    else {
-        Write-Host "USBIP drivers already installed" -ForegroundColor Green
+    catch {
+        Write-Host "Warning: VIIPER installation failed. You may need to install it manually." -ForegroundColor Yellow
+        Write-Host "See: https://alia5.github.io/VIIPER/stable/getting-started/installation/" -ForegroundColor Yellow
     }
     
     Write-Host ""
@@ -229,17 +172,8 @@ pnputil.exe /add-driver usbip2_ude.inf /install
     Write-Host ""
     Write-Host "Installation location: $installDir" -ForegroundColor Cyan
     Write-Host "Executable: $sisrExe" -ForegroundColor Cyan
-    Write-Host ""
-    
-    if ($needsReboot) {
-        Write-Host "IMPORTANT: A system reboot is required for USBIP drivers to function properly." -ForegroundColor Yellow
-        Write-Host "Please restart your computer before using SISR." -ForegroundColor Yellow
-        Write-Host ""
-    }
-    else {
-        Write-Host "You can now run SISR from the Desktop or Start Menu shortcut." -ForegroundColor Green
-        Write-Host ""
-    }
+    Write-Host "You can now run SISR from the Desktop or Start Menu shortcut." -ForegroundColor Green
+    Write-Host "" 
     
     if ($isUpdate) {
         Write-Host "Update complete!" -ForegroundColor Green
