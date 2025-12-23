@@ -1042,6 +1042,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-do-i-uninstall-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I uninstall this?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#i-want-feature-xyz" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1291,6 +1302,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-do-i-uninstall-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do I uninstall this?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#i-want-feature-xyz" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1388,7 +1410,8 @@ that appear as real hardware at the system level</p>
 <p>See <a href="../../getting-started/usbip/">USBIP setup</a> for setup instructions</p>
 <h2 id="what-is-viiper">What is VIIPER?</h2>
 <p>VIIPER (<strong>V</strong>irtual <strong>I</strong>nput over <strong>IP</strong> <strong>E</strong>mulato<strong>R</strong>) is the USBIP server that SISR uses to emulate controllers.</p>
-<p><strong>VIIPER is installed alongside with SISR</strong>  </p>
+<p><strong>VIIPER is bundled with SISR</strong><br />
+you don't need to download/setup it separately  </p>
 <p>VIIPER listens on:</p>
 <ul>
 <li><code>:3241</code> for USBIP connections</li>
@@ -1396,14 +1419,46 @@ that appear as real hardware at the system level</p>
 </ul>
 <p>See the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a> for more details</p>
 <h2 id="common-issues">Common Issues</h2>
-<p>For common issues (doubled controllers, Steam CEF debugging, port conflicts, etc.) see: <a href="../troubleshooting/">Troubleshooting</a></p>
+<p>For common issues (doubled controllers, Steam CEF debugging, port conflicts, etc.), see: <a href="../troubleshooting/">Troubleshooting</a></p>
+<h2 id="how-do-i-uninstall-this">How do I uninstall this?</h2>
+<p>The installation scripts as well as the documentation tell you what is happening during install.<br />
+To uninstall reverse those steps.  </p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">Linux</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>If you cant be bothered, run this in PowerShell</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">rm </span><span class="n">-rf</span> <span class="s2">&quot;$env:LOCALAPPDATA\SISR&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">rm </span><span class="n">-rf</span> <span class="s2">&quot;$env:LOCALAPPDATA\VIIPER&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">Remove-ItemProperty</span> <span class="n">-Path</span> <span class="s2">&quot;HKCU:\Software\Microsoft\Windows\CurrentVersion\Run&quot;</span> <span class="n">-Name</span> <span class="s2">&quot;VIIPER&quot;</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">Remove-Item</span> <span class="s2">&quot;</span><span class="p">$(</span> <span class="no">[Environment]</span><span class="p">::</span><span class="n">GetFolderPath</span><span class="p">(</span><span class="s1">&#39;Desktop&#39;</span><span class="p">)</span> <span class="p">)</span><span class="s2">\SISR.lnk&quot;</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nb">Remove-Item</span> <span class="s2">&quot;$env:APPDATA\Microsoft\Windows\Start Menu\Programs\SISR.lnk&quot;</span> <span class="n">-ErrorAction</span> <span class="n">SilentlyContinue</span>
+</code></pre></div>
+<details class="info inline end">
+<summary>Driver Removal</summary>
+<p><img alt="Device Manager Driver Removal" src="../../assets/usbip-uninstall.gif" /></p>
+</details>
+<p>The USBIP-Win2 driver can be removed via Device Manager</p>
+</div>
+<div class="tabbed-block">
+<p>If you cant be bothered, run this in a terminal</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/.local/share/SISR
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>rm<span class="w"> </span>-rf<span class="w"> </span>~/.local/share/VIIPER
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>viiper.service
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/systemd/system/viiper.service
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>sudo<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/etc/modules-load.d/viiper.conf
+</code></pre></div>
+<p>USBIP can be uninstalled via whatever package manager your distribution uses</p>
+</div>
+</div>
+</div>
 <h2 id="i-want-feature-xyz">I want feature XYZ</h2>
 <p>Check <a href="https://github.com/Alia5/SISR/issues">GitHub Issues</a> to see if it's already requested<br />
 If not, open a new issue  </p>
 <p>No guarantees, though.  </p>
 <p>Better yet, implement it yourself and open a pull request 😉<br />
-Alternatively, you can hire me to implement it for you <br />
-Rates start at 100€/hour 😜</p>
+Alternatively, you can hire me to implement it for you 😜<br />
+Rates start at 100€/hour.</p>
 
 
 
