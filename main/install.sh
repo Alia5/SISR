@@ -138,26 +138,28 @@ else
     fi
 fi
 
-echo "Loading vhci_hcd kernel module..."
-if sudo modprobe vhci_hcd; then
-    echo "vhci_hcd module loaded"
+echo "Checking vhci_hcd kernel module..."
+if lsmod | grep -q vhci_hcd; then
+    echo "vhci_hcd module is already loaded"
 else
-    echo "Warning: Could not load vhci_hcd module" 
+    echo "Loading vhci_hcd kernel module..."
+    if sudo modprobe vhci_hcd; then
+        echo "vhci_hcd module loaded"
+    else
+        echo "Warning: Could not load vhci_hcd module" 
+    fi
 fi
 
 MODULES_CONF="/etc/modules-load.d/sisr.conf"
-echo "Configuring vhci_hcd to load at boot..."
-if echo "vhci_hcd" | sudo tee "$MODULES_CONF" >/dev/null; then
-    echo "Module persistence configured: $MODULES_CONF"
+if ! lsmod | grep -q vhci_hcd; then
+    echo "Configuring vhci_hcd to load at boot..."
+    if echo "vhci_hcd" | sudo tee "$MODULES_CONF" >/dev/null; then
+        echo "Module persistence configured: $MODULES_CONF"
+    else
+        echo "Warning: Could not configure module persistence" 
+    fi
 else
-    echo "Warning: Could not configure module persistence" 
-fi
-
-if lsmod | grep -q vhci_hcd; then
-    echo "USBIP kernel module verified"
-else
-    echo "Warning: USBIP kernel module not loaded. Trying again..." 
-    sudo modprobe vhci_hcd || echo "Error: Could not load USBIP kernel module" 
+    echo "vhci_hcd module is already loaded, skipping autoload configuration"
 fi
 
 echo ""
