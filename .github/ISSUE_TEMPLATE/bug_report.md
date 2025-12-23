@@ -16,11 +16,13 @@ assignees: ''
 
 ## To Reproduce
 
-Steps to reproduce the behavior:
+**Exact** steps to reproduce the behavior:
 
 1. Connect hardware as '...'
 2. Run command '...'
 3. See error
+
+(Imagine you're explaining what you are doing to someone who hasn't the slightest Idea about computers)
 
 ## Expected Behavior
 <!-- What you expected to happen -->
