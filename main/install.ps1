@@ -65,7 +65,7 @@ try {
     Write-Host "Installing to $installDir..." -ForegroundColor Cyan
     
     if ($isUpdate) {
-        Write-Host "Existing SISR installation detected (update mode)" -ForegroundColor Yellow
+        Write-Host "Existing SISR installation detected" -ForegroundColor Yellow
         $procs = Get-Process -Name "SISR" -ErrorAction SilentlyContinue
         if ($procs) {
             Write-Host "Stopping running SISR instance(s)..." -ForegroundColor Yellow
@@ -80,9 +80,13 @@ try {
     
     Write-Host ""
     Write-Host "Installing VIIPER version: $viiperVersion" -ForegroundColor Cyan
+    $viiperInstallVersion = $viiperVersion
+    if ($viiperInstallVersion -eq "dev-snapshot") {
+        $viiperInstallVersion = "main"
+    }
     $viiperScript = Join-Path $tempDir "viiper-install.ps1"
     try {
-        Invoke-WebRequest -Uri "https://alia5.github.io/VIIPER/$viiperVersion/install.ps1" -OutFile $viiperScript -ErrorAction Stop
+        Invoke-WebRequest -Uri "https://alia5.github.io/VIIPER/$viiperInstallVersion/install.ps1" -OutFile $viiperScript -ErrorAction Stop
         & powershell -ExecutionPolicy Bypass -File $viiperScript
         Write-Host "VIIPER installed successfully" -ForegroundColor Green
     }

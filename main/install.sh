@@ -72,7 +72,7 @@ INSTALL_DIR="$HOME/.local/share/SISR"
 IS_UPDATE=0
 if [ -f "$INSTALL_DIR/SISR.AppImage" ]; then
     IS_UPDATE=1
-    echo "Existing SISR installation detected (update mode)"
+    echo "Existing SISR installation detected"
 fi
 
 echo "Installing to $INSTALL_DIR..."
@@ -109,7 +109,11 @@ echo ""
 echo "Installing VIIPER..."
 
 echo "Installing VIIPER version: $VIIPER_VERSION"
-if curl -fsSL "https://alia5.github.io/VIIPER/${VIIPER_VERSION}/install.sh" | sh; then
+VIIPER_INSTALL_VERSION=$VIIPER_VERSION
+if [ "$VIIPER_INSTALL_VERSION" = "dev-snapshot" ]; then
+    VIIPER_INSTALL_VERSION="main"
+fi
+if curl -fsSL "https://alia5.github.io/VIIPER/${VIIPER_INSTALL_VERSION}/install.sh" | sh; then
     echo "VIIPER installed successfully"
 else
     echo "Warning: VIIPER installation failed. You may need to install it manually." 
