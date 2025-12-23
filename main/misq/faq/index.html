@@ -1042,10 +1042,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#common-issues" class="md-nav__link">
+  <a href="#how-do-i-uninstall-this" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Issues
+        How do I uninstall this?
       
     </span>
   </a>
@@ -1053,10 +1053,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-do-i-uninstall-this" class="md-nav__link">
+  <a href="#common-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How do I uninstall this?
+        Common Issues
       
     </span>
   </a>
@@ -1313,10 +1313,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#common-issues" class="md-nav__link">
+  <a href="#how-do-i-uninstall-this" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Issues
+        How do I uninstall this?
       
     </span>
   </a>
@@ -1324,10 +1324,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-do-i-uninstall-this" class="md-nav__link">
+  <a href="#common-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How do I uninstall this?
+        Common Issues
       
     </span>
   </a>
@@ -1366,22 +1366,86 @@
 
 
 <h1 id="faq">FAQ</h1>
-<h2 id="wheres-the-gui">Where's the GUI?</h2>
+<style>
+    .md-typeset details.question {
+        border-color: rgba(128, 128, 128, 0.33);
+        &:focus-within {
+            box-shadow: 0 0 0 .2rem #448aff1a;
+        }
+        & summary {
+            background: transparent;
+            &::before {
+                color: #227399a9;
+                background-color: #227399a9;
+                outline: transparent;
+            }
+            &::before:focus,
+            &::before:focus-visible {
+                outline: transparent;
+                box-shadow: transparent;
+            }
+            &::after {
+                color: var(--md-default-fg-color);
+            }
+        }
+    }
+    .toc-anchor {
+        position: absolute;
+        opacity: 0;
+        overflow: hidden;
+        width: 0;
+        height: 0;
+        padding: 0;
+        margin: 0 !important;
+        pointer-events: none;
+    }
+ </style>
+
+<script>
+(()=>{
+    const open=(hash)=>{
+        if(!hash||hash==="#")return;
+        const h=document.getElementById(hash.slice(1));
+        let n=h?.nextElementSibling;
+        while(n){
+            if(/^H[1-6]$/.test(n.tagName)) break;
+            if(n.tagName==="DETAILS"){n.open=true;break;}
+            n=n.nextElementSibling;
+        }
+    };
+    let last="";
+    const tick=()=>{const h=location.hash;if(h!==last){last=h;open(h);}requestAnimationFrame(tick);};
+    requestAnimationFrame(tick);
+})();
+</script>
+
+<h2 class="toc-anchor" id="wheres-the-gui">Where's the GUI?</h2>
+<details class="question">
+<summary>Where's the GUI?</summary>
 <p>SISR runs as a <strong>system tray application</strong> by default.</p>
 <ul>
 <li>Right-click the tray icon to show/hide the UI</li>
 <li>Or launch with <code>-w --window-fullscreen false</code> to show the window at startup</li>
 <li><strong>If</strong> the window runs <strong>as overlay</strong> press <strong><code>Ctrl+Shift+Alt+S</code></strong>
-  or <strong><code>LB+RB+BACK+A</code></strong> (<em>"A" button needs to be pressed last</em>) to toggle UI visibility.</li>
+or <strong><code>LB+RB+BACK+A</code></strong> (<em>"A" button needs to be pressed last</em>) to toggle UI visibility.</li>
 </ul>
 <p>You can also run <code>sisr --help</code> to see all CLI options</p>
-<h2 id="i-dont-like-the-system-tray-app-behavior-can-i-run-it-as-a-normal-windowed-application">I don't like the system tray app behavior, can I run it as a normal windowed application?</h2>
+</details>
+<h2 class="toc-anchor" id="i-dont-like-the-system-tray-app-behavior-can-i-run-it-as-a-normal-windowed-application">I don't like the system tray app behavior, can I run it as a normal windowed application?</h2>
+<details class="question">
+<summary>I don't like the system tray app behavior, can I run it as a normal windowed application?</summary>
 <p>Yes, you can!<br />
 Launch SISR with <code>-w --window-fullscreen false</code> to show the window at startup and disable fullscreen behavior</p>
-<h2 id="i-dont-like-the-chosen-overlay-shortcutcontroller-chord-can-i-change-it">I don't like the chosen overlay shortcut/controller chord, can I change it?</h2>
+</details>
+<h2 class="toc-anchor" id="i-dont-like-the-chosen-overlay-shortcutcontroller-chord-can-i-change-it">I don't like the chosen overlay shortcut/controller chord, can I change it?</h2>
+<details class="question">
+<summary>I don't like the chosen overlay shortcut/controller chord, can I change it?</summary>
 <p>You do realize Steam Input can remap controller buttons/shortcuts, right?<br />
 You're smart, you can figure it out 😜</p>
-<h2 id="why-would-i-use-this-over-steam-input-directly">Why would I use this over Steam Input directly?</h2>
+</details>
+<h2 class="toc-anchor" id="why-would-i-use-this-over-steam-input-directly">Why would I use this over Steam Input directly?</h2>
+<details class="question">
+<summary>Why would I use this over Steam Input directly?</summary>
 <p>SISR can be used to circumvent issues with games and applications that
 do not support Steam Input or otherwise pose challenges, like (but not limited to):</p>
 <ul>
@@ -1398,14 +1462,20 @@ without the need to stream the entire game</p>
 <p class="admonition-title">Info</p>
 <p>That said, if you do not have issues with Steam Input directly, you probably should not use SISR at all 😉</p>
 </div>
-<h2 id="can-i-use-this-with-steam-link-remote-play">Can I use this with "Steam Link" / "Remote Play"</h2>
+</details>
+<h2 class="toc-anchor" id="can-i-use-this-with-steam-link-remote-play">Can I use this with "Steam Link" / "Remote Play"</h2>
+<details class="question">
+<summary>Can I use this with "Steam Link" / "Remote Play"?</summary>
 <p>Theoretically(?)
 But practically don't expect it to work or be a good experience.  </p>
 <p>Look into setting up Sunshine/Apollo and Moonlight instead!<br />
 Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.<br />
 I have not yet had the time to write documentation for this<br />
 <sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup></p>
-<h2 id="why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers">Why would I want to use this instead of <em>directly</em> using USBIP/VirtualHere to forward controllers?</h2>
+</details>
+<h2 class="toc-anchor" id="why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers">Why would I want to use this instead of <em>directly</em> using USBIP/VirtualHere to forward controllers?</h2>
+<details class="question">
+<summary>Why would I want to use this instead of <em>directly</em> using USBIP/VirtualHere to forward controllers?</summary>
 <p>Diretly forwarding the Steam Decks (or similar devices) inputs via USBIP/VirtualHere comes with significant drawbacks:</p>
 <ul>
 <li>The forwarded device is entirely "removed" from the host machine  <ul>
@@ -1418,7 +1488,7 @@ This can be especially problematic if the host machine is a Steam Deck...</li>
 <li>USBIP on Windows specifically does not <em>currently</em> work with the Steam Decks built-in controller</li>
 <li>VirtualHere is closed-source and requires a paid license for more than a single device</li>
 <li>I have personally experienced significant latency and input issues
-  when using VirtualHere specifically on long gaming sessions</li>
+when using VirtualHere specifically on long gaming sessions</li>
 <li>On the Steam Deck (or similar devices), the Touchscreens inputs cannot be forwarded via USBIP/VirtualHere at all</li>
 </ul>
 <p>SISR circumvents all of these issues by:</p>
@@ -1426,18 +1496,24 @@ This can be especially problematic if the host machine is a Steam Deck...</li>
 <li>Forwarding Steams Virtual Controllers instead of the physical device</li>
 <li>Forward additional Keyboard/Mouse devices alongside the controllers</li>
 <li>Providing "<em>an out</em>" using it's dedicated shortcut/controller chord (<strong><code>CTRL+SHIFT+ALT+S</code></strong>, <strong><code>LB+RB+BACK+A</code></strong>)
-  to toggle the UI visibility and stop/start forwarding</li>
+to toggle the UI visibility and stop/start forwarding</li>
 <li>Being fully open-source and free to use<br />
-   Even if a feature is not supported, everyone can grab the source-code
-   of any part in the chain (except Steam itself) and implement it 😉</li>
+Even if a feature is not supported, everyone can grab the source-code
+of any part in the chain (except Steam itself) and implement it 😉</li>
 </ul>
-<h2 id="what-is-usbip">What is USBIP?</h2>
+</details>
+<h2 class="toc-anchor" id="what-is-usbip">What is USBIP?</h2>
+<details class="question">
+<summary>What is USBIP?</summary>
 <p><strong>USBIP</strong> is a protocol for tunneling USB devices over TCP/IP<br />
 It allows a USB device on one machine to appear on another machine over the network (or localhost).</p>
 <p>SISR uses USBIP (via <a href="https://alia5.github.io/VIIPER/">VIIPER</a>) to create emulated controllers
 that appear as real hardware at the system level</p>
 <p>See <a href="../../getting-started/usbip/">USBIP setup</a> for setup instructions</p>
-<h2 id="what-is-viiper">What is VIIPER?</h2>
+</details>
+<h2 class="toc-anchor" id="what-is-viiper">What is VIIPER?</h2>
+<details class="question">
+<summary>What is VIIPER?</summary>
 <p>VIIPER (<strong>V</strong>irtual <strong>I</strong>nput over <strong>IP</strong> <strong>E</strong>mulato<strong>R</strong>) is the USBIP server that SISR uses to emulate controllers.</p>
 <p><strong>VIIPER is bundled with SISR</strong><br />
 you don't need to download/setup it separately  </p>
@@ -1447,9 +1523,10 @@ you don't need to download/setup it separately  </p>
 <li><code>:3242</code> for the control API</li>
 </ul>
 <p>See the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a> for more details</p>
-<h2 id="common-issues">Common Issues</h2>
-<p>For common issues (doubled controllers, Steam CEF debugging, port conflicts, etc.), see: <a href="../troubleshooting/">Troubleshooting</a></p>
-<h2 id="how-do-i-uninstall-this">How do I uninstall this?</h2>
+</details>
+<h2 class="toc-anchor" id="how-do-i-uninstall-this">How do I uninstall this?</h2>
+<details class="question">
+<summary>How do I uninstall this?</summary>
 <p>The installation scripts as well as the documentation tell you what is happening during install.<br />
 To uninstall reverse those steps.  </p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">Linux</label></div>
@@ -1481,6 +1558,9 @@ To uninstall reverse those steps.  </p>
 </div>
 </div>
 </div>
+</details>
+<h2 id="common-issues">Common Issues</h2>
+<p>For common issues (doubled controllers, Steam CEF debugging, port conflicts, etc.), see: <a href="../troubleshooting/">Troubleshooting</a></p>
 <h2 id="i-want-feature-xyz">I want feature XYZ</h2>
 <p>Check <a href="https://github.com/Alia5/SISR/issues">GitHub Issues</a> to see if it's already requested<br />
 If not, open a new issue  </p>
