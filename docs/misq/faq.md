@@ -40,6 +40,16 @@ without the need to stream the entire game
 !!! info
     That said, if you do not have issues with Steam Input directly, you probably should not use SISR at all 😉
 
+## Can I use this with "Steam Link" / "Remote Play"
+
+Theoretically(?)
+But practically don't expect it to work or be a good experience.  
+
+Look into setting up Sunshine/Apollo and Moonlight instead!  
+Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.  
+I have not yet had the time to write documentation for this  
+<sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup>
+
 ## Why would I want to use this instead of _directly_ using USBIP/VirtualHere to forward controllers?
 
 Diretly forwarding the Steam Decks (or similar devices) inputs via USBIP/VirtualHere comes with significant drawbacks:

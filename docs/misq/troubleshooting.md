@@ -53,6 +53,14 @@ This can also circumvent issues with the Steam overlay not showing up correctly.
 **Do note that this may increase CPU/GPU usage** and
 can potentially negatively affect gaming performance on lower end systems
 
+### My controller doesn't work properly when SISR is running and I launch a game from Steam
+
+SISR is meant as supporting-tools for games/applications **outside of Steam** that do not support Steam Input properly.
+
+Just disable/exit SISR before running your regular (working with Steam Input) games...
+
+Steam game launch detection is **not yet implemented**.
+
 ## 🪟 UI / Window issues
 
 ### I can't see the UI / The UI doesn't show up
@@ -137,6 +145,21 @@ See [Installation](../getting-started/installation.md)
 
 SISR couldn't restart Steam automatically via `steam://` URL scheme
 Restart Steam manually, then restart SISR
+
+### SISR says the overlay notfier could not be initialized
+
+Just tap "_Yes_" or pass `--wcd true` as launch options.
+
+### This doesn't work with "Steam Link" / "Remote Play"
+
+**The short answer:** Don't use SISR with Steam Link / Remote Play.
+
+The long answer: Don't use SISR with Steam Link / Remote Play.  
+Look into setting up Sunshine/Apollo and Moonlight instead.  
+
+Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.  
+I have not yet had the time to write documentation for this  
+<sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup>
 
 ## ⌨️🖱️ Keyboard/Mouse Emulation
 
