@@ -982,6 +982,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My controller doesn't work properly when SISR is running and I launch a game from Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1148,6 +1159,28 @@
     <span class="md-ellipsis">
       
         Failed to restart Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sisr-says-the-overlay-notfier-could-not-be-initialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says the overlay notfier could not be initialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-doesnt-work-with-steam-link-remote-play" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        This doesn't work with "Steam Link" / "Remote Play"
       
     </span>
   </a>
@@ -1459,6 +1492,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My controller doesn't work properly when SISR is running and I launch a game from Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1631,6 +1675,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sisr-says-the-overlay-notfier-could-not-be-initialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says the overlay notfier could not be initialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-doesnt-work-with-steam-link-remote-play" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        This doesn't work with "Steam Link" / "Remote Play"
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1773,6 +1839,10 @@ To make touch/radial menus show up, you can add the <code>--wcd true</code> laun
 <p>This can also circumvent issues with the Steam overlay not showing up correctly.</p>
 <p><strong>Do note that this may increase CPU/GPU usage</strong> and
 can potentially negatively affect gaming performance on lower end systems</p>
+<h3 id="my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam">My controller doesn't work properly when SISR is running and I launch a game from Steam</h3>
+<p>SISR is meant as supporting-tools for games/applications <strong>outside of Steam</strong> that do not support Steam Input properly.</p>
+<p>Just disable/exit SISR before running your regular (working with Steam Input) games...</p>
+<p>Steam game launch detection is <strong>not yet implemented</strong>.</p>
 <h2 id="ui-window-issues">🪟 UI / Window issues</h2>
 <h3 id="i-cant-see-the-ui-the-ui-doesnt-show-up">I can't see the UI / The UI doesn't show up</h3>
 <ul>
@@ -1836,6 +1906,15 @@ See <a href="../../getting-started/installation/">Installation</a></p>
 <h3 id="failed-to-restart-steam">Failed to restart Steam</h3>
 <p>SISR couldn't restart Steam automatically via <code>steam://</code> URL scheme
 Restart Steam manually, then restart SISR</p>
+<h3 id="sisr-says-the-overlay-notfier-could-not-be-initialized">SISR says the overlay notfier could not be initialized</h3>
+<p>Just tap "<em>Yes</em>" or pass <code>--wcd true</code> as launch options.</p>
+<h3 id="this-doesnt-work-with-steam-link-remote-play">This doesn't work with "Steam Link" / "Remote Play"</h3>
+<p><strong>The short answer:</strong> Don't use SISR with Steam Link / Remote Play.</p>
+<p>The long answer: Don't use SISR with Steam Link / Remote Play.<br />
+Look into setting up Sunshine/Apollo and Moonlight instead.  </p>
+<p>Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.<br />
+I have not yet had the time to write documentation for this<br />
+<sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup></p>
 <h2 id="keyboardmouse-emulation">⌨️🖱️ Keyboard/Mouse Emulation</h2>
 <h3 id="kbm-emulation-is-disabled">KB/M emulation is disabled</h3>
 <p>SISR disables KB/M emulation on <strong>localhost/loopback</strong> as it makes no sense there  </p>
