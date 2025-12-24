@@ -1,7 +1,7 @@
 use std::sync::OnceLock;
 
 use crate::app::steam_utils::cef_debug::ensure::CEF_DEBUG_PORT;
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use tracing::trace;
 
@@ -35,95 +35,126 @@ pub fn sisr_host() -> String {
     }
 }
 
-pub async fn inject(tab_title: &str, payload: &str) -> Result<String> {
-    let ws_port = WS_SERVER_PORT
-        .get()
-        .cloned()
-        .expect("WebSocket server port not set");
+pub fn inject(
+    tab_title: &str,
+    payload: &str,
+) -> std::pin::Pin<Box<dyn std::future::Future<Output = anyhow::Result<String>> + Send>> {
+    let tab_title = tab_title.to_string();
+    let payload = payload.to_string();
+    Box::pin(async move {
+        let ws_port = WS_SERVER_PORT
+            .get()
+            .cloned()
+            .expect("WebSocket server port not set");
 
-    let mut tab_title = tab_title.to_string();
-    let tabs = list_tabs().await?;
-    // TODO: needs better handling, but for now, inject into the first overlay-tab we can find
-    // as it is likely the most recent anyway
-    if tab_title == "Overlay" {
-        tab_title = tabs
+        let tab_title = tab_title;
+        let tabs = list_tabs().await?;
+
+        if tab_title == "Overlay" {
+            let inject_tabs = tabs
+                .iter()
+                .filter(
+                    |t|
+                // SP_Overlay (windows)
+                 t.title.to_lowercase().contains("overlay") //
+                 // MainMenu_sp2 (SteamDeck Game mode) - no `SteamClient.Overlay` in window,
+                 // but we can use focus,focusout events
+                 // ALSO applied for big picture, so multiple injections and let the JS handle it
+                 || t.title.to_lowercase().starts_with("mainmenu_"), //
+                )
+                .map(|t| t.title.clone())
+                .collect::<Vec<_>>();
+            if inject_tabs.is_empty() {
+                return Err(anyhow::anyhow!("No overlay tabs found for injection"));
+            }
+
+            let mut res: Result<String> = Err(anyhow::anyhow!("No injection performed"));
+            for t in inject_tabs {
+                match inject(&t, payload.as_str()).await {
+                    Err(e) => {
+                        trace!("Injection into tab '{}' failed: {}", t, e);
+                        res = Err(e);
+                    }
+                    Ok(v) => {
+                        res = Ok(v);
+                    }
+                }
+            }
+            return res;
+        }
+        let tab = tabs
             .iter()
-            .find(|t| t.title.contains("Overlay"))
-            .map(|t| t.title.clone())
-            .ok_or_else(|| anyhow::anyhow!("Overlay tab not found"))?;
-    }
-    let tab = tabs
-        .iter()
-        .find(|t| t.title == tab_title)
-        .ok_or_else(|| anyhow::anyhow!("Tab with title '{}' not found", tab_title))?;
+            .find(|t| t.title == tab_title)
+            .ok_or_else(|| anyhow::anyhow!("Tab with title '{}' not found", tab_title))?;
 
-    let ws_url = tab.web_socket_debugger_url.clone();
-    let (ws_stream, _) = tokio_tungstenite::connect_async(&ws_url).await?;
-    let (mut write, mut read) = ws_stream.split();
+        let ws_url = tab.web_socket_debugger_url.clone();
+        let (ws_stream, _) = tokio_tungstenite::connect_async(&ws_url).await?;
+        let (mut write, mut read) = ws_stream.split();
 
-    let js_payload = format!("var SISR_HOST = 'localhost:{}';\n {}", ws_port, payload);
+        let js_payload = format!("var SISR_HOST = 'localhost:{}';\n {}", ws_port, payload);
 
-    let command = serde_json::json!({
-        "id": 1,
-        "method": "Runtime.evaluate",
-        "params": {
-            "expression": js_payload,
-            "returnByValue": true,
-            "awaitPromise": true
-        }
-    });
-
-    use futures_util::{SinkExt, StreamExt};
-    use tokio_tungstenite::tungstenite::Message;
-
-    write
-        .send(Message::Text(command.to_string().into()))
-        .await?;
-
-    if let Some(msg) = read.next().await {
-        let response = msg?;
-        if let Message::Text(text) = response {
-            let text_str = text.to_string();
-            trace!("Inject Response: {}", text_str);
-            let result: serde_json::Value = serde_json::from_str(&text_str)?;
-
-            if let Some(exception_details) =
-                result.get("result").and_then(|r| r.get("exceptionDetails"))
-            {
-                return Err(anyhow::anyhow!(
-                    "JavaScript exception: {}",
-                    serde_json::to_string_pretty(&exception_details)?
-                ));
+        let command = serde_json::json!({
+            "id": 1,
+            "method": "Runtime.evaluate",
+            "params": {
+                "expression": js_payload,
+                "returnByValue": true,
+                "awaitPromise": true
             }
+        });
 
-            if let Some(exception_details) = result.get("exceptionDetails") {
-                return Err(anyhow::anyhow!(
-                    "JavaScript exception: {}",
-                    serde_json::to_string_pretty(&exception_details)?
-                ));
+        use futures_util::{SinkExt, StreamExt};
+        use tokio_tungstenite::tungstenite::Message;
+
+        write
+            .send(Message::Text(command.to_string().into()))
+            .await?;
+
+        if let Some(msg) = read.next().await {
+            let response = msg?;
+            if let Message::Text(text) = response {
+                let text_str = text.to_string();
+                trace!("Inject Response: {}", text_str);
+                let result: serde_json::Value = serde_json::from_str(&text_str)?;
+
+                if let Some(exception_details) =
+                    result.get("result").and_then(|r| r.get("exceptionDetails"))
+                {
+                    return Err(anyhow::anyhow!(
+                        "JavaScript exception: {}",
+                        serde_json::to_string_pretty(&exception_details)?
+                    ));
+                }
+
+                if let Some(exception_details) = result.get("exceptionDetails") {
+                    return Err(anyhow::anyhow!(
+                        "JavaScript exception: {}",
+                        serde_json::to_string_pretty(&exception_details)?
+                    ));
+                }
+
+                if let Some(error) = result.get("error") {
+                    return Err(anyhow::anyhow!(
+                        "Chrome DevTools Protocol error: {}",
+                        serde_json::to_string_pretty(&error)?
+                    ));
+                }
+
+                if let Some(result_value) = result.get("result").and_then(|r| r.get("result"))
+                    && let Some(value) = result_value.get("value")
+                {
+                    trace!("JavaScript injection result: {}", value);
+                    return Ok(value.to_string());
+                }
+
+                Ok("undefined".to_string())
+            } else {
+                Err(anyhow::anyhow!("Unexpected WebSocket message type"))
             }
-
-            if let Some(error) = result.get("error") {
-                return Err(anyhow::anyhow!(
-                    "Chrome DevTools Protocol error: {}",
-                    serde_json::to_string_pretty(&error)?
-                ));
-            }
-
-            if let Some(result_value) = result.get("result").and_then(|r| r.get("result"))
-                && let Some(value) = result_value.get("value")
-            {
-                trace!("JavaScript injection result: {}", value);
-                return Ok(value.to_string());
-            }
-
-            Ok("undefined".to_string())
         } else {
-            Err(anyhow::anyhow!("Unexpected WebSocket message type"))
+            Err(anyhow::anyhow!("No response from WebSocket"))
         }
-    } else {
-        Err(anyhow::anyhow!("No response from WebSocket"))
-    }
+    })
 }
 
 pub async fn list_tabs() -> Result<Vec<CefTab>> {

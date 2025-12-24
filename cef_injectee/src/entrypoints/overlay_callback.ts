@@ -8,9 +8,23 @@ const main = async () => {
     ) => {
         api.overlayStateChanged(overlay_opened_closed_bool);
     }
-    await (opener as SteamWindow).SteamClient.Overlay.RegisterForOverlayActivated(
-        overlayCallback
-    );
+
+    // Injected into "normal" overlay-tab
+    if (!!opener && (opener as SteamWindow)?.SteamClient?.Overlay) {
+        await (opener as SteamWindow).SteamClient.Overlay.RegisterForOverlayActivated(
+            overlayCallback
+        );
+    } else {
+        // Injected into "Gaming Mode", no overlay tab exists,
+        // but we can query focus of the big picture menu ;)
+        window.addEventListener("focus", () => {
+            api.overlayStateChanged(true);
+        });
+        window.addEventListener("focusout", () => {
+            api.overlayStateChanged(false);
+        });
+    }
+
 };
 
 api.connect().then(() => {
