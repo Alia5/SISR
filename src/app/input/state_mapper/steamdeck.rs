@@ -8,13 +8,6 @@ pub fn update_from_sdl_gamepad(input: &mut steamdeck::SteamdeckInput, gp: &sdl3:
     //
     // Buttons/axes mapping is based on SDL's generic gamepad layout.
 
-    #[inline]
-    fn trigger_axis_to_u16(v: i16) -> u16 {
-        // SDL3 axis range: [-32768, 32767]. Triggers are typically [0, 32767] but clamp anyway.
-        let v = (v.max(0) as i32).clamp(0, 32767);
-        ((v * 65535) / 32767).clamp(0, 65535) as u16
-    }
-
     let mut b: u64 = 0;
 
     if gp.button(Button::South) {
@@ -83,11 +76,9 @@ pub fn update_from_sdl_gamepad(input: &mut steamdeck::SteamdeckInput, gp: &sdl3:
 
     let lt_raw = gp.axis(Axis::TriggerLeft);
     let rt_raw = gp.axis(Axis::TriggerRight);
-    let lt_u16 = trigger_axis_to_u16(lt_raw);
-    let rt_u16 = trigger_axis_to_u16(rt_raw);
 
     // TODO:!
-    const TRIGGER_BUTTON_THRESHOLD: i16 = 4096;
+    const TRIGGER_BUTTON_THRESHOLD: i16 = 16384;
     if lt_raw > TRIGGER_BUTTON_THRESHOLD {
         b |= steamdeck::BUTTON_L2;
     }
@@ -102,8 +93,8 @@ pub fn update_from_sdl_gamepad(input: &mut steamdeck::SteamdeckInput, gp: &sdl3:
     input.right_stick_x = gp.axis(Axis::RightX);
     input.right_stick_y = gp.axis(Axis::RightY);
 
-    input.trigger_l = lt_u16;
-    input.trigger_r = rt_u16;
+    input.trigger_l = lt_raw as u16;
+    input.trigger_r = rt_raw as u16;
 
     // TODO: Not available via current SDL polling path (requires sensor/touchpad events state):
     input.left_pad_x = 0;

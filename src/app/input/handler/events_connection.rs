@@ -1,4 +1,4 @@
-use crate::app::steam_utils::binding_enforcer::binding_enforcer;
+use crate::app::{input::device::InputState, steam_utils::binding_enforcer::binding_enforcer};
 use sdl3::event::Event;
 use tracing::{debug, error, info, trace, warn};
 
@@ -110,9 +110,15 @@ impl EventHandler {
                     which,
                     existing_device.sdl_device_infos.len()
                 );
+
                 handle_existing_device_connect(
                     &mut self.viiper,
                     existing_device,
+                    &mut self
+                        .sdl_id_to_device
+                        .get_mut(which)
+                        .expect("Device state not found")
+                        .1,
                     steam_handle,
                     *which,
                     viiper_ready,
@@ -122,12 +128,11 @@ impl EventHandler {
         } else {
             let device_id = self.next_device_id;
             self.next_device_id += 1;
-            self.sdl_id_to_device
-                .insert(*which, (device_id, DeviceState::default()));
-
+            let mut device_state = DeviceState::default();
             handle_new_device(
                 &mut self.viiper,
                 &mut guard,
+                &mut device_state,
                 device_id,
                 *which,
                 steam_handle,
@@ -135,6 +140,8 @@ impl EventHandler {
                 sdl_device_info,
                 self.steamdeck_gamepad_direct_forward,
             );
+            self.sdl_id_to_device
+                .insert(*which, (device_id, device_state));
         }
     }
     pub fn on_pad_removed(&mut self, event: &Event) {
@@ -306,6 +313,7 @@ impl EventHandler {
 fn handle_existing_device_connect(
     viiper: &mut super::viiper_bridge::ViiperBridge,
     device: &mut Device,
+    device_state: &mut DeviceState,
     steam_handle: u64,
     sdl_id: u32,
     viiper_ready: bool,
@@ -322,6 +330,7 @@ fn handle_existing_device_connect(
 
     if is_steamdeck_controller && steamdeck_gamepad_direct_forward {
         device.viiper_type = "steamdeck".to_string();
+        device_state.input = InputState::SteamDeckInput(Default::default());
 
         if steam_handle != 0 {
             debug!("skipping deck controller with steam handle due to direct forwarding");
@@ -385,6 +394,7 @@ fn handle_existing_device_connect(
 fn handle_new_device(
     viiper: &mut super::viiper_bridge::ViiperBridge,
     guard: &mut std::sync::MutexGuard<'_, super::State>,
+    device_state: &mut DeviceState,
     device_id: u64,
     sdl_id: u32,
     steam_handle: u64,
@@ -421,6 +431,7 @@ fn handle_new_device(
 
     if is_steamdeck_controller && steamdeck_gamepad_direct_forward {
         device.viiper_type = "steamdeck".to_string();
+        device_state.input = InputState::SteamDeckInput(Default::default());
 
         if steam_handle != 0 {
             debug!("skipping deck controller with steam handle due to direct forwarding");

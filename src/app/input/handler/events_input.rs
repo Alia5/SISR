@@ -63,7 +63,9 @@ impl EventHandler {
                 let Some(dev) = guard.devices.get(device_id) else {
                     return;
                 };
-                if dev.steam_handle == 0 {
+
+                // TODO: only cancel this for steam_handle 0 WHEN THE DEVICE IS NOT A STEAMDECK AAAAAND forwarding is NOT enabled
+                if dev.steam_handle == 0 && !self.steamdeck_gamepad_direct_forward {
                     return;
                 }
                 drop(guard);
@@ -80,7 +82,7 @@ impl EventHandler {
 
                 if gp.button(sdl3::gamepad::Button::LeftShoulder)
                     && gp.button(sdl3::gamepad::Button::RightShoulder)
-                    && gp.button(sdl3::gamepad::Button::Back)
+                    && (gp.button(sdl3::gamepad::Button::Back))
                 {
                     trace!("UI toggle controller chord detected on SDL ID {}", which);
                     if let Ok(guard) = self.winit_waker.lock() {
