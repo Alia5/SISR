@@ -116,6 +116,7 @@ impl EventHandler {
                     steam_handle,
                     *which,
                     viiper_ready,
+                    self.steamdeck_gamepad_direct_forward,
                 );
             }
         } else {
@@ -132,6 +133,7 @@ impl EventHandler {
                 steam_handle,
                 is_joystick,
                 sdl_device_info,
+                self.steamdeck_gamepad_direct_forward,
             );
         }
     }
@@ -307,7 +309,48 @@ fn handle_existing_device_connect(
     steam_handle: u64,
     sdl_id: u32,
     viiper_ready: bool,
+    steamdeck_gamepad_direct_forward: bool,
 ) {
+    let is_steamdeck_controller = device
+        .sdl_device_infos
+        .iter()
+        .any(is_steamdeck_controller_info);
+    debug!(
+        "ExistingDeviceConnect: Is steamdeck controller: {}",
+        is_steamdeck_controller
+    );
+
+    if is_steamdeck_controller && steamdeck_gamepad_direct_forward {
+        device.viiper_type = "steamdeck".to_string();
+
+        if steam_handle != 0 {
+            debug!("skipping deck controller with steam handle due to direct forwarding");
+            return;
+        }
+
+        if device.viiper_device.is_some() {
+            debug!(
+                "Device {} already has a VIIPER device; skipping creation",
+                device.id
+            );
+            return;
+        }
+
+        info!(
+            "Connecting device {} upon connect with direct Steam Deck Controller forwarding",
+            device.id
+        );
+        if viiper_ready {
+            viiper.create_device(device);
+        } else {
+            trace!(
+                "VIIPER not ready; scheduling connect for device {} on ready",
+                device.id
+            );
+        }
+        return;
+    }
+
     if device.steam_handle == 0 && steam_handle != 0 {
         device.steam_handle = steam_handle;
         info!(
@@ -347,11 +390,20 @@ fn handle_new_device(
     steam_handle: u64,
     is_joystick: bool,
     sdl_device_info: SdlDeviceInfo,
+    steamdeck_gamepad_direct_forward: bool,
 ) {
     let mut sdl_ids = std::collections::HashSet::new();
     sdl_ids.insert(sdl_id);
 
-    let device = Device {
+    // Steam Deck controller: check vendor_id/product_id (0x28de/0x1205).
+    let is_steamdeck_controller = is_steamdeck_controller_info(&sdl_device_info);
+
+    debug!(
+        "NewDeviceConnect: Is steamdeck controller: {}",
+        is_steamdeck_controller
+    );
+
+    let mut device = Device {
         id: device_id,
         sdl_ids,
         steam_handle,
@@ -364,6 +416,27 @@ fn handle_new_device(
             "Added Joystick device {} (SDL ID {}); Steam Handle: {}",
             device_id, sdl_id, steam_handle
         );
+        return;
+    }
+
+    if is_steamdeck_controller && steamdeck_gamepad_direct_forward {
+        device.viiper_type = "steamdeck".to_string();
+
+        if steam_handle != 0 {
+            debug!("skipping deck controller with steam handle due to direct forwarding");
+            return;
+        }
+
+        if guard.viiper_ready {
+            viiper.create_device(&device);
+        } else {
+            trace!(
+                "VIIPER not ready; scheduling connect for device {} on ready",
+                device_id
+            );
+        }
+
+        guard.devices.insert(device_id, device);
         return;
     }
 
@@ -443,4 +516,24 @@ fn try_get_real_vid_pid_from_gamepad(gp: &sdl3::gamepad::Gamepad) -> Option<(Str
     }
 
     fallback
+}
+
+fn is_steamdeck_controller_info(info: &SdlDeviceInfo) -> bool {
+    fn try_get_u16_property(info: &SdlDeviceInfo, key: &str) -> Option<u16> {
+        match info.properties.get(key) {
+            Some(crate::app::input::sdl_device_info::SdlValue::U16(v)) => Some(*v),
+            Some(crate::app::input::sdl_device_info::SdlValue::OptU16(Some(v))) => Some(*v),
+            Some(crate::app::input::sdl_device_info::SdlValue::HexU16(Some(v))) => Some(*v),
+            _ => None,
+        }
+    }
+
+    let (Some(vid), Some(pid)) = (
+        try_get_u16_property(info, "vendor_id"),
+        try_get_u16_property(info, "product_id"),
+    ) else {
+        return false;
+    };
+
+    vid == 0x28de && pid == 0x1205
 }

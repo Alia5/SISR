@@ -359,6 +359,17 @@ Enable continous redraw now?
                     self.viiper.create_device(device);
                     continue;
                 }
+                if self.steamdeck_gamepad_direct_forward
+                    && device.viiper_type == "steamdeck"
+                    && device.steam_handle == 0
+                {
+                    info!(
+                        "connecting steamdeck device ID {} to VIIPER now that VIIPER is ready",
+                        device.id
+                    );
+                    self.viiper.create_device(device);
+                    continue;
+                }
                 if device.steam_handle != 0 {
                     info!(
                         "Connecting device ID {} to VIIPER now that VIIPER is ready",

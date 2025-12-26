@@ -57,8 +57,7 @@ fn main() -> ExitCode {
         env::set_var("SDL_JOYSTICK_HIDAPI_STEAMXBOX", "0");
         // this specific SDL_Hint doesn't work when Steam is injected.
         // Envar does...
-        // Ignore real controllers for now util we have found a way to "merge" them with Steams virtual controllers. (when using more than 1...)
-        // env::set_var("SDL_GAMECONTROLLER_IGNORE_DEVICES", "");
+        env::set_var("SDL_GAMECONTROLLER_IGNORE_DEVICES", "");
     }
 
     info!("Starting SISR...");

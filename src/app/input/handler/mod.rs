@@ -23,12 +23,12 @@ use sdl3::event::EventSender;
 use tracing::{debug, trace, warn};
 use winit::event_loop::EventLoopProxy;
 
-use crate::app::input::handler::gui::bottom_bar::BottomBar;
 use crate::app::{
     gui::dispatcher::GuiDispatcher,
     input::device::{Device, DeviceState, SDLDevice},
     window::RunnerEvent,
 };
+use crate::{app::input::handler::gui::bottom_bar::BottomBar, config::CONFIG};
 
 pub struct EventHandler {
     winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
@@ -40,6 +40,7 @@ pub struct EventHandler {
     sdl_id_to_device: HashMap<u32, (u64, DeviceState)>,
     next_device_id: u64,
     viiper: ViiperBridge,
+    steamdeck_gamepad_direct_forward: bool,
     kbm_emulation_enabled: Arc<AtomicBool>,
     state: Arc<Mutex<State>>,
 }
@@ -86,6 +87,19 @@ impl EventHandler {
             viiper_ready: false,
             viiper_version: None,
         }));
+
+        let steamdeck_gamepad_direct_forward = if let Some(addr) = viiper_address {
+            !addr.ip().is_loopback()
+        } else {
+            CONFIG
+                .read()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .steamdeck_gamepad_direct_forward
+                .unwrap_or(false)
+        };
+
         let bottom_bar = Arc::new(Mutex::new(BottomBar::new()));
         let clone_handle = async_handle.clone();
         let mut res = Self {
@@ -100,6 +114,7 @@ impl EventHandler {
             state: state.clone(),
             viiper: ViiperBridge::new(viiper_address, sdl_waker.clone(), clone_handle),
             kbm_emulation_enabled: kbm_emulation_enabled.clone(),
+            steamdeck_gamepad_direct_forward,
         };
 
         if let Ok(dispatcher_guard) = res.gui_dispatcher.lock()

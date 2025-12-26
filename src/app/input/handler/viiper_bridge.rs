@@ -7,10 +7,10 @@ use sdl3::event::EventSender;
 use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc;
 use tracing::{error, info, warn};
+use viiper_client::AsyncViiperClient;
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
-use viiper_client::AsyncViiperClient;
 
 use crate::app::input::device::Device;
 
