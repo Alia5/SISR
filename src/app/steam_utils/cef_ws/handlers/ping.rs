@@ -13,12 +13,7 @@ struct PongResponse {
     timestamp: u64,
 }
 
-pub fn handle(
-    _message: &CefMessage,
-    _winit_waker: &Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    _sdl_waker: &Arc<Mutex<Option<sdl3::event::EventSender>>>,
-    writer: &ResponseWriter,
-) {
+pub fn handle(_message: &CefMessage, writer: &ResponseWriter) {
     debug!("CEF Debug WebSocket: Received ping");
 
     let response = PongResponse {

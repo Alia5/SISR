@@ -7,3 +7,5 @@ pub mod tray;
 pub mod window;
 
 pub use core::App;
+
+pub mod input_v2;

@@ -1,9 +1,9 @@
-use std::sync::{Arc, Mutex, atomic::Ordering};
+use std::sync::atomic::Ordering;
 
 use egui::{Button, Id, RichText, Vec2};
-use sdl3::event::EventSender;
 use tracing::warn;
 
+use crate::app::core::get_tokio_handle;
 use crate::app::input::handler::State;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::util::{
@@ -11,12 +11,7 @@ use crate::app::steam_utils::util::{
 };
 use crate::config::CONFIG;
 
-pub fn draw(
-    state: &mut State,
-    _: Arc<Mutex<Option<EventSender>>>,
-    ctx: &egui::Context,
-    open: &mut bool,
-) {
+pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
     if !*open {
         return;
     }
@@ -132,7 +127,7 @@ pub fn draw(
                                 ui.style_mut().spacing.button_padding = Vec2::new(12.0, 6.0);
                                 let btn = Button::new("🛠 Open Configurator").selected(true);
                                 if ui.add(btn).clicked() {
-                                    state.async_handle.spawn(open_controller_config(app_id));
+                                    get_tokio_handle().spawn(open_controller_config(app_id));
                                 }
                                 ui.reset_style();
                             });

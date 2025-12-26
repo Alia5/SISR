@@ -7,12 +7,15 @@ use sdl3::event::EventSender;
 use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc;
 use tracing::{error, info, warn};
+use viiper_client::AsyncViiperClient;
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
-use viiper_client::AsyncViiperClient;
 
+use crate::app::core::get_tokio_handle;
 use crate::app::input::device::Device;
+use crate::app::input_v2::event::handler_events::HandlerEvent;
+use crate::app::input_v2::sdl_loop;
 
 type SdlWaker = Arc<Mutex<Option<EventSender>>>;
 type OutputReader<R> = Arc<tokio::sync::Mutex<R>>;
@@ -23,6 +26,7 @@ pub(super) enum StreamCommand {
     SendMouseInput(mouse::MouseInput),
 }
 
+#[derive(Debug)]
 pub enum ViiperEvent {
     ServerDisconnected {
         device_id: u64,
@@ -53,16 +57,10 @@ pub(super) struct ViiperBridge {
     client: Option<Arc<AsyncViiperClient>>,
     bus_id: Arc<tokio::sync::Mutex<Option<u32>>>,
     stream_senders: Arc<Mutex<HashMap<u64, mpsc::UnboundedSender<StreamCommand>>>>,
-    sdl_waker: SdlWaker,
-    async_handle: tokio::runtime::Handle,
 }
 
 impl ViiperBridge {
-    pub fn new(
-        viiper_address: Option<SocketAddr>,
-        sdl_waker: SdlWaker,
-        async_handle: tokio::runtime::Handle,
-    ) -> Self {
+    pub fn new(viiper_address: Option<SocketAddr>) -> Self {
         Self {
             client: match viiper_address {
                 Some(addr) => Some(Arc::new(AsyncViiperClient::new(addr))),
@@ -72,8 +70,6 @@ impl ViiperBridge {
                 }
             },
             stream_senders: Arc::new(Mutex::new(HashMap::new())),
-            sdl_waker,
-            async_handle,
             bus_id: Arc::new(tokio::sync::Mutex::new(None)),
         }
     }
@@ -81,29 +77,22 @@ impl ViiperBridge {
     pub fn create_device(&self, device: &Device) {
         let Some(client) = self.client.clone() else {
             error!("No VIIPER client available to create device");
-            return Self::push_event(
-                &self.sdl_waker,
-                ViiperEvent::ErrorCreateDevice {
-                    device_id: device.id,
-                },
-            );
+            return Self::push_event(ViiperEvent::ErrorCreateDevice {
+                device_id: device.id,
+            });
         };
-        let sdl_waker = self.sdl_waker.clone();
         let bus_id = self.bus_id.clone();
         let device_id = device.id;
         let device_type = device.viiper_type.clone();
 
-        self.async_handle.spawn(async move {
+        get_tokio_handle().spawn(async move {
             let bus_id = {
                 let mut bus_guard = bus_id.lock().await;
                 let id = match Self::ensure_bus(&client, *bus_guard).await {
                     Ok(id) => id,
                     Err(e) => {
                         error!("Failed to ensure VIIPER bus exists: {}", e);
-                        return Self::push_event(
-                            &sdl_waker,
-                            ViiperEvent::ErrorCreateDevice { device_id },
-                        );
+                        return Self::push_event(ViiperEvent::ErrorCreateDevice { device_id });
                     }
                 };
 
@@ -125,49 +114,36 @@ impl ViiperBridge {
                 Ok(resp) => resp,
                 Err(e) => {
                     error!("Failed to create VIIPER device: {}", e);
-                    return Self::push_event(
-                        &sdl_waker,
-                        ViiperEvent::ErrorCreateDevice { device_id },
-                    );
+                    return Self::push_event(ViiperEvent::ErrorCreateDevice { device_id });
                 }
             };
             info!("Created VIIPER device with {:?}", response);
-            Self::push_event(
-                &sdl_waker,
-                ViiperEvent::DeviceCreated {
-                    device_id,
-                    viiper_device: response,
-                },
-            );
+            Self::push_event(ViiperEvent::DeviceCreated {
+                device_id,
+                viiper_device: response,
+            });
         });
     }
 
     pub fn connect_device(&mut self, device: &Device) {
         let Some(viiper_dev) = device.viiper_device.clone() else {
             error!("No VIIPER client available to create device");
-            return Self::push_event(
-                &self.sdl_waker,
-                ViiperEvent::ErrorConnectDevice {
-                    device_id: device.id,
-                },
-            );
+            return Self::push_event(ViiperEvent::ErrorConnectDevice {
+                device_id: device.id,
+            });
         };
 
         let Some(client) = self.client.clone() else {
             error!("No VIIPER client available to create device");
-            return Self::push_event(
-                &self.sdl_waker,
-                ViiperEvent::ErrorConnectDevice {
-                    device_id: device.id,
-                },
-            );
+            return Self::push_event(ViiperEvent::ErrorConnectDevice {
+                device_id: device.id,
+            });
         };
-        let sdl_waker = self.sdl_waker.clone();
         let stream_senders = self.stream_senders.clone();
         let device_id = device.id;
         let device_type = device.viiper_type.clone();
 
-        self.async_handle.spawn(async move {
+        get_tokio_handle().spawn(async move {
             let mut dev_stream = match client
                 .connect_device(viiper_dev.bus_id, &viiper_dev.dev_id)
                 .await
@@ -175,20 +151,13 @@ impl ViiperBridge {
                 Ok(stream) => stream,
                 Err(e) => {
                     error!("Failed to connect VIIPER device: {}", e);
-                    return Self::push_event(
-                        &sdl_waker,
-                        ViiperEvent::ErrorConnectDevice { device_id },
-                    );
+                    return Self::push_event(ViiperEvent::ErrorConnectDevice { device_id });
                 }
             };
-            let disco_sdl_waker = sdl_waker.clone();
             dev_stream
                 .on_disconnect(move || {
                     info!("VIIPER server disconnected device {}", device_id);
-                    Self::push_event(
-                        &disco_sdl_waker,
-                        ViiperEvent::ServerDisconnected { device_id },
-                    );
+                    Self::push_event(ViiperEvent::ServerDisconnected { device_id });
                 })
                 .map_err(|e| {
                     error!(
@@ -198,15 +167,11 @@ impl ViiperBridge {
                 })
                 .ok();
 
-            let output_sdl_waker = sdl_waker.clone();
             let device_type_clone = device_type.clone();
             dev_stream
                 .on_output(move |reader| {
-                    let sdl_waker = output_sdl_waker.clone();
                     let dev_type = device_type_clone.clone();
-                    async move {
-                        Self::handle_device_output(reader, sdl_waker, device_id, &dev_type).await
-                    }
+                    async move { Self::handle_device_output(reader, device_id, &dev_type).await }
                 })
                 .map_err(|e| {
                     error!(
@@ -224,7 +189,7 @@ impl ViiperBridge {
             }
 
             info!("Connected VIIPER device {:?}", viiper_dev);
-            Self::push_event(&sdl_waker, ViiperEvent::DeviceConnected { device_id });
+            Self::push_event(ViiperEvent::DeviceConnected { device_id });
 
             while let Some(cmd) = rx.recv().await {
                 let e = match cmd {
@@ -306,10 +271,9 @@ impl ViiperBridge {
         }
     }
 
-    fn push_event(sdl_waker: &SdlWaker, event: ViiperEvent) {
-        if let Ok(guard) = sdl_waker.lock()
-            && let Some(sender) = &*guard
-            && let Err(e) = sender.push_custom_event(super::HandlerEvent::ViiperEvent(event))
+    fn push_event(event: ViiperEvent) {
+        if let Err(e) =
+            sdl_loop::get_event_sender().push_custom_event(HandlerEvent::ViiperEvent(event))
         {
             error!("Failed to push VIIPER event: {}", e);
         }
@@ -317,7 +281,6 @@ impl ViiperBridge {
 
     async fn handle_device_output<R>(
         reader: OutputReader<R>,
-        sdl_waker: SdlWaker,
         device_id: u64,
         device_type: &str,
     ) -> std::io::Result<()>
@@ -325,8 +288,8 @@ impl ViiperBridge {
         R: tokio::io::AsyncRead + Unpin + Send,
     {
         match device_type {
-            "xbox360" => Self::process_xbox360_rumble_output(reader, &sdl_waker, device_id).await,
-            "keyboard" => Self::process_keyboard_output(reader, &sdl_waker, device_id).await,
+            "xbox360" => Self::process_xbox360_rumble_output(reader, device_id).await,
+            "keyboard" => Self::process_keyboard_output(reader, device_id).await,
             _ => {
                 warn!("Unknown device type for output: {}", device_type);
                 reader.lock().await.read_to_end(&mut vec![]).await?;
@@ -337,7 +300,6 @@ impl ViiperBridge {
 
     async fn process_xbox360_rumble_output<R>(
         reader: OutputReader<R>,
-        sdl_waker: &SdlWaker,
         device_id: u64,
     ) -> std::io::Result<()>
     where
@@ -357,20 +319,16 @@ impl ViiperBridge {
             return Ok(());
         }
 
-        Self::push_event(
-            sdl_waker,
-            ViiperEvent::DeviceRumble {
-                device_id,
-                l: buf[0],
-                r: buf[1],
-            },
-        );
+        Self::push_event(ViiperEvent::DeviceRumble {
+            device_id,
+            l: buf[0],
+            r: buf[1],
+        });
         Ok(())
     }
 
     async fn process_keyboard_output<R>(
         reader: OutputReader<R>,
-        _sdl_waker: &SdlWaker,
         _device_id: u64,
     ) -> std::io::Result<()>
     where

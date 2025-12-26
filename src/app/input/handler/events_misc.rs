@@ -4,8 +4,10 @@ use std::sync::atomic::Ordering;
 
 use crate::{
     app::{
+        core::get_tokio_handle,
         gui::dialogs::{self, Dialog, push_dialog},
         steam_utils::{cef_debug, util::launched_via_steam},
+        window,
     },
     config::CONFIG,
 };
@@ -30,10 +32,8 @@ impl EventHandler {
         self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
         info!("KB/M emulation toggled: {}", enabled);
 
-        if let Ok(guard_proxy) = self.winit_waker.lock()
-            && let Some(proxy) = guard_proxy.as_ref()
-            && let Err(e) =
-                proxy.send_event(crate::app::window::RunnerEvent::SetKbmCursorGrab(enabled))
+        if let Err(e) = window::get_event_sender()
+            .send_event(crate::app::window::RunnerEvent::SetKbmCursorGrab(enabled))
         {
             warn!("Failed to notify window about KB/M cursor grab toggle: {e}");
         }
@@ -47,17 +47,14 @@ impl EventHandler {
                 .unwrap_or(false);
 
             if !already_open {
-                let winit_waker = self.winit_waker.clone();
                 let msg = "KB/M emulation enabled.\n\n\
 UI will be hidden and the cursor will be captured when you enter capture mode.\n\n\
 Toggle UI/capture:\n\
   Keyboard: Ctrl+Shift+Alt+S\n\
   Gamepad:  LB+RB+Back+A";
                 _ = push_dialog(Dialog::new_ok(TITLE, msg, move || {
-                    if let Ok(guard) = winit_waker.lock()
-                        && let Some(proxy) = guard.as_ref()
-                        && let Err(e) =
-                            proxy.send_event(crate::app::window::RunnerEvent::EnterCaptureMode())
+                    if let Err(e) = window::get_event_sender()
+                        .send_event(crate::app::window::RunnerEvent::EnterCaptureMode())
                     {
                         warn!("Failed to enter capture mode after KB/M OK: {e}");
                     }
@@ -237,7 +234,7 @@ Toggle UI/capture:\n\
 
         let cont_redraw = guard.window_continuous_redraw.clone();
         if !cont_redraw.load(std::sync::atomic::Ordering::Relaxed) {
-            self.async_handle.spawn(async move {
+            get_tokio_handle().spawn(async move {
                 if !launched_via_steam() {
                     debug!("NOT launched via Steam, delaying CEF overlay notifier injection");
                     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
@@ -314,16 +311,8 @@ Enable continous redraw now?
         }
         drop(guard);
 
-        let Ok(waker_guard) = self.winit_waker.lock() else {
-            error!(
-                "Failed to acquire winit waker lock on Steam overlay state change to {}",
-                open
-            );
-            return;
-        };
-        if let Some(proxy) = waker_guard.as_ref()
-            && let Err(e) =
-                proxy.send_event(crate::app::window::RunnerEvent::OverlayStateChanged(open))
+        if let Err(e) = window::get_event_sender()
+            .send_event(crate::app::window::RunnerEvent::OverlayStateChanged(open))
         {
             error!("Failed to send overlay state change to window: {}", e);
         }

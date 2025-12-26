@@ -1,16 +1,12 @@
-use std::sync::{Arc, Mutex};
-
 use egui::text::{LayoutJob, TextFormat};
 use egui::{Align, Align2, Area, FontId, TextStyle, Vec2};
-use sdl3::event::EventSender;
 use serde::{Deserialize, Serialize};
 use tracing::trace;
 
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::input::handler::State;
 
-type RenderFn =
-    fn(&mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>, &egui::Context, &mut bool);
+type RenderFn = fn(&mut State, &egui::Context, &mut bool);
 
 pub struct BarItem {
     pub title: &'static str,
@@ -76,12 +72,7 @@ impl BottomBar {
         ctx.data_mut(|d| d.insert_persisted(egui::Id::new("bottom_bar_state"), state));
     }
 
-    pub fn draw(
-        &mut self,
-        state: &mut State,
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
-        ctx: &egui::Context,
-    ) {
+    pub fn draw(&mut self, state: &mut State, ctx: &egui::Context) {
         self.load_state(ctx);
 
         let mut state_changed = false;
@@ -129,7 +120,7 @@ impl BottomBar {
 
         for item in &mut self.items {
             if item.open {
-                (item.render)(state, sdl_waker.clone(), ctx, &mut item.open);
+                (item.render)(state, ctx, &mut item.open);
                 if !item.open {
                     state_changed = true;
                 }

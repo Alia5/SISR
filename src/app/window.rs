@@ -2,7 +2,7 @@ use egui::text::LayoutJob;
 use std::convert::TryFrom;
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 use tokio::sync::Notify;
 
@@ -10,12 +10,11 @@ use egui::{Align, Context, FontId, TextFormat, Vec2};
 use egui_wgpu::Renderer as EguiRenderer;
 use egui_wgpu::ScreenDescriptor;
 use egui_winit::State as EguiWinitState;
-use sdl3::event::EventSender;
 use sdl3::sys::mouse::{SDL_HideCursor, SDL_ShowCursor};
 use tracing::{debug, error, info, trace, warn};
 use winit::application::ApplicationHandler;
 use winit::event::{DeviceEvent, WindowEvent};
-use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop, EventLoopProxy};
 use winit::window::{CursorGrabMode, Fullscreen, Window, WindowAttributes, WindowId, WindowLevel};
 
 #[cfg(windows)]
@@ -24,7 +23,9 @@ use winit::platform::windows::WindowAttributesExtWindows;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::gui::{dark_theme, dialogs, light_theme};
-use crate::app::input::{handler::HandlerEvent, kbm_events, kbm_winit_map};
+use crate::app::input::{kbm_events, kbm_winit_map};
+use crate::app::input_v2::event::handler_events::HandlerEvent;
+use crate::app::input_v2::sdl_loop;
 use crate::config::CONFIG;
 use crate::gfx::Gfx;
 
@@ -43,6 +44,15 @@ pub enum RunnerEvent {
     OverlayStateChanged(bool),
 }
 
+static EVENT_SENDER: OnceLock<Arc<EventLoopProxy<RunnerEvent>>> = OnceLock::new();
+
+pub fn get_event_sender() -> Arc<EventLoopProxy<RunnerEvent>> {
+    EVENT_SENDER
+        .get()
+        .cloned()
+        .expect("Event sender not initialized")
+}
+
 pub struct WindowRunner {
     window: Option<Arc<Window>>,
     gfx: Option<Gfx>,
@@ -50,8 +60,6 @@ pub struct WindowRunner {
     egui_winit: Option<EguiWinitState>,
     egui_renderer: Option<EguiRenderer>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
-    winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
     window_ready: Arc<Notify>,
     pre_dialog_window_visible: bool,
     continuous_redraw: Arc<AtomicBool>,
@@ -74,8 +82,6 @@ impl WindowRunner {
 
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
         dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
         window_ready: Arc<Notify>,
         continuous_redraw: Arc<AtomicBool>,
@@ -128,9 +134,6 @@ impl WindowRunner {
             egui_winit: None,
             egui_renderer: None,
             gui_dispatcher: dispatcher,
-            // The legend of Zelda: The
-            winit_waker,
-            sdl_waker,
             window_ready,
             pre_dialog_window_visible: CONFIG
                 .read()
@@ -158,13 +161,7 @@ impl WindowRunner {
     }
 
     fn try_push_kbm_event(&self, ev: HandlerEvent) {
-        let Ok(guard) = self.sdl_waker.lock() else {
-            return;
-        };
-        let Some(sender) = guard.as_ref() else {
-            return;
-        };
-        if let Err(e) = sender.push_custom_event(ev) {
+        if let Err(e) = sdl_loop::get_event_sender().push_custom_event(ev) {
             trace!("Failed to push KBM custom event to SDL: {e}");
         }
     }
@@ -186,15 +183,10 @@ impl WindowRunner {
             .expect("Failed to create event loop");
         event_loop.set_control_flow(ControlFlow::Wait);
 
-        match self.winit_waker.lock() {
-            Ok(mut guard) => {
-                let proxy = event_loop.create_proxy();
-                *guard = Some(proxy);
-            }
-            Err(e) => {
-                error!("Failed to set winit event loop proxy: {}", e);
-            }
-        }
+        EVENT_SENDER
+            .set(Arc::new(event_loop.create_proxy()))
+            .expect("Failed to set global event sender");
+
         match event_loop.run_app(self) {
             Ok(_) => ExitCode::SUCCESS,
             Err(e) => {
@@ -318,11 +310,11 @@ impl WindowRunner {
 
                             let response = stacked_button(ui, job, true, Vec2::new(24.0, 12.0));
                             if response.clicked() {
-                                #[allow(clippy::collapsible_if)]
-                                if let Ok(guard) = self.winit_waker.lock()
-                                    && let Some(proxy) = guard.as_ref()
+                                // FUCK CLIPPY
+                                if let Err(e) =
+                                    get_event_sender().send_event(RunnerEvent::ToggleUi())
                                 {
-                                    let _ = proxy.send_event(RunnerEvent::ToggleUi());
+                                    warn!("Failed to send ToggleUi event: {}", e);
                                 }
                             }
                         });
@@ -348,11 +340,9 @@ impl WindowRunner {
 
                             let response = stacked_button(ui, job, true, Vec2::new(24.0, 12.0));
                             if response.clicked() {
-                                #[allow(clippy::collapsible_if)]
-                                if let Ok(guard) = self.winit_waker.lock()
-                                    && let Some(proxy) = guard.as_ref()
-                                {
-                                    let _ = proxy.send_event(RunnerEvent::Quit());
+                                // FUCK CLIPPY
+                                if let Err(e) = get_event_sender().send_event(RunnerEvent::Quit()) {
+                                    warn!("Failed to send Quit event: {}", e);
                                 }
                             }
                         });

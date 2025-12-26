@@ -1,6 +1,7 @@
 use crate::app::input::handler::ViiperEvent;
 use crate::app::input::kbm_events;
 
+#[derive(Debug)]
 pub enum HandlerEvent {
     ViiperEvent(ViiperEvent),
     IgnoreDevice { device_id: u64 },

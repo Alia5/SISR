@@ -1,13 +1,12 @@
-use std::sync::{Arc, Mutex};
-
 use egui::{CollapsingHeader, Id, RichText, Vec2};
-use sdl3::event::EventSender;
 
-use crate::app::gui::dialogs::{ Dialog, push_dialog};
-use crate::app::input::handler::{HandlerEvent, State};
+use crate::app::gui::dialogs::{Dialog, push_dialog};
+use crate::app::input::handler::State;
 use crate::app::input::sdl_device_info::SdlValue;
+use crate::app::input_v2::event::handler_events::HandlerEvent;
+use crate::app::input_v2::sdl_loop;
 
-pub fn draw(state: &mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>,  ctx: &egui::Context, open: &mut bool) {
+pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
     egui::Window::new("🎮 Gamepads")
         .id(Id::new("controller_info"))
         .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
@@ -39,7 +38,6 @@ pub fn draw(state: &mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>,  ctx:
                             })
                         });
                     let title_string = title.unwrap_or_else(|| format!("Device #{}", device.id));
-                    let waker_clone = sdl_waker.clone();
                     ui.horizontal(move |ui| {
                         ui.heading(RichText::new(
                             title_string.clone(),
@@ -50,13 +48,13 @@ pub fn draw(state: &mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>,  ctx:
                                 "Ignore Device", 
                                 format!("Are you sure you want to ignore \"{}\"?\nThe device will only reappear once you restart the application.", title_string),
                                  move ||{
-                                    waker_clone.lock().expect("sdl_loop does not exist").as_ref().map(|waker| {
-                                        waker.push_custom_event(
-                                            HandlerEvent::IgnoreDevice {
-                                                device_id
-                                            })
-                                    });
-                                 }, 
+                                    if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
+                                        HandlerEvent::IgnoreDevice {
+                                            device_id
+                                        }) {
+                                        tracing::error!("Failed to send IgnoreDevice event: {}", e);
+                                    }
+                                 },
                                  ||{})
                                 );
                         }
@@ -111,18 +109,14 @@ pub fn draw(state: &mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>,  ctx:
                                     .clicked()
                                 {
                                     let device_id = device.id;
-                                    sdl_waker
-                                        .clone()
-                                        .lock()
-                                        .expect("sdl_loop does not exist")
-                                        .as_ref()
-                                        .map(|waker| {
-                                            waker.push_custom_event(if device.viiper_connected {
+                                    if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
+                                        if device.viiper_connected {
                                                 HandlerEvent::DisconnectViiperDevice { device_id }
                                             } else {
                                                 HandlerEvent::ConnectViiperDevice { device_id }
-                                            })
-                                        });
+                                            }) {
+                                        tracing::error!("Failed to send Viiper connect/disconnect event: {}", e);
+                                            }
                                 }
                             });
                         };

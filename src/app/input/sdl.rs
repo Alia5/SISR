@@ -1,6 +1,8 @@
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
+use crate::app::input_v2::event::handler_events::HandlerEvent;
+use crate::app::window;
 use crate::app::{
     App,
     gui::dispatcher::GuiDispatcher,
@@ -11,12 +13,8 @@ use sdl3::sys::events::{
     SDL_EVENT_GAMEPAD_STEAM_HANDLE_UPDATED, SDL_EVENT_GAMEPAD_UPDATE_COMPLETE,
     SDL_EVENT_JOYSTICK_UPDATE_COMPLETE, SDL_Event, SDL_PollEvent, SDL_WaitEvent,
 };
-use sdl3::{
-    event::{Event, EventSender},
-    gamepad::Gamepad,
-};
+use sdl3::{event::Event, gamepad::Gamepad};
 use tracing::{Level, debug, error, span, trace, warn};
-use winit::event_loop::EventLoopProxy;
 
 pub fn get_gamepad_steam_handle(pad: &Gamepad) -> u64 {
     use sdl3::sys::gamepad::SDL_GetGamepadSteamHandle;
@@ -49,7 +47,7 @@ pub fn get_gamepad_steam_handle(pad: &Gamepad) -> u64 {
 }
 
 #[macro_export]
-macro_rules! event_which {
+macro_rules! event_which_w {
     ($event:expr) => {
         match $event {
             Event::JoyAxisMotion { which, .. }
@@ -76,28 +74,19 @@ macro_rules! event_which {
 }
 
 pub struct InputLoop {
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
-    async_handle: tokio::runtime::Handle,
     continuous_redraw: Arc<AtomicBool>,
     kbm_emulation_enabled: Arc<AtomicBool>,
 }
 
 impl InputLoop {
     pub fn new(
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
-        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
         gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
-        async_handle: tokio::runtime::Handle,
         continuous_redraw: Arc<AtomicBool>,
         kbm_emulation_enabled: Arc<AtomicBool>,
     ) -> Self {
         Self {
-            sdl_waker,
-            winit_waker,
             gui_dispatcher,
-            async_handle,
             continuous_redraw,
             kbm_emulation_enabled,
         }
@@ -137,20 +126,19 @@ impl InputLoop {
 
         let _events = match sdl.event() {
             Ok(event_subsystem) => {
-                if let Err(e) =
-                    event_subsystem.register_custom_event::<super::handler::HandlerEvent>()
-                {
+                if let Err(e) = event_subsystem.register_custom_event::<HandlerEvent>() {
                     error!("Failed to register VIIPER disconnect event: {}", e);
                 }
 
-                match self.sdl_waker.lock() {
-                    Ok(mut guard) => {
-                        *guard = Some(event_subsystem.event_sender());
-                    }
-                    Err(e) => {
-                        error!("Failed to set SDL event sender: {}", e);
-                    }
-                }
+                // match self.sdl_waker.lock() {
+                //     Ok(mut guard) => {
+                //         *guard = Some(event_subsystem.event_sender());
+                //     }
+                //     Err(e) => {
+                //         error!("Failed to set SDL event sender: {}", e);
+                //     }
+                // }
+
                 event_subsystem
             }
             Err(e) => {
@@ -184,7 +172,7 @@ impl InputLoop {
         }
 
         trace!("SDL loop exiting");
-        App::shutdown(None, Some(&self.winit_waker));
+        App::shutdown();
     }
 
     fn run_loop(
@@ -196,11 +184,8 @@ impl InputLoop {
         let span = span!(Level::INFO, "sdl_loop");
 
         let mut pad_event_handler = EventHandler::new(
-            self.sdl_waker.clone(),
-            self.winit_waker.clone(),
             self.gui_dispatcher.clone(),
             viiper_address,
-            self.async_handle.clone(),
             joystick_subsystem,
             gamepad_subsystem,
             self.continuous_redraw.clone(),
@@ -276,45 +261,40 @@ impl InputLoop {
                             // ignore joysticks for now
                         }
                         if event.is_user_event()
-                            && let Some(handler_event) =
-                                event.as_user_event_type::<super::handler::HandlerEvent>()
+                            && let Some(handler_event) = event.as_user_event_type::<HandlerEvent>()
                         {
                             match handler_event {
-                                super::handler::HandlerEvent::ViiperEvent(ve) => {
+                                HandlerEvent::ViiperEvent(ve) => {
                                     handler.on_viiper_event(ve);
                                 }
-                                super::handler::HandlerEvent::IgnoreDevice { device_id } => {
+                                HandlerEvent::IgnoreDevice { device_id } => {
                                     handler.ignore_device(device_id);
                                 }
-                                super::handler::HandlerEvent::ConnectViiperDevice { device_id } => {
+                                HandlerEvent::ConnectViiperDevice { device_id } => {
                                     handler.connect_viiper_device(device_id);
                                 }
-                                super::handler::HandlerEvent::DisconnectViiperDevice {
-                                    device_id,
-                                } => {
+                                HandlerEvent::DisconnectViiperDevice { device_id } => {
                                     handler.disconnect_viiper_device(device_id);
                                 }
-                                super::handler::HandlerEvent::CefDebugReady { port } => {
+                                HandlerEvent::CefDebugReady { port } => {
                                     handler.on_cef_debug_ready(port);
                                 }
-                                super::handler::HandlerEvent::OverlayStateChanged { open } => {
+                                HandlerEvent::OverlayStateChanged { open } => {
                                     handler.on_overlay_state_changed(open);
                                 }
-                                super::handler::HandlerEvent::SetKbmEmulationEnabled {
-                                    enabled,
-                                } => {
+                                HandlerEvent::SetKbmEmulationEnabled { enabled } => {
                                     handler.set_kbm_emulation_enabled(enabled);
                                 }
-                                super::handler::HandlerEvent::KbmKeyEvent(ev) => {
+                                HandlerEvent::KbmKeyEvent(ev) => {
                                     handler.on_kbm_key_event(ev);
                                 }
-                                super::handler::HandlerEvent::KbmPointerEvent(ev) => {
+                                HandlerEvent::KbmPointerEvent(ev) => {
                                     handler.on_kbm_pointer_event(ev);
                                 }
-                                super::handler::HandlerEvent::KbmReleaseAll() => {
+                                HandlerEvent::KbmReleaseAll() => {
                                     handler.on_kbm_release_all();
                                 }
-                                super::handler::HandlerEvent::ViiperReady { version } => {
+                                HandlerEvent::ViiperReady { version } => {
                                     handler.on_viiper_ready(version);
                                 }
                             }
@@ -335,14 +315,10 @@ impl InputLoop {
     }
 
     fn request_redraw(&self) {
-        if let Ok(guard) = self.winit_waker.lock()
-            && let Some(proxy) = &*guard
-        {
-            match proxy.send_event(RunnerEvent::Redraw()) {
-                Ok(_) => {}
-                Err(e) => {
-                    warn!("Failed to request GUI redraw: {}", e);
-                }
+        match window::get_event_sender().send_event(RunnerEvent::Redraw()) {
+            Ok(_) => {}
+            Err(e) => {
+                warn!("Failed to request GUI redraw: {}", e);
             }
         }
     }

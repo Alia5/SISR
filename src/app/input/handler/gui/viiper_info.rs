@@ -1,17 +1,13 @@
 use std::collections::BTreeSet;
-use std::sync::{Arc, Mutex};
 
 use egui::{Id, Vec2};
-use sdl3::event::EventSender;
 
-use crate::app::input::handler::{HandlerEvent, State};
+use crate::app::{
+    input::handler::State,
+    input_v2::{event::handler_events::HandlerEvent, sdl_loop},
+};
 
-pub fn draw(
-    state: &mut State,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    ctx: &egui::Context,
-    open: &mut bool,
-) {
+pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
     egui::Window::new("🐍 VIIPER")
         .id(Id::new("viiper_info"))
         .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
@@ -90,11 +86,15 @@ pub fn draw(
                     if ui
                         .checkbox(&mut enabled, "Keyboard/mouse emulation")
                         .changed()
-                        && let Ok(guard) = sdl_waker.lock()
-                        && let Some(sender) = guard.as_ref()
                     {
-                        _ = sender
-                            .push_custom_event(HandlerEvent::SetKbmEmulationEnabled { enabled });
+                        if let Err(e) = sdl_loop::get_event_sender()
+                            .push_custom_event(HandlerEvent::SetKbmEmulationEnabled { enabled })
+                        {
+                            tracing::error!(
+                                "Failed to send SetKbmEmulationEnabled event to SDL loop: {}",
+                                e
+                            );
+                        }
                     }
                     if is_localhost {
                         ui.label(
