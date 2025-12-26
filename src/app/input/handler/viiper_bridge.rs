@@ -12,13 +12,14 @@ use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
 
-use crate::app::input::device::Device;
+use crate::app::input::device::{self, Device};
 
 type SdlWaker = Arc<Mutex<Option<EventSender>>>;
 type OutputReader<R> = Arc<tokio::sync::Mutex<R>>;
 
+#[allow(clippy::enum_variant_names)]
 pub(super) enum StreamCommand {
-    SendXbox360Input(xbox360::Xbox360Input),
+    SendGamepadInput(device::InputState),
     SendKeyboardInput(keyboard::KeyboardInput),
     SendMouseInput(mouse::MouseInput),
 }
@@ -228,15 +229,9 @@ impl ViiperBridge {
 
             while let Some(cmd) = rx.recv().await {
                 let e = match cmd {
-                    StreamCommand::SendXbox360Input(input) => {
-                        if device_type != "xbox360" {
-                            warn!(
-                                "Ignoring xbox360 input for non-xbox360 device {} (type={})",
-                                device_id, device_type
-                            );
-                            continue;
-                        }
-                        dev_stream.send(&input).await.err()
+                    StreamCommand::SendGamepadInput(input) => {
+                        Self::send_gamepad_input(&mut dev_stream, &device_type, device_id, input)
+                            .await
                     }
                     StreamCommand::SendKeyboardInput(input) => {
                         if device_type != "keyboard" {
@@ -312,6 +307,36 @@ impl ViiperBridge {
             && let Err(e) = sender.push_custom_event(super::HandlerEvent::ViiperEvent(event))
         {
             error!("Failed to push VIIPER event: {}", e);
+        }
+    }
+
+    async fn send_gamepad_input(
+        dev_stream: &mut viiper_client::AsyncDeviceStream,
+        device_type: &str,
+        device_id: u64,
+        input: device::InputState,
+    ) -> Option<viiper_client::ViiperError> {
+        match input {
+            device::InputState::Xbox360Input(input) => {
+                if device_type != "xbox360" {
+                    warn!(
+                        "Ignoring xbox360 input for non-xbox360 device {} (type={})",
+                        device_id, device_type
+                    );
+                    return None;
+                }
+                dev_stream.send(&input).await.err()
+            }
+            device::InputState::SteamDeckInput(input) => {
+                if device_type != "steamdeck" {
+                    warn!(
+                        "Ignoring steamdeck input for non-steamdeck device {} (type={})",
+                        device_id, device_type
+                    );
+                    return None;
+                }
+                dev_stream.send(&input).await.err()
+            }
         }
     }
 

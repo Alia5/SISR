@@ -37,7 +37,7 @@ impl EventHandler {
             input_state.update_from_sdl_gamepad(gamepad);
             self.viiper.update_device_state(
                 *device_id,
-                StreamCommand::SendXbox360Input(input_state.input.clone()),
+                StreamCommand::SendGamepadInput(input_state.input.clone()),
             );
         } else {
             warn!("No tracked gamepad for SDL ID {} on update complete", which);
