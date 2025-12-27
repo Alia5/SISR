@@ -1,12 +1,16 @@
 use std::panic;
 use std::sync::{Arc, OnceLock};
 
-use crate::app::input::event::handler::{self, sdl_device_connected, sdl_device_disconnected};
+use crate::app::input::event::handler::{
+    cef_debug_ready, connect_viiper_device, disconnect_viiper_device, ignore_device, kbm_key_event,
+    kbm_pointer_event, kbm_release_all, overlay_state_changed, sdl_device_connected,
+    sdl_device_disconnected, sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete,
+    sdl_joy_device_removed, sdl_joystick_update_complete, set_kbm_emulation_enabled, viiper_ready,
+};
 use crate::app::input::event::handler_events::HandlerEvent;
-use crate::app::input::event::router::{EventRouter, RoutedEvent};
-use crate::app::window;
-use crate::app::{App, input_old::sdl_hints, window::RunnerEvent};
-use sdl3::event::{Event, EventSender};
+use crate::app::input::event::router::EventRouter;
+use crate::app::{App, input_old::sdl_hints};
+use sdl3::event::EventSender;
 use sdl3::sys::events::{SDL_Event, SDL_PollEvent, SDL_WaitEvent};
 use sdl3::{EventSubsystem, GamepadSubsystem, JoystickSubsystem};
 use sdl3_sys::events::SDL_EventType;
@@ -21,6 +25,7 @@ pub fn get_event_sender() -> Arc<EventSender> {
         .expect("get sdl event sender called before initialized")
 }
 
+#[allow(dead_code)]
 struct Subsystems {
     joystick: JoystickSubsystem,
     gamepad: GamepadSubsystem,
@@ -28,7 +33,9 @@ struct Subsystems {
 }
 
 pub struct InputLoop {
+    #[allow(dead_code)]
     viiper_address: Option<std::net::SocketAddr>,
+    #[allow(dead_code)]
     subsystems: Option<Subsystems>,
     router: EventRouter,
 }
@@ -45,7 +52,7 @@ impl InputLoop {
         }
         let sdl = match sdl3::init() {
             Ok(sdl) => sdl,
-            Err(e) => {
+            Err(_e) => {
                 panic!("Failed to initialize SDL");
             }
         };
@@ -103,11 +110,23 @@ impl InputLoop {
         // }
 
         let mut router = EventRouter::default();
-        // router.register(Arc::new(sdl_device_connected::handler {}));
-        // router.register(Arc::new(sdl_device_disconnected::handler {}));
         router.register_multiple(&[
             Arc::new(sdl_device_connected::Handler {}),
             Arc::new(sdl_device_disconnected::Handler {}),
+            Arc::new(sdl_gamepad_steam_handle_updated::Handler {}),
+            Arc::new(sdl_gamepad_update_complete::Handler {}),
+            Arc::new(sdl_joystick_update_complete::Handler {}),
+            Arc::new(sdl_joy_device_removed::Handler {}),
+            Arc::new(ignore_device::Handler {}),
+            Arc::new(connect_viiper_device::Handler {}),
+            Arc::new(disconnect_viiper_device::Handler {}),
+            Arc::new(cef_debug_ready::Handler {}),
+            Arc::new(overlay_state_changed::Handler {}),
+            Arc::new(set_kbm_emulation_enabled::Handler {}),
+            Arc::new(kbm_key_event::Handler {}),
+            Arc::new(kbm_pointer_event::Handler {}),
+            Arc::new(kbm_release_all::Handler {}),
+            Arc::new(viiper_ready::Handler {}),
         ]);
 
         Self {
