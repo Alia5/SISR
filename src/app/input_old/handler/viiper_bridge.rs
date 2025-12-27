@@ -13,9 +13,9 @@ use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
 
 use crate::app::core::get_tokio_handle;
-use crate::app::input::device::Device;
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
+use crate::app::input_old::device::Device;
 
 type SdlWaker = Arc<Mutex<Option<EventSender>>>;
 type OutputReader<R> = Arc<tokio::sync::Mutex<R>>;

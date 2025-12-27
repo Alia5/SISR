@@ -1,5 +1,5 @@
-use crate::app::input::handler::ViiperEvent;
-use crate::app::input::kbm_events;
+use crate::app::input_old::handler::ViiperEvent;
+use crate::app::input_old::kbm_events;
 
 #[derive(Debug)]
 pub enum HandlerEvent {

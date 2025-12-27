@@ -1,7 +1,7 @@
 use tracing::{debug, warn};
 
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
 use crate::app::steam_utils::cef_ws::CefMessage;
 use crate::app::steam_utils::cef_ws::response_writer::ResponseWriter;
 use crate::app::window::{self, RunnerEvent};

@@ -4,7 +4,7 @@ use egui::{Button, Id, RichText, Vec2};
 use tracing::warn;
 
 use crate::app::core::get_tokio_handle;
-use crate::app::input::handler::State;
+use crate::app::input_old::handler::State;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::util::{
     launched_in_steam_game_mode, launched_via_steam, open_controller_config,

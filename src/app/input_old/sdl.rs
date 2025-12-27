@@ -1,12 +1,12 @@
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
-use crate::app::input_v2::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::window;
 use crate::app::{
     App,
     gui::dispatcher::GuiDispatcher,
-    input::{handler::EventHandler, sdl_hints},
+    input_old::{handler::EventHandler, sdl_hints},
     window::RunnerEvent,
 };
 use sdl3::sys::events::{

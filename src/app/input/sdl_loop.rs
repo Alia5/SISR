@@ -1,12 +1,15 @@
+use std::panic;
 use std::sync::{Arc, OnceLock};
 
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::event::router::{EventRouter, RoutedEvent};
+use crate::app::input::event::handler::{self, sdl_device_connected, sdl_device_disconnected};
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::router::{EventRouter, RoutedEvent};
 use crate::app::window;
-use crate::app::{App, input::sdl_hints, window::RunnerEvent};
+use crate::app::{App, input_old::sdl_hints, window::RunnerEvent};
 use sdl3::event::{Event, EventSender};
 use sdl3::sys::events::{SDL_Event, SDL_PollEvent, SDL_WaitEvent};
 use sdl3::{EventSubsystem, GamepadSubsystem, JoystickSubsystem};
+use sdl3_sys::events::SDL_EventType;
 use tracing::{Level, span};
 
 static EVENT_SENDER: OnceLock<Arc<EventSender>> = OnceLock::new();
@@ -32,14 +35,6 @@ pub struct InputLoop {
 
 impl InputLoop {
     pub fn new(viiper_address: Option<std::net::SocketAddr>) -> Self {
-        Self {
-            viiper_address,
-            subsystems: None,
-            router: EventRouter::new(),
-        }
-    }
-
-    pub fn run(&mut self) {
         tracing::trace!("SDL_Init");
 
         for (hint_name, hint_value) in sdl_hints::SDL_HINTS {
@@ -51,23 +46,20 @@ impl InputLoop {
         let sdl = match sdl3::init() {
             Ok(sdl) => sdl,
             Err(e) => {
-                tracing::error!("Failed to initialize SDL: {}", e);
-                return;
+                panic!("Failed to initialize SDL");
             }
         };
 
         let joystick_subsystem = match sdl.joystick() {
             Ok(js) => js,
             Err(e) => {
-                tracing::error!("Failed to initialize SDL joystick subsystem: {e}");
-                return;
+                panic!("Failed to initialize SDL joystick subsystem: {e}");
             }
         };
         let gamepad_subsystem = match sdl.gamepad() {
             Ok(gp) => gp,
             Err(e) => {
-                tracing::error!("Failed to initialize SDL gamepad subsystem: {e}");
-                return;
+                panic!("Failed to initialize SDL gamepad subsystem: {e}");
             }
         };
 
@@ -84,8 +76,7 @@ impl InputLoop {
                 event_subsystem
             }
             Err(e) => {
-                tracing::error!("Failed to get SDL event subsystem: {}", e);
-                return;
+                panic!("Failed to initialize SDL event subsystem: {e}");
             }
         };
 
@@ -94,13 +85,11 @@ impl InputLoop {
             gamepad: gamepad_subsystem,
             event: events,
         };
-        self.subsystems = Some(sdl_systems);
 
         let _event_pump = match sdl.event_pump() {
             Ok(pump) => pump,
             Err(e) => {
-                tracing::error!("Failed to get SDL event pump: {}", e);
-                return;
+                panic!("Failed to get SDL event pump: {e}");
             }
         };
 
@@ -113,37 +102,50 @@ impl InputLoop {
         //     });
         // }
 
-        match self.run_loop() {
-            Ok(_) => {}
-            Err(_) => {
-                tracing::error!("SDL loop exited with error");
-            }
-        }
+        let mut router = EventRouter::default();
+        // router.register(Arc::new(sdl_device_connected::handler {}));
+        // router.register(Arc::new(sdl_device_disconnected::handler {}));
+        router.register_multiple(&[
+            Arc::new(sdl_device_connected::Handler {}),
+            Arc::new(sdl_device_disconnected::Handler {}),
+        ]);
 
-        tracing::trace!("SDL loop exiting");
-        App::shutdown();
+        Self {
+            viiper_address,
+            subsystems: Some(sdl_systems),
+            router,
+        }
     }
 
-    fn run_loop(&mut self) -> Result<(), ()> {
+    pub fn run(&mut self) {
         let span = span!(Level::INFO, "sdl_loop");
 
         tracing::trace!("SDL loop starting");
 
         let mut sdl_event: SDL_Event = unsafe { std::mem::zeroed() };
 
-        loop {
-            if !unsafe { SDL_WaitEvent(&mut sdl_event) } {
-                continue;
-            }
-            if self.process_one(&mut sdl_event, &span)? {
-                return Ok(());
-            }
-            while unsafe { SDL_PollEvent(&mut sdl_event) } {
+        match (|| -> Result<(), ()> {
+            loop {
+                if !unsafe { SDL_WaitEvent(&mut sdl_event) } {
+                    continue;
+                }
                 if self.process_one(&mut sdl_event, &span)? {
                     return Ok(());
                 }
+                while unsafe { SDL_PollEvent(&mut sdl_event) } {
+                    if self.process_one(&mut sdl_event, &span)? {
+                        return Ok(());
+                    }
+                }
+            }
+        })() {
+            Ok(_) => {}
+            Err(_) => {
+                tracing::error!("SDL loop encountered an error and is exiting");
             }
         }
+        tracing::trace!("SDL loop exiting");
+        App::shutdown();
     }
 
     fn process_one(
@@ -151,30 +153,12 @@ impl InputLoop {
         sdl_event: &mut SDL_Event,
         span: &tracing::span::Span,
     ) -> Result<bool, ()> {
-        let event = Event::from_ll(*sdl_event);
-        match event {
-            Event::Quit { .. } => {
-                tracing::event!(parent: span, Level::INFO, event = ?event, "Quit event received");
-                return Ok(true);
-            }
-            Event::Unknown { .. } => {
-                self.router.route(&None, sdl_event);
-            }
-            _ => {
-                if event.is_joy() {
-                    // ignore joysticks for now
-                }
-                if event.is_user_event()
-                    && let Some(handler_event) = event.as_user_event_type::<HandlerEvent>()
-                {
-                    self.router
-                        .route(&Some(RoutedEvent::UserEvent(handler_event)), sdl_event);
-                } else {
-                    self.router
-                        .route(&Some(RoutedEvent::SdlEvent(event)), sdl_event);
-                }
-            }
+        if unsafe { sdl_event.r#type } == SDL_EventType::QUIT.0 {
+            tracing::event!(parent: span, Level::INFO, "Quit event received from window runner");
+            return Ok(true);
         }
+
+        self.router.route(sdl_event);
         Ok(false)
     }
 }

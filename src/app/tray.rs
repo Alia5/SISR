@@ -11,8 +11,8 @@ use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 
 use crate::app::core::get_tokio_handle;
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::util::open_controller_config;
 use crate::app::window::RunnerEvent;

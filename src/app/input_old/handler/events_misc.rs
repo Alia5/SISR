@@ -75,7 +75,7 @@ Toggle UI/capture:\n\
                 let keyboard_id = self.next_device_id;
                 self.next_device_id += 1;
 
-                let keyboard_device = crate::app::input::device::Device {
+                let keyboard_device = crate::app::input_old::device::Device {
                     id: keyboard_id,
                     viiper_type: "keyboard".to_string(),
                     ..Default::default()
@@ -95,7 +95,7 @@ Toggle UI/capture:\n\
                 let mouse_id = self.next_device_id;
                 self.next_device_id += 1;
 
-                let mouse_device = crate::app::input::device::Device {
+                let mouse_device = crate::app::input_old::device::Device {
                     id: mouse_id,
                     viiper_type: "mouse".to_string(),
                     ..Default::default()

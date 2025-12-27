@@ -19,10 +19,10 @@ use std::{
 
 use crate::app::{
     gui::dispatcher::GuiDispatcher,
-    input::device::{Device, DeviceState, SDLDevice},
+    input_old::device::{Device, DeviceState, SDLDevice},
     window::RunnerEvent,
 };
-use crate::app::{input::handler::gui::bottom_bar::BottomBar, window};
+use crate::app::{input_old::handler::gui::bottom_bar::BottomBar, window};
 
 pub struct EventHandler {
     gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
@@ -108,12 +108,12 @@ impl EventHandler {
             let mouse_id = res.next_device_id;
             res.next_device_id += 1;
 
-            let keyboard_device = crate::app::input::device::Device {
+            let keyboard_device = crate::app::input_old::device::Device {
                 id: keyboard_id,
                 viiper_type: "keyboard".to_string(),
                 ..Default::default()
             };
-            let mouse_device = crate::app::input::device::Device {
+            let mouse_device = crate::app::input_old::device::Device {
                 id: mouse_id,
                 viiper_type: "mouse".to_string(),
                 ..Default::default()

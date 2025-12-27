@@ -23,9 +23,9 @@ use winit::platform::windows::WindowAttributesExtWindows;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::gui::{dark_theme, dialogs, light_theme};
-use crate::app::input::{kbm_events, kbm_winit_map};
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
+use crate::app::input_old::{kbm_events, kbm_winit_map};
 use crate::config::CONFIG;
 use crate::gfx::Gfx;
 

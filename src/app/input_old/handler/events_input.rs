@@ -3,7 +3,7 @@ use crate::app::window;
 use sdl3::event::Event;
 use tracing::{debug, error, trace, warn};
 
-use crate::app::input::{device::SDLDevice, handler::ViiperEvent};
+use crate::app::input_old::{device::SDLDevice, handler::ViiperEvent};
 
 use super::EventHandler;
 use super::viiper_bridge::StreamCommand;

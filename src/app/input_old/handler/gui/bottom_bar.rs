@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use tracing::trace;
 
 use crate::app::gui::stacked_button::stacked_button;
-use crate::app::input::handler::State;
+use crate::app::input_old::handler::State;
 
 type RenderFn = fn(&mut State, &egui::Context, &mut bool);
 

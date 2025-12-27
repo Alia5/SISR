@@ -14,8 +14,8 @@ use super::tray;
 use super::window::WindowRunner;
 use crate::app::gui::dialogs::{self, push_dialog};
 use crate::app::gui::dispatcher::GuiDispatcher;
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
 use crate::app::steam_utils::cef_debug;
 use crate::app::steam_utils::cef_debug::ensure::{
     ensure_cef_enabled, ensure_steam_running,
@@ -83,7 +83,6 @@ impl App {
             }
         }
 
-
         let dispatcher = self.gui_dispatcher.clone();
         let continuous_redraw = Arc::new(AtomicBool::new(
             self.cfg.window.continous_draw.unwrap_or(false),
@@ -95,10 +94,10 @@ impl App {
 
         let viiper_address = self.cfg.viiper_address.as_ref().and_then(|addr_str| {
             addr_str
-                .to_socket_addrs()
-                .map_err(|e| error!("Invalid VIIPER address '{}': {}", addr_str, e))
-                .ok()
-                .and_then(|mut addrs| addrs.next())
+            .to_socket_addrs()
+            .map_err(|e| error!("Invalid VIIPER address '{}': {}", addr_str, e))
+            .ok()
+            .and_then(|mut addrs| addrs.next())
         });
         let sdl_handle = thread::spawn(move || {   
             let mut input_loop = sdl_loop::InputLoop::new(viiper_address);  
@@ -141,10 +140,6 @@ impl App {
                 error!("Failed to initialize GUI dispatcher: {}", e);
             }
         }
-
-
-        
-
         let window_ready = Arc::new(Notify::new());
         self.ensure_viiper(
             window_ready.clone(),

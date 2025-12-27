@@ -3,8 +3,8 @@ use std::collections::BTreeSet;
 use egui::{Id, Vec2};
 
 use crate::app::{
-    input::handler::State,
-    input_v2::{event::handler_events::HandlerEvent, sdl_loop},
+    input::{event::handler_events::HandlerEvent, sdl_loop},
+    input_old::handler::State,
 };
 
 pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {

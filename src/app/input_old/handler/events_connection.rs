@@ -2,7 +2,7 @@ use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use sdl3::event::Event;
 use tracing::{debug, error, info, trace, warn};
 
-use crate::app::input::{
+use crate::app::input_old::{
     device::{Device, DeviceState, SDLDevice},
     sdl::get_gamepad_steam_handle,
     sdl_device_info::SdlDeviceInfo,

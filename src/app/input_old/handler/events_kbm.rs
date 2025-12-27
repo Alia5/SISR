@@ -4,7 +4,7 @@ use sdl3::keyboard::Scancode;
 use viiper_client::devices::keyboard::constants as kb_const;
 use viiper_client::devices::{keyboard, mouse};
 
-use crate::app::input::kbm_events::{KbmKeyEvent, KbmPointerEvent};
+use crate::app::input_old::kbm_events::{KbmKeyEvent, KbmPointerEvent};
 
 use super::EventHandler;
 use super::viiper_bridge::StreamCommand;

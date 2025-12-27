@@ -1,10 +1,10 @@
 use egui::{CollapsingHeader, Id, RichText, Vec2};
 
 use crate::app::gui::dialogs::{Dialog, push_dialog};
-use crate::app::input::handler::State;
-use crate::app::input::sdl_device_info::SdlValue;
-use crate::app::input_v2::event::handler_events::HandlerEvent;
-use crate::app::input_v2::sdl_loop;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
+use crate::app::input_old::handler::State;
+use crate::app::input_old::sdl_device_info::SdlValue;
 
 pub fn draw(state: &mut State, ctx: &egui::Context, open: &mut bool) {
     egui::Window::new("🎮 Gamepads")
