@@ -1,11 +1,8 @@
 use serde::Serialize;
-use std::sync::{Arc, Mutex};
 use tracing::debug;
-use winit::event_loop::EventLoopProxy;
 
 use crate::app::steam_utils::cef_ws::response_writer::ResponseWriter;
 use crate::app::steam_utils::cef_ws::{CefMessage, broadcast_ws};
-use crate::app::window::RunnerEvent;
 
 #[derive(Serialize)]
 struct PongResponse {

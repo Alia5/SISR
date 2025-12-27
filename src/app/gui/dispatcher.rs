@@ -1,7 +1,6 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use tracing::{debug, error, warn};
-use winit::event_loop::EventLoopProxy;
 
 use crate::app::window::{self, RunnerEvent};
 

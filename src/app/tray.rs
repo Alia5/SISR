@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::rc::Rc;
 
 use tracing::Span;
-use tracing::{Level, error, event, info, span, trace, warn};
+use tracing::{Level, event, info, span, trace, warn};
 use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 

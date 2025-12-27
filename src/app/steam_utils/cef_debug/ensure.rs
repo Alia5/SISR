@@ -4,7 +4,6 @@ use std::{
 };
 
 use tracing::{debug, error, info, trace, warn};
-use winit::event_loop::EventLoopProxy;
 
 use crate::{
     app::{
