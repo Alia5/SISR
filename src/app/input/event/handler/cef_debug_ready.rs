@@ -70,6 +70,7 @@ Enable continuous redraw now?
                 }
             }
         });
+        window::request_redraw();
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

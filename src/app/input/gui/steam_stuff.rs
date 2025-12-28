@@ -5,6 +5,7 @@ use crate::app::core::get_tokio_handle;
 use crate::app::input::context::Context;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::cef_debug::ensure::CEF_DEBUG_PORT;
+use crate::app::steam_utils::cef_debug::inject::get_ws_server_port;
 use crate::app::steam_utils::util::{
     launched_in_steam_game_mode, launched_via_steam, open_controller_config,
 };
@@ -141,7 +142,7 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                     },
                 );
                 ui.collapsing("CEF Stuff", |ui| {
-                    if let Some(port) = CEF_DEBUG_PORT.get() {
+                    if let Some(port) = get_ws_server_port() {
                         ui.horizontal_wrapped(|ui| {
                             ui.label(RichText::new("Steam CEF Debug:").strong());
                             ui.label(RichText::new("Enabled").weak());
