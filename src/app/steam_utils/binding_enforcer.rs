@@ -108,6 +108,13 @@ impl BindingEnforcer {
                 error!("Failed to deactivate Steam binding enforcement: {}", e);
             }
         }
+        // steam sometimes takes ages to deactive, sending twice helps ¯\_(ツ)_/¯
+        match open_steam_url("steam://forceinputappid/0") {
+            Ok(_) => {
+                self.active = false;
+            }
+            Err(e) => {}
+        }
     }
 }
 
