@@ -91,6 +91,8 @@ impl EventRouter {
         let span = tracing::span!(tracing::Level::TRACE, "sdl_event", ?event_type);
         let _enter = span.enter();
 
+        // tracing::trace!("Routing SDL event: {:?}", event_type);
+
         let hl_event = Event::from_ll(*sdl_event);
         if let Some(handler) = self.sdl_type_handler_map.get(&event_type) {
             handler.handle_event(
@@ -131,7 +133,7 @@ impl EventRouter {
             return;
         }
 
-        if hl_event.is_joy() {
+        if hl_event.is_joy() || event_type == SDL_EventType::JOYSTICK_UPDATE_COMPLETE || event_type == SDL_EventType::GAMEPAD_AXIS_MOTION {
             // reduce log spam
             return;
         }

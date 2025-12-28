@@ -1,5 +1,5 @@
 use std::mem::discriminant;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 
 use sdl3::event::Event;
 use sdl3_sys::events::SDL_Event;
@@ -14,6 +14,7 @@ use crate::app::input::{
     device::Device,
     event::router::{EventHandler, ListenEvent, RoutedEvent},
 };
+use crate::config::get_config;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -25,6 +26,41 @@ impl Handler {
         Self {
             ctx: context,
             viiper_bridge,
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn handle_new_controller_device(
+        &self,
+        ctx: &MutexGuard<'_, Context>,
+        steam_handle: u64,
+        create_viiper_device: bool,
+        which: u32,
+        joystick: Option<sdl3::joystick::Joystick>,
+        gamepad: Option<sdl3::gamepad::Gamepad>,
+        type_str: &str,
+    ) {
+        let device_id = ctx
+            .next_device_id
+            .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let device_type = type_str.to_string();
+        let device = Arc::new(Mutex::new(Device {
+            id: device_id,
+            sdl_devices: vec![SDLDevice::new(which, joystick, gamepad)],
+            steam_handle,
+            viiper_type: Some(device_type.clone()),
+
+            viiper_device: None,
+        }));
+        ctx.devices.insert(device_id, device.clone());
+        tracing::info!("Added new device {:?}", device.clone().lock().ok());
+
+        if create_viiper_device {
+            let Ok(viiper) = self.viiper_bridge.lock() else {
+                tracing::error!("Failed to lock ViiperBridge mutex");
+                return;
+            };
+            viiper.create_device(device_id, device_type.as_str());
         }
     }
 }
@@ -116,32 +152,38 @@ impl EventHandler for Handler {
                 );
                 return;
             }
+
+            if let Some(true) = get_config().steamdeck_gamepad_direct_forward
+                && real_vid == "0x28de"
+                && real_pid == "0x1205"
+            {
+                tracing::debug!("SteamDeck controller detected, setting up fwd...");
+                if steam_handle == 0 {
+                    self.handle_new_controller_device(
+                        &ctx,
+                        steam_handle,
+                        steam_handle == 0,
+                        which,
+                        joystick,
+                        gamepad,
+                        "steamdeck",
+                    );
+                }
+                return;
+            }
         }
 
         let Some(device_mtx) = ctx.device_for_sdl_id(which) else {
-            let device_id = ctx
-                .next_device_id
-                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            let device_type = "xbox360".to_string(); // TODO: determine viiper type by config (not implemented)
-            let device = Arc::new(Mutex::new(Device {
-                id: device_id,
-                sdl_devices: vec![SDLDevice::new(which, joystick, gamepad)],
+            // TODO: determine viiper type by config (not implemented)
+            self.handle_new_controller_device(
+                &ctx,
                 steam_handle,
-                viiper_type: Some(device_type.clone()), // TODO: determine viiper type by config (not implemented)
-
-                viiper_device: None,
-            }));
-            ctx.devices.insert(device_id, device.clone());
-            tracing::info!("Added new device {:?}", device.clone().lock().ok());
-
-            if steam_handle != 0 {
-                let Ok(viiper) = self.viiper_bridge.lock() else {
-                    tracing::error!("Failed to lock ViiperBridge mutex");
-                    return;
-                };
-                viiper.create_device(device_id, device_type.as_str());
-            }
-
+                steam_handle != 0,
+                which,
+                joystick,
+                gamepad,
+                "xbox360",
+            );
             return;
         };
 

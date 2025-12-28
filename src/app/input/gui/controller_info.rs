@@ -143,6 +143,7 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                                     }
                                     let mut selected = device.viiper_type.clone().unwrap_or_else(|| "xbox360".to_string());
                                     let before = selected.clone();
+                                    // TODO: extra steamdeck forward crap
                                     egui::ComboBox::from_label("")
                                         .selected_text(selected.clone())
                                         .show_ui(ui, |ui| {

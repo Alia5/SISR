@@ -10,6 +10,7 @@ use tokio::sync::mpsc;
 use tracing::{error, info, warn};
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
+use viiper_client::devices::steamdeck;
 use viiper_client::devices::xbox360;
 use viiper_client::{AsyncViiperClient, DeviceInput};
 
@@ -267,6 +268,7 @@ impl ViiperBridge {
                 "xbox360" => forward_loop!("xbox360", xbox360::Xbox360Input),
                 "keyboard" => forward_loop!("keyboard", keyboard::KeyboardInput),
                 "mouse" => forward_loop!("mouse", mouse::MouseInput),
+                "steamdeck" => forward_loop!("steamdeck", steamdeck::SteamdeckInput),
                 _ => {
                     warn!("Unhandled VIIPER device type: {}", device_type);
                     while rx.recv().await.is_some() {}

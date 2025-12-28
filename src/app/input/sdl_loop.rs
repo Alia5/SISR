@@ -5,10 +5,7 @@ use crate::app::App;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::input::context::Context;
 use crate::app::input::event::handler::{
-    cef_debug_ready, connect_viiper_device, disconnect_viiper_device, ignore_device, kbm_key_event,
-    kbm_pointer_event, kbm_release_all, on_controller_button_down, on_viiper_event,
-    overlay_state_changed, sdl_device_connected, sdl_device_disconnected,
-    sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete, set_kbm_emulation, viiper_ready,
+    cef_debug_ready, connect_viiper_device, disconnect_viiper_device, ignore_device, kbm_key_event, kbm_pointer_event, kbm_release_all, on_controller_button_down, on_viiper_event, overlay_state_changed, sdl_device_connected, sdl_device_disconnected, sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete, sdl_steamdeck_updates, set_kbm_emulation, viiper_ready
 };
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::event::kbm_context::KbmContext;
@@ -18,7 +15,7 @@ use crate::app::input::sdl_hints;
 use crate::app::input::viiper_bridge::ViiperBridge;
 use sdl3::event::EventSender;
 use sdl3::sys::events::{SDL_Event, SDL_PollEvent, SDL_WaitEvent};
-use sdl3::{EventSubsystem, GamepadSubsystem, JoystickSubsystem};
+use sdl3::{EventSubsystem, GamepadSubsystem, JoystickSubsystem, SensorSubsystem};
 use sdl3_sys::events::SDL_EventType;
 use tracing::{Level, span};
 
@@ -34,6 +31,7 @@ pub fn get_event_sender() -> Arc<EventSender> {
 pub struct Subsystems {
     pub joystick: JoystickSubsystem,
     pub gamepad: GamepadSubsystem,
+    pub sensor: SensorSubsystem,
     pub event: EventSubsystem,
 }
 
@@ -78,6 +76,13 @@ impl InputLoop {
             }
         };
 
+        let sensor_subsystem = match sdl.sensor() {
+            Ok(s) => s,
+            Err(e) => {
+                panic!("Failed to initialize SDL sensor subsystem: {e}");
+            }
+        };
+
         let events = match sdl.event() {
             Ok(event_subsystem) => {
                 if let Err(e) = event_subsystem.register_custom_event::<HandlerEvent>() {
@@ -98,6 +103,7 @@ impl InputLoop {
         let sdl_systems = Subsystems {
             joystick: joystick_subsystem,
             gamepad: gamepad_subsystem,
+            sensor: sensor_subsystem,
             event: events,
         };
 
@@ -117,6 +123,10 @@ impl InputLoop {
         router.register_multiple(&[
             Arc::new(on_controller_button_down::Handler::new(context.clone())),
             Arc::new(sdl_gamepad_update_complete::Handler::new(
+                context.clone(),
+                viiper_bridge.clone(),
+            )),
+            Arc::new(sdl_steamdeck_updates::Handler::new(
                 context.clone(),
                 viiper_bridge.clone(),
             )),

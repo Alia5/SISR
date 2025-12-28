@@ -1,0 +1,3 @@
+[submodule "deps/SDL"]
+	path = deps/SDL
+	url = https://github.com/Alia5/SISR_SDL.git

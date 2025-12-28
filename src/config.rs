@@ -10,6 +10,15 @@ use tracing::{debug, warn};
 
 pub static CONFIG: sync::RwLock<Option<Config>> = sync::RwLock::new(None);
 
+pub fn get_config() -> Config {
+    CONFIG
+        .read()
+        .expect("WTF config not initialized")
+        .as_ref()
+        .cloned()
+        .expect("WTF config not initialized")
+}
+
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
 #[command(version = option_env!("SISR_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")), about, long_about = None)]
 pub struct Config {
@@ -63,9 +72,21 @@ pub struct Config {
         num_args = 0..=1,
         default_missing_value = "true",
         env = "SISR_KBM_EMULATION",
-        help = "Enable keyboard/mouse emulation (true/false) [default: false]"
+        help = "Enable keyboard/mouse emulation (remote VIIPER only) (true/false) [default: false]"
     )]
     pub kbm_emulation: Option<bool>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "steamdeck-gamepad-direct-forward",
+        visible_alias = "sddf",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        env = "SISR_STEAMDECK_GAMEPAD_DIRECT_FORWARD",
+        help = "Enable direct Gamepad forwarding of Steam Deck Controller (remote VIIPER only) (true/false) [default: false]"
+    )]
+    pub steamdeck_gamepad_direct_forward: Option<bool>,
 
     #[command(flatten)]
     pub window: WindowOpts,
@@ -194,6 +215,7 @@ impl Default for Config {
             tray: Some(true),
             viiper_address: Some("localhost:3242".to_string()),
             kbm_emulation: Some(false),
+            steamdeck_gamepad_direct_forward: Some(false),
             window: WindowOpts {
                 create: Some(false),
                 fullscreen: Some(true),

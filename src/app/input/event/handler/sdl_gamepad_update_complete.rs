@@ -24,7 +24,7 @@ impl EventHandler for Handler {
         _event: &Option<RoutedEvent>,
         sdl_event: &SDL_Event,
     ) {
-        let event_type = SDL_EventType(unsafe { sdl_event.r#type });
+        // let event_type = SDL_EventType(unsafe { sdl_event.r#type });
         // tracing::trace!(event = ?event_type); // TODO: log only if enabled via flag
         let which = unsafe { sdl_event.gdevice.which };
         let Ok(ctx) = self.ctx.lock() else {

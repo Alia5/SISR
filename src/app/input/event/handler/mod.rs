@@ -15,3 +15,4 @@ pub mod sdl_gamepad_update_complete;
 pub mod sdl_joystick_update_complete;
 pub mod set_kbm_emulation;
 pub mod viiper_ready;
+pub mod sdl_steamdeck_updates;
