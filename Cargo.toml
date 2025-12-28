@@ -4,7 +4,10 @@ version = "0.0.1"
 edition = "2024"
 
 [dependencies]
-sdl3-sys = { version = "0.5.11+SDL3-3.2.28", features = ["build-from-source"] }
+sdl3-sys = { version = "0.5.11+SDL3-3.2.28", features = [
+    "build-from-source",
+    "debug-impls",
+] }
 clap = { version = "4.5.53", features = ["derive", "env"] }
 serde = { version = "1", features = ["derive"] }
 figment = { version = "0.10", features = ["json", "toml", "yaml"] }
@@ -36,6 +39,7 @@ futures-util = "0.3.31"
 serde_json = "1.0.145"
 new-vdf-parser = "0.2.0"
 libloading = "0.9.0"
+dashmap = "6.1.0"
 
 [target."cfg(windows)".dependencies]
 windows-sys = { version = "0.61.2", features = [

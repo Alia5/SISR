@@ -2,7 +2,7 @@ use egui::text::LayoutJob;
 use std::convert::TryFrom;
 use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 use tokio::sync::Notify;
 
@@ -10,12 +10,11 @@ use egui::{Align, Context, FontId, TextFormat, Vec2};
 use egui_wgpu::Renderer as EguiRenderer;
 use egui_wgpu::ScreenDescriptor;
 use egui_winit::State as EguiWinitState;
-use sdl3::event::EventSender;
 use sdl3::sys::mouse::{SDL_HideCursor, SDL_ShowCursor};
 use tracing::{debug, error, info, trace, warn};
 use winit::application::ApplicationHandler;
 use winit::event::{DeviceEvent, WindowEvent};
-use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop, EventLoopProxy};
 use winit::window::{CursorGrabMode, Fullscreen, Window, WindowAttributes, WindowId, WindowLevel};
 
 #[cfg(windows)]
@@ -24,7 +23,9 @@ use winit::platform::windows::WindowAttributesExtWindows;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::gui::stacked_button::stacked_button;
 use crate::app::gui::{dark_theme, dialogs, light_theme};
-use crate::app::input::{handler::HandlerEvent, kbm_events, kbm_winit_map};
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
+use crate::app::input::{kbm_events, kbm_winit_map};
 use crate::config::CONFIG;
 use crate::gfx::Gfx;
 
@@ -43,20 +44,48 @@ pub enum RunnerEvent {
     OverlayStateChanged(bool),
 }
 
+static EVENT_SENDER: OnceLock<Arc<EventLoopProxy<RunnerEvent>>> = OnceLock::new();
+
+pub fn get_event_sender() -> Arc<EventLoopProxy<RunnerEvent>> {
+    EVENT_SENDER
+        .get()
+        .cloned()
+        .expect("Event sender not initialized")
+}
+
+pub fn request_redraw() {
+    if let Err(e) = get_event_sender().send_event(RunnerEvent::Redraw()) {
+        trace!("Failed to send Redraw event to window event loop: {}", e);
+    }
+}
+
+static CONTINUOUS_REDRAW: AtomicBool = AtomicBool::new(false);
+pub fn is_continuous_redraw() -> bool {
+    CONTINUOUS_REDRAW.load(Ordering::Relaxed)
+}
+
+pub fn set_continuous_redraw(enabled: bool) {
+    CONTINUOUS_REDRAW.store(enabled, Ordering::Relaxed);
+}
+
+static KBM_EMULATION: AtomicBool = AtomicBool::new(false);
+pub fn is_kbm_emulation_enabled() -> bool {
+    KBM_EMULATION.load(Ordering::Relaxed)
+}
+pub fn set_kbm_emulation_enabled(enabled: bool) {
+    KBM_EMULATION.store(enabled, Ordering::Relaxed);
+}
+
 pub struct WindowRunner {
     window: Option<Arc<Window>>,
     gfx: Option<Gfx>,
     egui_ctx: Context,
     egui_winit: Option<EguiWinitState>,
     egui_renderer: Option<EguiRenderer>,
-    gui_dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
-    winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
+    gui_dispatcher: Arc<Mutex<GuiDispatcher>>,
     window_ready: Arc<Notify>,
     pre_dialog_window_visible: bool,
-    continuous_redraw: Arc<AtomicBool>,
     last_cursor_pos: Option<(f64, f64)>,
-    kbm_emulation_enabled: Arc<AtomicBool>,
     window_visible_shared: Arc<Mutex<bool>>,
     ui_visible_shared: Arc<Mutex<bool>>,
     ui_visible: bool,
@@ -74,12 +103,8 @@ impl WindowRunner {
 
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        winit_waker: Arc<Mutex<Option<winit::event_loop::EventLoopProxy<RunnerEvent>>>>,
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
-        dispatcher: Arc<Mutex<Option<GuiDispatcher>>>,
+        dispatcher: Arc<Mutex<GuiDispatcher>>,
         window_ready: Arc<Notify>,
-        continuous_redraw: Arc<AtomicBool>,
-        kbm_emulation_enabled: Arc<AtomicBool>,
         window_visible_shared: Arc<Mutex<bool>>,
         ui_visible_shared: Arc<Mutex<bool>>,
     ) -> Self {
@@ -121,6 +146,7 @@ impl WindowRunner {
             .ok()
             .and_then(|c| c.as_ref().cloned())
             .expect("Config not set");
+
         Self {
             window: None,
             gfx: None,
@@ -128,9 +154,6 @@ impl WindowRunner {
             egui_winit: None,
             egui_renderer: None,
             gui_dispatcher: dispatcher,
-            // The legend of Zelda: The
-            winit_waker,
-            sdl_waker,
             window_ready,
             pre_dialog_window_visible: CONFIG
                 .read()
@@ -140,15 +163,13 @@ impl WindowRunner {
                 .window
                 .create
                 .unwrap_or(false),
-            continuous_redraw,
             last_cursor_pos: None,
-            kbm_emulation_enabled: kbm_emulation_enabled.clone(),
             window_visible_shared,
             ui_visible_shared,
             ui_visible: if cfg.window.fullscreen.unwrap_or(true) {
                 false
             } else {
-                !kbm_emulation_enabled.load(Ordering::Relaxed)
+                !is_kbm_emulation_enabled()
             },
             modifiers: Default::default(),
             fullscreen: cfg.window.fullscreen.unwrap_or(true),
@@ -158,13 +179,7 @@ impl WindowRunner {
     }
 
     fn try_push_kbm_event(&self, ev: HandlerEvent) {
-        let Ok(guard) = self.sdl_waker.lock() else {
-            return;
-        };
-        let Some(sender) = guard.as_ref() else {
-            return;
-        };
-        if let Err(e) = sender.push_custom_event(ev) {
+        if let Err(e) = sdl_loop::get_event_sender().push_custom_event(ev) {
             trace!("Failed to push KBM custom event to SDL: {e}");
         }
     }
@@ -186,15 +201,10 @@ impl WindowRunner {
             .expect("Failed to create event loop");
         event_loop.set_control_flow(ControlFlow::Wait);
 
-        match self.winit_waker.lock() {
-            Ok(mut guard) => {
-                let proxy = event_loop.create_proxy();
-                *guard = Some(proxy);
-            }
-            Err(e) => {
-                error!("Failed to set winit event loop proxy: {}", e);
-            }
-        }
+        EVENT_SENDER
+            .set(Arc::new(event_loop.create_proxy()))
+            .expect("Failed to set global event sender");
+
         match event_loop.run_app(self) {
             Ok(_) => ExitCode::SUCCESS,
             Err(e) => {
@@ -219,7 +229,7 @@ impl WindowRunner {
     }
 
     fn update_cursor_visibility(&self) {
-        let hide = !self.ui_visible && self.kbm_emulation_enabled.load(Ordering::Relaxed);
+        let hide = !self.ui_visible && is_kbm_emulation_enabled();
 
         if let Some(window) = &self.window {
             window.set_cursor_visible(!hide);
@@ -290,10 +300,9 @@ impl WindowRunner {
 
         let full_output = self.egui_ctx.run(raw_input, |ctx| {
             if self.ui_visible
-                && let Ok(guard) = self.gui_dispatcher.lock()
-                && let Some(dispatcher) = &*guard
+                && let Ok(dispatcher) = self.gui_dispatcher.lock()
             {
-                Self::draw_ui(dispatcher, ctx);
+                Self::draw_ui(&dispatcher, ctx);
 
                 if self.fullscreen {
                     egui::Area::new(egui::Id::new("hide_ui_button"))
@@ -318,11 +327,11 @@ impl WindowRunner {
 
                             let response = stacked_button(ui, job, true, Vec2::new(24.0, 12.0));
                             if response.clicked() {
-                                #[allow(clippy::collapsible_if)]
-                                if let Ok(guard) = self.winit_waker.lock()
-                                    && let Some(proxy) = guard.as_ref()
+                                // FUCK CLIPPY
+                                if let Err(e) =
+                                    get_event_sender().send_event(RunnerEvent::ToggleUi())
                                 {
-                                    let _ = proxy.send_event(RunnerEvent::ToggleUi());
+                                    warn!("Failed to send ToggleUi event: {}", e);
                                 }
                             }
                         });
@@ -348,11 +357,9 @@ impl WindowRunner {
 
                             let response = stacked_button(ui, job, true, Vec2::new(24.0, 12.0));
                             if response.clicked() {
-                                #[allow(clippy::collapsible_if)]
-                                if let Ok(guard) = self.winit_waker.lock()
-                                    && let Some(proxy) = guard.as_ref()
-                                {
-                                    let _ = proxy.send_event(RunnerEvent::Quit());
+                                // FUCK CLIPPY
+                                if let Err(e) = get_event_sender().send_event(RunnerEvent::Quit()) {
+                                    warn!("Failed to send Quit event: {}", e);
                                 }
                             }
                         });
@@ -453,7 +460,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         if self.ui_visible {
             return;
         }
-        if !self.kbm_emulation_enabled.load(Ordering::Relaxed) {
+        if !is_kbm_emulation_enabled() {
             return;
         }
 
@@ -545,12 +552,10 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
         self.gfx = Some(gfx);
         self.window = Some(window);
 
-        let passthrough = self.fullscreen
-            && !self.ui_visible
-            && !self.kbm_emulation_enabled.load(Ordering::Relaxed);
+        let passthrough = self.fullscreen && !self.ui_visible && !is_kbm_emulation_enabled();
         self.set_passthrough(passthrough);
         if !self.ui_visible
-            && self.kbm_emulation_enabled.load(Ordering::Relaxed)
+            && is_kbm_emulation_enabled()
             && let Some(window) = &self.window
         {
             // CLIPPY!!!!
@@ -589,7 +594,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                         window.set_window_level(WindowLevel::AlwaysOnTop);
                     }
                     window.focus_window();
-                    if !self.ui_visible && self.kbm_emulation_enabled.load(Ordering::Relaxed) {
+                    if !self.ui_visible && is_kbm_emulation_enabled() {
                         // fuck clippy, there's a difference!
                         if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
                             warn!("Failed to confine cursor to window: {e}");
@@ -631,7 +636,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                     return;
                 };
 
-                let kbm_emu_enabled = self.kbm_emulation_enabled.load(Ordering::Relaxed);
+                let kbm_emu_enabled = is_kbm_emulation_enabled();
 
                 if self.ui_visible {
                     self.ui_visible = false;
@@ -682,9 +687,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                     return;
                 };
                 self.ui_visible = false;
-                self.set_passthrough(
-                    self.fullscreen && !self.kbm_emulation_enabled.load(Ordering::Relaxed),
-                );
+                self.set_passthrough(self.fullscreen && !is_kbm_emulation_enabled());
                 if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
                     warn!("Failed to confine cursor to window: {e}");
                 }
@@ -692,7 +695,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                 window.request_redraw();
             }
             RunnerEvent::SetKbmCursorGrab(enabled) => {
-                self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
+                set_kbm_emulation_enabled(enabled);
 
                 let Some(window) = self.window.clone() else {
                     return;
@@ -721,9 +724,8 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                     debug!("Steam overlay opened, disabling passthrough");
                     self.set_passthrough(false);
                 } else {
-                    let should_passthrough = self.fullscreen
-                        && !self.ui_visible
-                        && !self.kbm_emulation_enabled.load(Ordering::Relaxed);
+                    let should_passthrough =
+                        self.fullscreen && !self.ui_visible && !is_kbm_emulation_enabled();
                     debug!(
                         "Steam overlay closed, restoring passthrough: {}",
                         should_passthrough
@@ -752,9 +754,8 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
                 }
             }
             RunnerEvent::DialogPopped() => {
-                let should_restore_passthrough = self.fullscreen
-                    && !self.ui_visible
-                    && !self.kbm_emulation_enabled.load(Ordering::Relaxed);
+                let should_restore_passthrough =
+                    self.fullscreen && !self.ui_visible && !is_kbm_emulation_enabled();
                 self.set_passthrough(should_restore_passthrough);
                 if let Some(window) = &self.window {
                     trace!("Dialog popped, requesting redraw");
@@ -781,7 +782,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
     }
 
     fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
-        if !self.continuous_redraw.load(Ordering::Relaxed) {
+        if !is_continuous_redraw() {
             return;
         }
 
@@ -821,9 +822,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
-        if !self.continuous_redraw.load(Ordering::Relaxed)
-            && matches!(event, WindowEvent::RedrawRequested)
-        {
+        if !is_continuous_redraw() && matches!(event, WindowEvent::RedrawRequested) {
             if let Some(repaint_after) = self.render()
                 && let Some(window) = self.window.as_ref()
                 && repaint_after < Duration::MAX
@@ -890,8 +889,7 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             _ => {}
         }
 
-        let capture_forward =
-            !self.ui_visible && self.kbm_emulation_enabled.load(Ordering::Relaxed);
+        let capture_forward = !self.ui_visible && is_kbm_emulation_enabled();
 
         match event {
             WindowEvent::ModifiersChanged(mods) => {

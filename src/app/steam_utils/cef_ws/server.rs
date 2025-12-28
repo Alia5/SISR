@@ -7,12 +7,11 @@ use tokio::sync::mpsc;
 use tokio_tungstenite::WebSocketStream;
 use tokio_tungstenite::tungstenite::Message;
 use tracing::{debug, error, info, trace, warn};
-use winit::event_loop::EventLoopProxy;
 
 use serde::Serialize;
 
+use crate::app::core::get_tokio_handle;
 use crate::app::steam_utils::cef_ws::CefMessage;
-use crate::app::window::RunnerEvent;
 
 use super::handler::Handler;
 use super::messages::WsResponse;
@@ -73,38 +72,23 @@ impl WebSocketServer {
         }
     }
 
-    pub fn run(
-        self,
-        listener: TcpListener,
-        handle: tokio::runtime::Handle,
-        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-        sdl_waker: Arc<Mutex<Option<sdl3::event::EventSender>>>,
-    ) {
+    pub fn run(self, listener: TcpListener) {
         let connections = self.connections.clone();
         let port = self.port;
 
         super::broadcast::set_server(Arc::new(self));
 
-        handle.spawn(async move {
+        get_tokio_handle().spawn(async move {
             info!("CEF Debug WebSocket server listening on port {}", port);
 
             loop {
                 match listener.accept().await {
                     Ok((stream, addr)) => {
                         debug!("New CEF Debug WebSocket connection from: {}", addr);
-                        let winit_waker = winit_waker.clone();
-                        let sdl_waker = sdl_waker.clone();
                         let connections = connections.clone();
 
                         tokio::spawn(async move {
-                            if let Err(e) = Self::handle_connection(
-                                stream,
-                                addr,
-                                winit_waker,
-                                sdl_waker,
-                                connections,
-                            )
-                            .await
+                            if let Err(e) = Self::handle_connection(stream, addr, connections).await
                             {
                                 error!(
                                     "Error handling CEF Debug WebSocket connection from {}: {}",
@@ -124,8 +108,6 @@ impl WebSocketServer {
     async fn handle_connection(
         stream: TcpStream,
         addr: SocketAddr,
-        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-        sdl_waker: Arc<Mutex<Option<sdl3::event::EventSender>>>,
         connections: Arc<Mutex<Vec<BroadcastSender>>>,
     ) -> Result<()> {
         let ws_stream = tokio_tungstenite::accept_async(stream)
@@ -134,17 +116,15 @@ impl WebSocketServer {
 
         info!("CEF Debug WebSocket connection established with {}", addr);
 
-        Self::process_messages(ws_stream, addr, winit_waker, sdl_waker, connections).await
+        Self::process_messages(ws_stream, addr, connections).await
     }
 
     async fn process_messages(
         ws_stream: WebSocketStream<TcpStream>,
         addr: SocketAddr,
-        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-        sdl_waker: Arc<Mutex<Option<sdl3::event::EventSender>>>,
         connections: Arc<Mutex<Vec<BroadcastSender>>>,
     ) -> Result<()> {
-        let handler = Handler::new(winit_waker, sdl_waker);
+        let handler = Handler::new();
 
         let (broadcast_tx, mut broadcast_rx) = mpsc::unbounded_channel();
         let broadcast_tx_clone = broadcast_tx.clone();

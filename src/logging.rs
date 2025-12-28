@@ -29,7 +29,8 @@ pub fn setup() {
 
     let targets = Targets::new()
         .with_default(LevelFilter::TRACE)
-        .with_target("calloop", LevelFilter::DEBUG);
+        .with_target("calloop", LevelFilter::DEBUG)
+        .with_target("winit", LevelFilter::WARN);
 
     let (stderr_filter, stderr_handle) = reload::Layer::new(initial_level);
     let stderr_layer = fmt::layer()

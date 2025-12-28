@@ -1,24 +1,22 @@
 use std::net::ToSocketAddrs;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
 #[cfg(target_os = "linux")]
 use std::rc::Rc;
 
-use sdl3::event::EventSender;
 use tracing::Span;
-use tracing::{Level, error, event, info, span, trace, warn};
+use tracing::{Level, event, info, span, trace, warn};
 use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
-use winit::event_loop::EventLoopProxy;
 
-use crate::app::input::handler::HandlerEvent;
+use crate::app::core::get_tokio_handle;
+use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::sdl_loop;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
 use crate::app::steam_utils::util::open_controller_config;
-use crate::app::window::ICON_BYTES;
 use crate::app::window::RunnerEvent;
+use crate::app::window::{self, ICON_BYTES};
 use crate::config::CONFIG;
-use tokio::runtime::Handle;
 
 use super::core::App;
 
@@ -45,24 +43,13 @@ struct TrayContext {
     force_config_id: MenuId,
     kbm_emulation_item: Option<CheckMenuItem>,
     kbm_emulation_id: Option<MenuId>,
-    kbm_emulation_enabled: Arc<AtomicBool>,
     window_visible: Arc<Mutex<bool>>,
     ui_visible: Arc<Mutex<bool>>,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    async_handle: Handle,
     fullscreen: bool,
 }
 
 impl TrayContext {
-    fn new(
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
-        winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-        window_visible: Arc<Mutex<bool>>,
-        ui_visible: Arc<Mutex<bool>>,
-        async_handle: Handle,
-        kbm_emulation_enabled: Arc<AtomicBool>,
-    ) -> Self {
+    fn new(window_visible: Arc<Mutex<bool>>, ui_visible: Arc<Mutex<bool>>) -> Self {
         let icon = load_icon();
         let menu = Menu::new();
 
@@ -111,7 +98,7 @@ impl TrayContext {
         menu.append(&force_config_item)
             .expect("Failed to add force config item");
 
-        let initial_kbm_enabled = kbm_emulation_enabled.load(Ordering::Relaxed);
+        let initial_kbm_enabled = window::is_kbm_emulation_enabled();
 
         let (kbm_emulation_item, kbm_emulation_id) = {
             let viiper_address = CONFIG
@@ -159,12 +146,8 @@ impl TrayContext {
             force_config_id,
             kbm_emulation_item,
             kbm_emulation_id,
-            kbm_emulation_enabled,
             window_visible,
             ui_visible,
-            sdl_waker,
-            winit_waker,
-            async_handle,
             fullscreen,
         }
     }
@@ -178,7 +161,7 @@ impl TrayContext {
         }
 
         if let Some(item) = &self.kbm_emulation_item {
-            item.set_checked(self.kbm_emulation_enabled.load(Ordering::Relaxed));
+            item.set_checked(window::is_kbm_emulation_enabled());
         }
 
         let (menu_text, _is_fullscreen) = if self.fullscreen {
@@ -199,40 +182,34 @@ impl TrayContext {
         if let Ok(event) = MenuEvent::receiver().try_recv() {
             if event.id == self.quit_id {
                 info!("Quit requested from tray menu");
-                App::shutdown(Some(&self.sdl_waker), Some(&self.winit_waker));
+                App::shutdown();
                 return true;
             }
             if event.id == self.toggle_window_id {
-                let Ok(winit_guard) = self.winit_waker.lock() else {
-                    error!("Failed to lock winit_waker mutex");
-                    return false;
-                };
-                if let Some(proxy) = &*winit_guard {
-                    if self.fullscreen {
-                        _ = proxy.send_event(RunnerEvent::ToggleUi());
+                if self.fullscreen {
+                    _ = window::get_event_sender().send_event(RunnerEvent::ToggleUi());
+                } else {
+                    let visible = if let Ok(mut guard) = self.window_visible.lock() {
+                        *guard = !*guard;
+                        *guard
                     } else {
-                        let visible = if let Ok(mut guard) = self.window_visible.lock() {
-                            *guard = !*guard;
-                            *guard
-                        } else {
-                            false
-                        };
-                        let event = if visible {
-                            RunnerEvent::ShowWindow()
-                        } else {
-                            RunnerEvent::HideWindow()
-                        };
-                        _ = proxy.send_event(event);
-                    }
+                        false
+                    };
+                    let event = if visible {
+                        RunnerEvent::ShowWindow()
+                    } else {
+                        RunnerEvent::HideWindow()
+                    };
+                    _ = window::get_event_sender().send_event(event);
                 }
+
                 return false;
             }
             if event.id == self.open_config_id {
                 if let Ok(guard) = binding_enforcer().lock()
                     && let Some(app_id) = guard.app_id()
                 {
-                    let handle = self.async_handle.clone();
-                    handle.spawn(open_controller_config(app_id));
+                    get_tokio_handle().spawn(open_controller_config(app_id));
                 }
                 return false;
             }
@@ -251,15 +228,15 @@ impl TrayContext {
                 && event.id == *kbm_id
                 && let Some(item) = &self.kbm_emulation_item
             {
-                let enabled = !self.kbm_emulation_enabled.load(Ordering::Relaxed);
-                self.kbm_emulation_enabled.store(enabled, Ordering::Relaxed);
+                let enabled = !window::is_kbm_emulation_enabled();
+                window::set_kbm_emulation_enabled(enabled);
                 item.set_checked(enabled);
 
-                if let Ok(guard) = self.sdl_waker.lock()
-                    && let Some(sender) = guard.as_ref()
-                {
-                    _ = sender.push_custom_event(HandlerEvent::SetKbmEmulationEnabled { enabled });
-                }
+                _ = sdl_loop::get_event_sender().push_custom_event(HandlerEvent::SetKbmEmulation {
+                    enabled,
+                    initialize: false,
+                });
+
                 return false;
             }
         }
@@ -291,44 +268,15 @@ pub fn shutdown() {
         });
         trace!("Set GTK quit flag and scheduled main_quit");
     }
-
-    #[cfg(target_os = "macos")]
-    {
-        // TODO: macOS CFRunLoop stop
-        tracing::warn!("macOS tray shutdown not yet implemented");
-    }
 }
 
-pub fn run(
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    window_visible: Arc<Mutex<bool>>,
-    ui_visible: Arc<Mutex<bool>>,
-    async_handle: Handle,
-    kbm_emulation_enabled: Arc<AtomicBool>,
-) {
+pub fn run(window_visible: Arc<Mutex<bool>>, ui_visible: Arc<Mutex<bool>>) {
     let span = span!(Level::INFO, "tray");
-    run_platform(
-        span,
-        sdl_waker,
-        winit_waker,
-        window_visible,
-        ui_visible,
-        async_handle,
-        kbm_emulation_enabled,
-    );
+    run_platform(span, window_visible, ui_visible);
 }
 
 #[cfg(windows)]
-fn run_platform(
-    span: Span,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    window_visible: Arc<Mutex<bool>>,
-    ui_visible: Arc<Mutex<bool>>,
-    async_handle: Handle,
-    kbm_emulation_enabled: Arc<AtomicBool>,
-) {
+fn run_platform(span: Span, window_visible: Arc<Mutex<bool>>, ui_visible: Arc<Mutex<bool>>) {
     use windows_sys::Win32::System::Threading::GetCurrentThreadId;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         DispatchMessageW, GetMessageW, MSG, TranslateMessage, WM_QUIT,
@@ -337,14 +285,7 @@ fn run_platform(
     let thread_id = unsafe { GetCurrentThreadId() };
     TRAY_THREAD_ID.store(thread_id, std::sync::atomic::Ordering::SeqCst);
 
-    let ctx = TrayContext::new(
-        sdl_waker,
-        winit_waker,
-        window_visible,
-        ui_visible.clone(),
-        async_handle,
-        kbm_emulation_enabled,
-    );
+    let ctx = TrayContext::new(window_visible, ui_visible.clone());
 
     loop {
         if ctx.handle_events() {
@@ -366,28 +307,13 @@ fn run_platform(
 }
 
 #[cfg(target_os = "linux")]
-fn run_platform(
-    span: Span,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    window_visible: Arc<Mutex<bool>>,
-    ui_visible: Arc<Mutex<bool>>,
-    async_handle: Handle,
-    kbm_emulation_enabled: Arc<AtomicBool>,
-) {
+fn run_platform(span: Span, window_visible: Arc<Mutex<bool>>, ui_visible: Arc<Mutex<bool>>) {
     if gtk::init().is_err() {
         event!(parent: &span, Level::ERROR, "Failed to initialize GTK for tray icon");
         return;
     }
 
-    let ctx = Rc::new(TrayContext::new(
-        sdl_waker,
-        winit_waker,
-        window_visible,
-        ui_visible.clone(),
-        async_handle,
-        kbm_emulation_enabled,
-    ));
+    let ctx = Rc::new(TrayContext::new(window_visible, ui_visible.clone()));
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         if GTK_QUIT_REQUESTED.load(std::sync::atomic::Ordering::SeqCst) {
             gtk::main_quit();
@@ -401,17 +327,6 @@ fn run_platform(
     });
 
     gtk::main();
-}
-
-#[cfg(target_os = "macos")]
-fn run_platform(
-    span: Span,
-    _sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    _winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-    _window_visible: Arc<Mutex<bool>>,
-    _async_handle: Handle,
-) {
-    event!(parent: &span, Level::WARN, "macOS tray icon requires main thread NSApplication event loop - not yet implemented");
 }
 
 fn load_icon() -> Icon {

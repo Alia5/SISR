@@ -3,9 +3,8 @@ use std::sync::{Arc, Mutex, OnceLock};
 use anyhow::Error;
 use egui::{Align2, Vec2};
 use tracing::error;
-use winit::event_loop::EventLoopProxy;
 
-use crate::app::window::RunnerEvent;
+use crate::app::window::{self, RunnerEvent};
 
 pub static REGISTRY: OnceLock<Registry> = OnceLock::new();
 
@@ -32,7 +31,6 @@ pub fn pop_dialog() -> Result<Arc<Dialog>, Error> {
 #[derive(Debug, Default)]
 pub struct Registry {
     dialogs: Mutex<Vec<Arc<Dialog>>>,
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
 }
 
 #[derive(Default)]
@@ -59,10 +57,9 @@ impl std::fmt::Debug for Dialog {
 }
 
 impl Registry {
-    pub fn new(winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>) -> Self {
+    pub fn new() -> Self {
         Self {
             dialogs: Mutex::new(Vec::new()),
-            winit_waker,
         }
     }
 
@@ -89,13 +86,7 @@ impl Registry {
         guard.push(Arc::new(dialog));
         drop(guard);
 
-        let Ok(waker_guard) = self.winit_waker.lock() else {
-            error!("Failed to acquire winit waker lock to request dialog redraw");
-            return;
-        };
-        if let Some(proxy) = &*waker_guard
-            && let Err(e) = proxy.send_event(RunnerEvent::DialogPushed())
-        {
+        if let Err(e) = window::get_event_sender().send_event(RunnerEvent::DialogPushed()) {
             error!(
                 "Failed to request dialog redraw after pushing dialog: {}",
                 e
@@ -111,13 +102,7 @@ impl Registry {
         let dlg = guard.pop();
         drop(guard);
 
-        let Ok(waker_guard) = self.winit_waker.lock() else {
-            error!("Failed to acquire winit waker lock to request dialog redraw");
-            return dlg;
-        };
-        if let Some(proxy) = &*waker_guard
-            && let Err(e) = proxy.send_event(RunnerEvent::DialogPopped())
-        {
+        if let Err(e) = window::get_event_sender().send_event(RunnerEvent::DialogPopped()) {
             error!(
                 "Failed to request dialog redraw after popping dialog: {}",
                 e

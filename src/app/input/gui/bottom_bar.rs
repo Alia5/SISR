@@ -1,16 +1,12 @@
-use std::sync::{Arc, Mutex};
-
 use egui::text::{LayoutJob, TextFormat};
 use egui::{Align, Align2, Area, FontId, TextStyle, Vec2};
-use sdl3::event::EventSender;
 use serde::{Deserialize, Serialize};
 use tracing::trace;
 
 use crate::app::gui::stacked_button::stacked_button;
-use crate::app::input::handler::State;
+use crate::app::input::context::Context;
 
-type RenderFn =
-    fn(&mut State, sdl_waker: Arc<Mutex<Option<EventSender>>>, &egui::Context, &mut bool);
+type RenderFn = fn(&Context, &egui::Context, &mut bool);
 
 pub struct BarItem {
     pub title: &'static str,
@@ -29,20 +25,21 @@ struct BottomBarState {
 }
 
 impl BottomBar {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             items: vec![
-                BarItem {
-                    title: "Gamepads",
-                    icon: "🎮",
-                    open: false,
-                    render: super::controller_info::draw,
-                },
                 BarItem {
                     title: "VIIPER Info",
                     icon: "🐍",
                     open: false,
                     render: super::viiper_info::draw,
+                },
+                BarItem {
+                    title: "Gamepads",
+                    icon: "🎮",
+                    open: false,
+                    render: super::controller_info::draw,
                 },
                 BarItem {
                     title: "Steam Stuff",
@@ -76,19 +73,14 @@ impl BottomBar {
         ctx.data_mut(|d| d.insert_persisted(egui::Id::new("bottom_bar_state"), state));
     }
 
-    pub fn draw(
-        &mut self,
-        state: &mut State,
-        sdl_waker: Arc<Mutex<Option<EventSender>>>,
-        ctx: &egui::Context,
-    ) {
-        self.load_state(ctx);
+    pub fn draw(&mut self, ctx: &Context, ectx: &egui::Context) {
+        self.load_state(ectx);
 
         let mut state_changed = false;
 
         Area::new("input_gui_bottom_bar".into())
             .anchor(Align2::CENTER_BOTTOM, Vec2::new(0.0, -16.0))
-            .show(ctx, |ui| {
+            .show(ectx, |ui| {
                 ui.horizontal(|ui| {
                     ui.spacing_mut().item_spacing = Vec2::new(24.0, 0.0);
 
@@ -129,7 +121,7 @@ impl BottomBar {
 
         for item in &mut self.items {
             if item.open {
-                (item.render)(state, sdl_waker.clone(), ctx, &mut item.open);
+                (item.render)(ctx, ectx, &mut item.open);
                 if !item.open {
                     state_changed = true;
                 }
@@ -137,7 +129,7 @@ impl BottomBar {
         }
 
         if state_changed {
-            self.save_state(ctx);
+            self.save_state(ectx);
         }
     }
 }

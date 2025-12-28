@@ -1,34 +1,29 @@
-use std::sync::{Arc, Mutex, atomic::Ordering};
-
 use egui::{Button, Id, RichText, Vec2};
-use sdl3::event::EventSender;
 use tracing::warn;
 
-use crate::app::input::handler::State;
+use crate::app::core::get_tokio_handle;
+use crate::app::input::context::Context;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
+use crate::app::steam_utils::cef_debug::ensure::CEF_DEBUG_PORT;
 use crate::app::steam_utils::util::{
     launched_in_steam_game_mode, launched_via_steam, open_controller_config,
 };
+use crate::app::window;
 use crate::config::CONFIG;
 
-pub fn draw(
-    state: &mut State,
-    _: Arc<Mutex<Option<EventSender>>>,
-    ctx: &egui::Context,
-    open: &mut bool,
-) {
+pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
     if !*open {
         return;
     }
 
     egui::Window::new("🚂 Steam Stuff")
         .id(Id::new("steam_stuff"))
-        .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
+        .default_pos(ectx.available_rect().center() - Vec2::new(210.0, 200.0))
         .default_size(Vec2::new(360.0, 260.0))
         .collapsible(false)
         .resizable(true)
         .open(open)
-        .show(ctx, |ui| {
+        .show(ectx, |ui| {
             egui::ScrollArea::both().auto_shrink(false).show(ui, |ui| {
                 let Ok(mut enforcer) = binding_enforcer().lock() else {
                     warn!("Failed to acquire binding enforcer lock for Steam Stuff GUI");
@@ -74,7 +69,7 @@ pub fn draw(
                     ui.label(RichText::new("Steam Overlay:").strong());
                     ui.label(
                         RichText::new(
-                            if state.steam_overlay_open {
+                            if ctx.steam_overlay_open {
                                 "Open"
                             } else {
                                 "Closed"
@@ -84,18 +79,23 @@ pub fn draw(
                         .weak(),
                     );
                 });
-                let mut continuous = state.window_continuous_redraw.load(Ordering::Relaxed);
+
+                let mut continuous = CONFIG
+                    .read()
+                    .ok()
+                    .and_then(|cfg_opt| cfg_opt.as_ref().and_then(|cfg| cfg.window.continous_draw))
+                    .unwrap_or(false);
+
                 if ui
                     .checkbox(&mut continuous, "Draw continuously to window")
                     .changed()
                 {
-                    state
-                        .window_continuous_redraw
-                        .store(continuous, Ordering::Relaxed);
+                    // FUCK CLIPPY
                     if let Ok(mut config_guard) = CONFIG.write()
                         && let Some(cfg) = config_guard.as_mut()
                     {
                         cfg.window.continous_draw = Some(continuous);
+                        window::set_continuous_redraw(continuous);
                     }
                 }
 
@@ -132,7 +132,7 @@ pub fn draw(
                                 ui.style_mut().spacing.button_padding = Vec2::new(12.0, 6.0);
                                 let btn = Button::new("🛠 Open Configurator").selected(true);
                                 if ui.add(btn).clicked() {
-                                    state.async_handle.spawn(open_controller_config(app_id));
+                                    get_tokio_handle().spawn(open_controller_config(app_id));
                                 }
                                 ui.reset_style();
                             });
@@ -141,7 +141,7 @@ pub fn draw(
                     },
                 );
                 ui.collapsing("CEF Stuff", |ui| {
-                    if let Some(port) = state.cef_debug_port {
+                    if let Some(port) = CEF_DEBUG_PORT.get() {
                         ui.horizontal_wrapped(|ui| {
                             ui.label(RichText::new("Steam CEF Debug:").strong());
                             ui.label(RichText::new("Enabled").weak());

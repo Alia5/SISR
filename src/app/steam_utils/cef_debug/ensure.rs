@@ -4,13 +4,12 @@ use std::{
 };
 
 use tracing::{debug, error, info, trace, warn};
-use winit::event_loop::EventLoopProxy;
 
 use crate::{
     app::{
         gui::dialogs::{self, Dialog, push_dialog},
         steam_utils::util::{self, launched_via_steam, open_steam_url, steam_path},
-        window::RunnerEvent,
+        window::{self, RunnerEvent},
     },
     config::CONFIG,
 };
@@ -67,25 +66,16 @@ pub fn check_enable_file() -> bool {
 // Yup! This code will do for now!
 // Believe or not, this is not LLM generated 🫣
 // Just stop reading!
-pub async fn ensure_cef_enabled(
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-) -> (bool, bool) {
+pub async fn ensure_cef_enabled() -> (bool, bool) {
     let Some(steam_path) = steam_path() else {
         error!("Steam installation path could not be found");
-        let winit_waker = winit_waker.clone();
         _ = push_dialog(Dialog::new_ok(
             "Steam not found",
             "Steam installation could not be found.
                     SISR cannot function without Steam
                     SISR will now quit",
             move || {
-                let Ok(guard) = winit_waker.lock() else {
-                    panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                };
-                let Some(proxy) = &*guard else {
-                    panic!("Winit waker not initialized to quit app after missing steam")
-                };
-                _ = proxy.send_event(RunnerEvent::Quit());
+                _ = window::get_event_sender().send_event(RunnerEvent::Quit());
             },
         ));
         // might as well, continue without, may be started from steam, and path is broken?
@@ -101,11 +91,9 @@ pub async fn ensure_cef_enabled(
         if !dialog_pushed {
             dialog_pushed = true;
             info!("CEF remote debugging not enabled in Steam, prompting user to enable...");
-            let winit_waker = winit_waker.clone();
             let steam_path = Arc::new(steam_path.clone());
             let file_create_attempted = file_create_attempted.clone();
             let continue_without = continue_without.clone();
-            let winit_waker2 = winit_waker.clone();
 
             #[cfg(target_os = "windows")]
             let extra_msg_string =
@@ -156,9 +144,7 @@ Steam needs to be restarted.\n\n",
                         info!("CEF debug file created successfully");
                     } else {
                         warn!("Failed to create CEF debug file");
-                        let winit_waker = winit_waker.clone();
                         std::thread::spawn(move || {
-                            let winit_waker = winit_waker.clone();
                             std::thread::sleep(std::time::Duration::from_secs(1));
                             _ = push_dialog(Dialog::new_ok(
                                 "Failed to enable CEF debugging",
@@ -168,13 +154,7 @@ Please create a file named '.cef-enable-remote-debugging' in your Steam installa
 
 SISR will close now.",
                                 move || {
-                                    let Ok(guard) = winit_waker.lock() else {
-                                        panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                                    };
-                                    let Some(proxy) = &*guard else {
-                                        panic!("Winit waker not initialized to quit app after missing steam")
-                                    };
-                                    _ = proxy.send_event(RunnerEvent::Quit());
+                                    _ = window::get_event_sender().send_event(RunnerEvent::Quit());
                                 },
                             ));
                         });
@@ -189,13 +169,7 @@ SISR will close now.",
                         return;
                     }
                     warn!("User chose not to enable CEF debugging");
-                    let Ok(guard) = winit_waker2.lock() else {
-                        panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                    };
-                    let Some(proxy) = &*guard else {
-                        panic!("Winit waker not initialized to quit app after missing steam")
-                    };
-                    _ = proxy.send_event(RunnerEvent::Quit());
+                    _ = window::get_event_sender().send_event(RunnerEvent::Quit());
                 },
             ));
         }
@@ -203,7 +177,7 @@ SISR will close now.",
     }
     if *file_create_attempted.lock().unwrap() && !*continue_without.lock().unwrap() {
         info!("CEF debugging enabled, restarting Steam...");
-        _ = restart_steam(winit_waker.clone()).await;
+        _ = restart_steam().await;
     }
 
     if check_enable_file() && !*continue_without.lock().unwrap() {
@@ -216,9 +190,7 @@ SISR will close now.",
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
         warn!("CEF debugging enable file present, but CEF debugging not reachable");
-        let winit_waker = winit_waker.clone();
         std::thread::spawn(move || {
-            let winit_waker = winit_waker.clone();
             std::thread::sleep(std::time::Duration::from_secs(1));
             _ = push_dialog(Dialog::new_ok(
                 "CEF debugging not reachable",
@@ -229,13 +201,7 @@ Please make sure Steam is running and nothing is blocking or using connections t
 
 SISR will close now.",
                 move || {
-                    let Ok(guard) = winit_waker.lock() else {
-                        panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                    };
-                    let Some(proxy) = &*guard else {
-                        panic!("Winit waker not initialized to quit app after missing steam")
-                    };
-                    _ = proxy.send_event(RunnerEvent::Quit());
+                    _ = window::get_event_sender().send_event(RunnerEvent::Quit());
                 },
             ));
         });
@@ -245,21 +211,14 @@ SISR will close now.",
     (check_enable_file(), *continue_without.lock().unwrap())
 }
 
-pub async fn restart_steam(winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>) -> bool {
+pub async fn restart_steam() -> bool {
     if let Err(e) = open_steam_url("steam://exit") {
-        let winit_waker = winit_waker.clone();
         error!("Failed to close Steam via URL scheme: {}", e);
         _ = push_dialog(Dialog::new_ok(
             "Failed to restart Steam",
             "Please restart Steam manually and restart SISR.",
             move || {
-                let Ok(guard) = winit_waker.lock() else {
-                    panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                };
-                let Some(proxy) = &*guard else {
-                    panic!("Winit waker not initialized to quit app after missing steam")
-                };
-                _ = proxy.send_event(RunnerEvent::Quit());
+                _ = window::get_event_sender().send_event(RunnerEvent::Quit());
             },
         ));
         tokio::time::sleep(std::time::Duration::from_hours(99999)).await; // wait forever, basically, we are done here
@@ -269,32 +228,22 @@ pub async fn restart_steam(winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEv
     info!("Restarting Steam...");
     if let Err(e) = open_steam_url("steam://open/main") {
         error!("Failed to start Steam via URL scheme: {}", e);
-        let winit_waker = winit_waker.clone();
         _ = push_dialog(Dialog::new_ok(
             "Failed to restart Steam",
             "Please restart Steam manually and restart SISR.",
             move || {
-                let Ok(guard) = winit_waker.lock() else {
-                    panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                };
-                let Some(proxy) = &*guard else {
-                    panic!("Winit waker not initialized to quit app after missing steam")
-                };
-                _ = proxy.send_event(RunnerEvent::Quit());
+                _ = window::get_event_sender().send_event(RunnerEvent::Quit());
             },
         ));
         tokio::time::sleep(std::time::Duration::from_hours(99999)).await; // wait forever, basically, we are done here
     }
     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-    ensure_steam_running(winit_waker.clone()).await
+    ensure_steam_running().await
 }
 
-pub async fn ensure_steam_running(
-    winit_waker: Arc<Mutex<Option<EventLoopProxy<RunnerEvent>>>>,
-) -> bool {
+pub async fn ensure_steam_running() -> bool {
     let Some(steam_path) = steam_path() else {
         error!("Steam installation path could not be found");
-        let winit_waker = winit_waker.clone();
         _ = push_dialog(Dialog::new_ok(
             "Steam not found",
             "Steam installation could not be found.
@@ -302,13 +251,7 @@ SISR cannot function without Steam
 
 SISR will now quit",
             move || {
-                let Ok(guard) = winit_waker.lock() else {
-                    panic!("Failed to acquire winit waker lock to quit app after missing steam")
-                };
-                let Some(proxy) = &*guard else {
-                    panic!("Winit waker not initialized to quit app after missing steam")
-                };
-                _ = proxy.send_event(RunnerEvent::Quit());
+                _ = window::get_event_sender().send_event(RunnerEvent::Quit());
             },
         ));
         return false;
@@ -325,9 +268,13 @@ SISR will now quit",
             debug!("Steam is not running, waiting for start...");
         }
         if !*dialog_open.lock().unwrap() {
-            let timeout_secs = CONFIG.read()
+            let timeout_secs = CONFIG
+                .read()
                 .ok()
-                .and_then(|c| c.as_ref().map(|cfg| cfg.steam.steam_launch_timeout_secs.unwrap_or(1)))
+                .and_then(|c| {
+                    c.as_ref()
+                        .map(|cfg| cfg.steam.steam_launch_timeout_secs.unwrap_or(1))
+                })
                 .unwrap_or(1);
             for _ in 0..timeout_secs {
                 if crate::app::steam_utils::util::steam_running() {

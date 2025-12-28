@@ -1,6 +1,7 @@
-use crate::app::input::handler::ViiperEvent;
 use crate::app::input::kbm_events;
+use crate::app::input::viiper_bridge::ViiperEvent;
 
+#[derive(Debug)]
 pub enum HandlerEvent {
     ViiperEvent(ViiperEvent),
     IgnoreDevice { device_id: u64 },
@@ -8,7 +9,7 @@ pub enum HandlerEvent {
     DisconnectViiperDevice { device_id: u64 },
     CefDebugReady { port: u16 },
     OverlayStateChanged { open: bool },
-    SetKbmEmulationEnabled { enabled: bool },
+    SetKbmEmulation { enabled: bool, initialize: bool },
     KbmKeyEvent(kbm_events::KbmKeyEvent),
     KbmPointerEvent(kbm_events::KbmPointerEvent),
     KbmReleaseAll(),

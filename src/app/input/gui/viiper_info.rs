@@ -1,32 +1,24 @@
 use std::collections::BTreeSet;
-use std::sync::{Arc, Mutex};
 
 use egui::{Id, Vec2};
-use sdl3::event::EventSender;
 
-use crate::app::input::handler::{HandlerEvent, State};
+use crate::app::input::{context::Context, event::handler_events::HandlerEvent, sdl_loop};
 
-pub fn draw(
-    state: &mut State,
-    sdl_waker: Arc<Mutex<Option<EventSender>>>,
-    ctx: &egui::Context,
-    open: &mut bool,
-) {
+pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
     egui::Window::new("🐍 VIIPER")
         .id(Id::new("viiper_info"))
-        .default_pos(ctx.available_rect().center() - Vec2::new(210.0, 200.0))
+        .default_pos(ectx.available_rect().center() - Vec2::new(210.0, 200.0))
         .default_size(Vec2::new(360.0, 240.0))
         .collapsible(false)
         .resizable(true)
         .open(open)
-        .show(ctx, |ui| {
+        .show(ectx, |ui| {
             egui::ScrollArea::both().auto_shrink(false).show(ui, |ui| {
                 ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new("VIIPER Address:").strong());
                     ui.label(
                         egui::RichText::new(
-                            state
-                                .viiper_address
+                            ctx.viiper_address
                                 .map(|addr| addr.to_string())
                                 .unwrap_or("None".to_string()),
                         )
@@ -37,31 +29,44 @@ pub fn draw(
                 ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new("VIIPER Available:").strong());
                     ui.label(
-                        egui::RichText::new(if state.viiper_ready { "true" } else { "false" })
-                            .weak(),
+                        egui::RichText::new(if ctx.viiper_available {
+                            "true"
+                        } else {
+                            "false"
+                        })
+                        .weak(),
                     );
                 });
 
                 ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new("VIIPER Version:").strong());
                     ui.label(
-                        egui::RichText::new(state.viiper_version.as_deref().unwrap_or("")).weak(),
+                        egui::RichText::new(ctx.viiper_version.as_deref().unwrap_or("")).weak(),
                     );
                 });
 
-                // Use the live connection flag — `viiper_device` may still be cached even if the
-                // server disconnected (or we hit network issues).
-                let connected = state.devices.values().any(|d| d.viiper_connected);
+                let connected = ctx.devices.iter().any(|r| {
+                    let Ok(dev) = r.value().lock() else {
+                        return false;
+                    };
+                    dev.viiper_device.is_some()
+                });
+
                 ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new("Any device(s) connected:").strong());
                     ui.label(egui::RichText::new(if connected { "true" } else { "false" }).weak());
                 });
 
                 ui.separator();
-                let busses = state
+                let busses = ctx
                     .devices
-                    .values()
-                    .filter_map(|d| d.viiper_device.as_ref().map(|v| v.bus_id))
+                    .iter()
+                    .filter_map(|r| {
+                        let Ok(dev) = r.value().lock() else {
+                            return None;
+                        };
+                        dev.viiper_device.as_ref().map(|v| v.device.bus_id)
+                    })
                     .collect::<BTreeSet<u32>>()
                     .into_iter()
                     .map(|id| id.to_string())
@@ -79,22 +84,29 @@ pub fn draw(
                     );
                 });
 
-                let is_localhost = state
+                let is_localhost = ctx
                     .viiper_address
                     .map(|addr| addr.ip().is_loopback())
                     .unwrap_or(false);
 
                 ui.separator();
                 ui.add_enabled_ui(!is_localhost, |ui| {
-                    let mut enabled = state.kbm_emulation_enabled;
+                    let mut enabled = ctx.keyboard_mouse_emulation;
                     if ui
                         .checkbox(&mut enabled, "Keyboard/mouse emulation")
                         .changed()
-                        && let Ok(guard) = sdl_waker.lock()
-                        && let Some(sender) = guard.as_ref()
                     {
-                        _ = sender
-                            .push_custom_event(HandlerEvent::SetKbmEmulationEnabled { enabled });
+                        if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
+                            HandlerEvent::SetKbmEmulation {
+                                enabled,
+                                initialize: false,
+                            },
+                        ) {
+                            tracing::error!(
+                                "Failed to send SetKbmEmulationEnabled event to SDL loop: {}",
+                                e
+                            );
+                        }
                     }
                     if is_localhost {
                         ui.label(
@@ -113,23 +125,31 @@ pub fn draw(
                         .small(),
                     );
 
-                    if state.kbm_emulation_enabled {
+                    if ctx.keyboard_mouse_emulation {
                         ui.separator();
                         ui.label(egui::RichText::new("KB/M VIIPER devices").strong());
 
                         for (label, wanted_type) in
                             [("⌨ Keyboard", "keyboard"), ("🖱 Mouse", "mouse")]
                         {
-                            let dev = state
-                                .devices
-                                .values()
-                                .find(|d| d.viiper_type == wanted_type);
+                            let r = ctx.devices.iter().find(|r| {
+                                let Ok(dev) = r.value().lock() else {
+                                    return false;
+                                };
+                                dev.viiper_type.clone().unwrap_or("N/A".to_string()) == wanted_type
+                            });
                             egui::CollapsingHeader::new(label)
                                 .default_open(true)
                                 .id_salt(format!("kbm_viiper_{wanted_type}"))
                                 .show(ui, |ui| {
-                                    let Some(dev) = dev else {
-                                        ui.label(egui::RichText::new("Not present").weak());
+                                    let Some(r) = r else {
+                                        return;
+                                    };
+
+                                    let Ok(dev) = r.value().lock() else {
+                                        tracing::error!(
+                                            "Failed to lock Device mutex for VIIPER KB/M info"
+                                        );
                                         return;
                                     };
 
@@ -138,7 +158,7 @@ pub fn draw(
                                         ui.label(
                                             egui::RichText::new(format!(
                                                 "{}",
-                                                dev.viiper_connected
+                                                dev.viiper_device.is_some()
                                             ))
                                             .weak(),
                                         );
@@ -151,7 +171,7 @@ pub fn draw(
                                                 ui.label(
                                                     egui::RichText::new(format!(
                                                         "{}",
-                                                        viiper_dev.bus_id
+                                                        viiper_dev.device.bus_id
                                                     ))
                                                     .weak(),
                                                 );
@@ -162,7 +182,7 @@ pub fn draw(
                                                 );
                                                 ui.label(
                                                     egui::RichText::new(
-                                                        viiper_dev.dev_id.to_string(),
+                                                        viiper_dev.device.dev_id.to_string(),
                                                     )
                                                     .weak(),
                                                 );
@@ -171,7 +191,7 @@ pub fn draw(
                                                 ui.label(egui::RichText::new("Type:").strong());
                                                 ui.label(
                                                     egui::RichText::new(
-                                                        viiper_dev.r#type.to_string(),
+                                                        viiper_dev.device.r#type.to_string(),
                                                     )
                                                     .weak(),
                                                 );
@@ -183,7 +203,7 @@ pub fn draw(
                                                 ui.label(
                                                     egui::RichText::new(format!(
                                                         "{:?}",
-                                                        viiper_dev.vid
+                                                        viiper_dev.device.vid
                                                     ))
                                                     .weak(),
                                                 );
@@ -195,7 +215,7 @@ pub fn draw(
                                                 ui.label(
                                                     egui::RichText::new(format!(
                                                         "{:?}",
-                                                        viiper_dev.pid
+                                                        viiper_dev.device.pid
                                                     ))
                                                     .weak(),
                                                 );
