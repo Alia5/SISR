@@ -1,5 +1,6 @@
 use std::mem::discriminant;
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 use sdl3::event::Event;
 use sdl3_sys::events::SDL_Event;
@@ -43,6 +44,17 @@ impl EventHandler for Handler {
                 return;
             }
         };
+
+        if *button == sdl3::gamepad::Button::Guide {
+            // draw frames for a a second for overlay-spawn...
+            tracing::debug!("HACK: Rending for a second to allow Steam overlay to spawn...");
+            thread::spawn(|| {
+                for _ in 0..60 {
+                    thread::sleep(std::time::Duration::from_millis(16));
+                    window::request_redraw();
+                }
+            });
+        }
 
         // trigger only on A-down, while LB+RB+Back are held.
         if *button != sdl3::gamepad::Button::South {
