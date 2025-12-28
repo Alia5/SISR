@@ -33,7 +33,7 @@ that should setup everything you need to get started with SISR quickly
     - Enable Steam CEF remote debugging
     - Create Desktop and Start Menu shortcuts
 
-    ??? tip "Version-Specific Installation"
+    !!! tip "Version-Specific Installation"
         The install scripts are version-aware based on where you download them from:
 
         - **Latest stable release:**  
@@ -66,7 +66,7 @@ that should setup everything you need to get started with SISR quickly
     - Enable Steam CEF remote debugging
     - Create a Launcher entry for SISR  
 
-    ??? tip "Version-Specific Installation"
+    !!! tip "Version-Specific Installation"
         The install scripts are version-aware based on where you download them from:
 
         - **Latest stable release:**  
