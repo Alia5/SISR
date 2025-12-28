@@ -7,6 +7,9 @@
 
 SISR (pronounced "scissor") redirects Steam Input configurations to the system level (localhost or network).  
 
+SISR takes controllers it receives from Steam (via Steam Input)
+and forwards them as emulated but more compatible controllers (indistinguishable from real hardware) to the OS.
+
 It can be used to circumvent issues with games and applications that
 do not support Steam Input or otherwise pose challenges, like (but not limited to):
 
