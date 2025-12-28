@@ -26,6 +26,7 @@ use crate::app::gui::{dark_theme, dialogs, light_theme};
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::sdl_loop;
 use crate::app::input::{kbm_events, kbm_winit_map};
+use crate::app::steam_utils::util::launched_in_steam_game_mode;
 use crate::config::CONFIG;
 use crate::gfx::Gfx;
 
@@ -370,9 +371,10 @@ impl WindowRunner {
         });
         egui_winit.handle_platform_output(window.as_ref(), full_output.platform_output);
 
+        let ppp = full_output.pixels_per_point;
         let screen_descriptor = ScreenDescriptor {
             size_in_pixels: [gfx.config.width, gfx.config.height],
-            pixels_per_point: window.scale_factor() as f32,
+            pixels_per_point: ppp,
         };
         let clipped_primitives = self
             .egui_ctx
@@ -501,13 +503,35 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
             .with_visible(true)
             .with_window_icon(icon.clone());
 
+        // fuck clippy
         if self.fullscreen {
             window_attrs = window_attrs
                 .with_fullscreen(Some(Fullscreen::Borderless(None)))
                 .with_decorations(false);
         } else {
             window_attrs =
-                window_attrs.with_inner_size(winit::dpi::PhysicalSize::new(1280.0, 720.0));
+                window_attrs.with_inner_size(winit::dpi::LogicalSize::new(1280.0, 720.0));
+        }
+        if launched_in_steam_game_mode() {
+            tracing::info!("Launched in Steam game mode, fixing window shenanigans...");
+            let monitor = event_loop
+                .primary_monitor()
+                .or_else(|| event_loop.available_monitors().next());
+            if let Some(monitor) = monitor {
+                let size = monitor.size();
+                window_attrs = window_attrs.with_inner_size(size);
+                tracing::debug!("Setting window size to {:?}", size);
+
+                if size.width == 1280 && size.height == 800 {
+                    tracing::debug!("Likely to run on Deck-Screen, adjusting window scale...");
+                    self.egui_ctx.set_pixels_per_point(0.66);
+                }
+            } else {
+                window_attrs = window_attrs
+                    .with_fullscreen(Some(Fullscreen::Borderless(None)))
+                    .with_decorations(false);
+                tracing::debug!("Could not get monitor info, setting borderless fullscreen");
+            }
         }
 
         #[cfg(windows)]
