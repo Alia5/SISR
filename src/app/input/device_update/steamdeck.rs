@@ -1,4 +1,3 @@
-use sdl3_sys::joystick::SDL_GetJoystickFromID;
 use viiper_client::devices::steamdeck::SteamdeckInput;
 
 use crate::app::input::sdl_sisr::ValveInReport;
@@ -11,13 +10,13 @@ pub fn update_from_raw_event(istate: &mut SteamdeckInput, raw_data: &[u8; 64]) -
 
     let report = unsafe { std::ptr::read_unaligned(raw_data.as_ptr() as *const ValveInReport) };
 
-    let (packet_num, deck_state) = unsafe {
+    let (_packet_num, deck_state) = unsafe {
         let packet_num = report.payload.deck_state.packet_num;
         let deck_state = &report.payload.deck_state;
         (packet_num, deck_state)
     };
 
-    tracing::trace!("Updating raw steamdeck state, seqno {}", packet_num);
+    // tracing::trace!("Updating raw steamdeck state, seqno {}", packet_num);
 
     istate.left_pad_x = deck_state.left_pad_x;
     istate.left_pad_y = deck_state.left_pad_y;

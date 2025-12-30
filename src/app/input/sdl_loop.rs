@@ -5,7 +5,11 @@ use crate::app::App;
 use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::input::context::Context;
 use crate::app::input::event::handler::{
-    cef_debug_ready, connect_viiper_device, disconnect_viiper_device, ignore_device, kbm_key_event, kbm_pointer_event, kbm_release_all, on_controller_button_down, on_viiper_event, overlay_state_changed, sdl_device_connected, sdl_device_disconnected, sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete, sdl_steamdeck_updates, set_kbm_emulation, viiper_ready
+    cef_debug_ready, connect_viiper_device, disconnect_viiper_device, ignore_device, kbm_key_event,
+    kbm_pointer_event, kbm_release_all, on_controller_button_down, on_viiper_event,
+    overlay_state_changed, sdl_device_connected, sdl_device_disconnected,
+    sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete, sdl_steamdeck_updates,
+    set_kbm_emulation, viiper_ready,
 };
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::event::kbm_context::KbmContext;
@@ -138,7 +142,7 @@ impl InputLoop {
                 context.clone(),
                 viiper_bridge.clone(),
             )),
-            Arc::new(on_viiper_event::Handler::new(
+            Arc::new(on_viiper_event::handler::Handler::new(
                 context.clone(),
                 viiper_bridge.clone(),
             )),

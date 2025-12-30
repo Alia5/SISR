@@ -101,7 +101,7 @@ impl EventHandler for Handler {
             tracing::error!("Failed to get boxed state for device id {}", device.id);
             return;
         };
-        tracing::trace!("Updating VIIPER steamdeck state");
+        // tracing::trace!("Updating VIIPER steamdeck state");
         viiper.update_device_state_boxed(device.id, viiper_device_state_boxed);
     }
 

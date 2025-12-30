@@ -4,7 +4,6 @@ use tracing::warn;
 use crate::app::core::get_tokio_handle;
 use crate::app::input::context::Context;
 use crate::app::steam_utils::binding_enforcer::binding_enforcer;
-use crate::app::steam_utils::cef_debug::ensure::CEF_DEBUG_PORT;
 use crate::app::steam_utils::cef_debug::inject::get_ws_server_port;
 use crate::app::steam_utils::util::{
     launched_in_steam_game_mode, launched_via_steam, open_controller_config,

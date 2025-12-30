@@ -1,4 +1,4 @@
-use sdl3_sys::events::{SDL_EVENT_GAMEPAD_UPDATE_COMPLETE, SDL_Event, SDL_EventType};
+use sdl3_sys::events::{SDL_EVENT_GAMEPAD_UPDATE_COMPLETE, SDL_Event};
 use std::sync::{Arc, Mutex};
 
 use crate::app::input::context::Context;

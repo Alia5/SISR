@@ -8,6 +8,7 @@ use dashmap::DashMap;
 use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc;
 use tracing::{error, info, warn};
+use viiper_client::DeviceOutput as _;
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::steamdeck;
@@ -33,6 +34,10 @@ pub enum DeviceOutput {
     Keyboard {
         device_id: u64,
         leds: u8,
+    },
+    Steamdeck {
+        device_id: u64,
+        output: steamdeck::SteamdeckOutput,
     },
 }
 
@@ -347,9 +352,16 @@ impl ViiperBridge {
     where
         R: tokio::io::AsyncRead + Unpin + Send,
     {
+        tracing::trace!(
+            "Handling VIIPER device output for device ID {} of type {}",
+            device_id,
+            device_type
+        );
+
         match device_type {
             "xbox360" => Self::process_xbox360_rumble_output(reader, device_id).await,
             "keyboard" => Self::process_keyboard_output(reader, device_id).await,
+            "steamdeck" => Self::process_steamdeck_output(reader, device_id).await,
             _ => {
                 warn!("Unknown device type for output: {}", device_type);
                 reader.lock().await.read_to_end(&mut vec![]).await?;
@@ -383,6 +395,51 @@ impl ViiperBridge {
             device_id,
             rumble_l: buf[0],
             rumble_r: buf[1],
+        }));
+        Ok(())
+    }
+
+    async fn process_steamdeck_output<R>(
+        reader: OutputReader<R>,
+        device_id: u64,
+    ) -> std::io::Result<()>
+    where
+        R: tokio::io::AsyncRead + Unpin + Send,
+    {
+        let mut buf = vec![0u8; 64];
+        let mut guard = reader.lock().await;
+        guard.read_exact(&mut buf).await?;
+        drop(guard);
+
+        tracing::trace!(
+            "Received VIIPER steamdeck output for device {}: {:?}; first byte: {}",
+            device_id,
+            buf,
+            buf[0]
+        );
+
+        let output = match steamdeck::SteamdeckOutput::from_bytes(&buf) {
+            Ok(v) => {
+                tracing::trace!(
+                    "Parsed VIIPER steamdeck output for device {}: {:?}; first byte: {}",
+                    device_id,
+                    v,
+                    buf[0]
+                );
+                v
+            }
+            Err(e) => {
+                warn!(
+                    "Failed to parse VIIPER steamdeck output for device {}: {}",
+                    device_id, e
+                );
+                return Ok(());
+            }
+        };
+
+        Self::push_event(ViiperEvent::DeviceOutput(DeviceOutput::Steamdeck {
+            device_id,
+            output,
         }));
         Ok(())
     }

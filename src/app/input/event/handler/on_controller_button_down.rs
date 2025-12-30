@@ -5,11 +5,9 @@ use std::thread;
 use sdl3::event::Event;
 use sdl3_sys::events::SDL_Event;
 
-use crate::app::input::device::SDLDevice;
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::{
     context::Context,
-    device::Device,
     event::router::{EventHandler, ListenEvent, RoutedEvent},
 };
 use crate::app::window;

@@ -1000,6 +1000,9 @@ impl ApplicationHandler<RunnerEvent> for WindowRunner {
 }
 impl Drop for WindowRunner {
     fn drop(&mut self) {
+        // Clean up HID devices before anything else
+        crate::app::input::steamdeck_hid::cleanup_all();
+
         // some dependency bullshit crashes... "oh rust so so safe"...
         if let Err(e) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             drop(self.egui_winit.take());

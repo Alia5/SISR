@@ -7,6 +7,7 @@ use sdl3_sys::events::SDL_Event;
 use crate::app::input::context::Context;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
+use crate::app::input::steamdeck_hid;
 use crate::app::input::viiper_bridge::ViiperBridge;
 
 pub struct Handler {
@@ -60,6 +61,8 @@ impl EventHandler for Handler {
             tracing::error!("Failed to lock {:?}", device_mtx);
             return;
         };
+
+        let is_steamdeck = device.viiper_type.as_deref() == Some("steamdeck");
         let Some(sdl_device) = device.sdl_device(which) else {
             tracing::warn!(
                 "WTF No SDL device found for SDL id {} in device {:?}",
@@ -73,6 +76,12 @@ impl EventHandler for Handler {
 
         match event {
             Event::ControllerDeviceRemoved { .. } => {
+                if is_steamdeck
+                    && let Some(gp) = sdl_device.gamepad.as_ref()
+                    && let Some(path) = gp.path()
+                {
+                    steamdeck_hid::close_path(&path);
+                }
                 sdl_device.gamepad.take();
             }
             Event::JoyDeviceRemoved { .. } => {

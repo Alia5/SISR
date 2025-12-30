@@ -113,7 +113,7 @@ impl BindingEnforcer {
             Ok(_) => {
                 self.active = false;
             }
-            Err(e) => {}
+            Err(_e) => {}
         }
     }
 }
