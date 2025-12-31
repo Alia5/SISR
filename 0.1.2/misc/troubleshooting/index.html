@@ -1,0 +1,2157 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Steam Input System Redirector - Documentation">
+      
+      
+        <meta name="author" content="Peter Repukat">
+      
+      
+      
+        <link rel="prev" href="../../guides/glossi_like/">
+      
+      
+        <link rel="next" href="../faq/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Troubleshooting - SISR Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#troubleshooting" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SISR Documentation" class="md-header__button md-logo" aria-label="SISR Documentation" data-md-component="logo">
+      
+  <img src="../../SISR.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SISR Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Troubleshooting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue-grey" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Alia5/SISR" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Alia5/SISR
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+  Installation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../config/config/" class="md-tabs__link">
+          
+  
+  
+  Configuration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/overview/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../dev/building/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SISR Documentation" class="md-nav__button md-logo" aria-label="SISR Documentation" data-md-component="logo">
+      
+  <img src="../../SISR.svg" alt="logo">
+
+    </a>
+    SISR Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Alia5/SISR" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Alia5/SISR
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Installation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/usbip/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    USBIP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Configuration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/glossi_like/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GlosSI like usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#controller-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎮 Controller Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎮 Controller Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#doubled-controllers-one-physical-controller-controls-multiple-emulated-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doubled controllers / One physical controller controls multiple emulated controllers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-game-still-detects-my-real-ps4dualsensenintendo-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My game still detects my real PS4/DualSense/Nintendo controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#game-doesnt-recognize-the-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Game doesn't recognize the controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#touchradial-menus-do-not-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Touch/Radial menus do not work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My controller doesn't work properly when SISR is running and I launch a game from Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui-window-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🪟 UI / Window issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🪟 UI / Window issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i-cant-see-the-ui-the-ui-doesnt-show-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I can't see the UI / The UI doesn't show up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-have-toggled-the-ui-but-now-i-cant-get-rid-of-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I have toggled the UI but now I can't get rid of it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-mouse-is-captured-by-the-overlay-and-i-cant-interact-with-other-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My mouse is captured by the overlay and I can't interact with other windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viiper-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐍 VIIPER Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐍 VIIPER Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sisr-says-viiper-is-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says VIIPER is unavailable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viiper-version-too-old" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VIIPER version too old
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usbip-attach-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        USBIP attach fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steam-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚂 Steam Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚂 Steam Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sisr-marker-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR marker not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-8080-conflicts-cef-debugging-is-enabled-but-sisr-could-not-reach-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port 8080 conflicts / CEF debugging is enabled, but SISR could not reach it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#steam-installation-could-not-be-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steam installation could not be found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-create-cef-debug-enable-file-in-steam-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failed to create CEF debug enable file in Steam directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-restart-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failed to restart Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sisr-says-the-overlay-notfier-could-not-be-initialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says the overlay notfier could not be initialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-doesnt-work-with-steam-link-remote-play" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        This doesn't work with "Steam Link" / "Remote Play"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-mouse-emulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⌨️🖱️ Keyboard/Mouse Emulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⌨️🖱️ Keyboard/Mouse Emulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kbm-emulation-is-disabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KB/M emulation is disabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏎️ Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏎️ Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-lag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input lag
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still stuck? 🙄
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#controller-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎮 Controller Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎮 Controller Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#doubled-controllers-one-physical-controller-controls-multiple-emulated-controllers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Doubled controllers / One physical controller controls multiple emulated controllers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-game-still-detects-my-real-ps4dualsensenintendo-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My game still detects my real PS4/DualSense/Nintendo controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#game-doesnt-recognize-the-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Game doesn't recognize the controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#touchradial-menus-do-not-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Touch/Radial menus do not work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My controller doesn't work properly when SISR is running and I launch a game from Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui-window-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🪟 UI / Window issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🪟 UI / Window issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i-cant-see-the-ui-the-ui-doesnt-show-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I can't see the UI / The UI doesn't show up
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-have-toggled-the-ui-but-now-i-cant-get-rid-of-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        I have toggled the UI but now I can't get rid of it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#my-mouse-is-captured-by-the-overlay-and-i-cant-interact-with-other-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        My mouse is captured by the overlay and I can't interact with other windows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viiper-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐍 VIIPER Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐍 VIIPER Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sisr-says-viiper-is-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says VIIPER is unavailable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viiper-version-too-old" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VIIPER version too old
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usbip-attach-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        USBIP attach fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steam-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚂 Steam Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚂 Steam Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sisr-marker-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR marker not found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-8080-conflicts-cef-debugging-is-enabled-but-sisr-could-not-reach-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port 8080 conflicts / CEF debugging is enabled, but SISR could not reach it
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#steam-installation-could-not-be-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steam installation could not be found
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-create-cef-debug-enable-file-in-steam-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failed to create CEF debug enable file in Steam directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-restart-steam" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failed to restart Steam
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sisr-says-the-overlay-notfier-could-not-be-initialized" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SISR says the overlay notfier could not be initialized
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#this-doesnt-work-with-steam-link-remote-play" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        This doesn't work with "Steam Link" / "Remote Play"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-mouse-emulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⌨️🖱️ Keyboard/Mouse Emulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⌨️🖱️ Keyboard/Mouse Emulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kbm-emulation-is-disabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        KB/M emulation is disabled
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏎️ Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏎️ Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-lag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input lag
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#still-stuck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Still stuck? 🙄
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="troubleshooting">Troubleshooting</h1>
+<style>
+    .md-typeset details.question {
+        border-color: rgba(128, 128, 128, 0.33);
+        &:focus-within {
+            box-shadow: 0 0 0 .2rem #448aff1a;
+        }
+        & summary {
+            background: transparent;
+            &::before {
+                color: #227399a9;
+                background-color: #227399a9;
+                outline: transparent;
+            }
+            &::before:focus,
+            &::before:focus-visible {
+                outline: transparent;
+                box-shadow: transparent;
+            }
+            &::after {
+                color: var(--md-default-fg-color);
+            }
+        }
+    }
+    .toc-anchor {
+        position: absolute;
+        opacity: 0;
+        overflow: hidden;
+        width: 0;
+        height: 0;
+        padding: 0;
+        margin: 0 !important;
+        pointer-events: none;
+    }
+ </style>
+
+<script>
+(()=>{
+    const open=(hash)=>{
+        if(!hash||hash==="#")return;
+        const h=document.getElementById(hash.slice(1));
+        let n=h?.nextElementSibling;
+        while(n){
+            if(/^H[1-6]$/.test(n.tagName)) break;
+            if(n.tagName==="DETAILS"){n.open=true;break;}
+            n=n.nextElementSibling;
+        }
+    };
+    let last="";
+    const tick=()=>{const h=location.hash;if(h!==last){last=h;open(h);}requestAnimationFrame(tick);};
+    requestAnimationFrame(tick);
+})();
+</script>
+
+<div class="grid cards">
+<ul>
+<li>
+<p><strong>Controller Issues</strong></p>
+<hr />
+<p>Problems with controller detection, doubling, and game compatibility</p>
+<p><a href="#controller-issues">Jump to section</a></p>
+</li>
+<li>
+<p><strong>UI / Window Issues</strong></p>
+<hr />
+<p>Window visibility, overlay problems, and mouse capture</p>
+<p><a href="#ui-window-issues">Jump to section</a></p>
+</li>
+<li>
+<p><strong>VIIPER Issues</strong></p>
+<hr />
+<p>Connection problems, version mismatches, and USBIP setup</p>
+<p><a href="#viiper-issues">Jump to section</a></p>
+</li>
+<li>
+<p><strong>Steam Integration</strong></p>
+<hr />
+<p>Marker shortcuts, CEF debugging, and port conflicts</p>
+<p><a href="#steam-integration">Jump to section</a></p>
+</li>
+<li>
+<p><strong>Keyboard/Mouse Emulation</strong></p>
+<hr />
+<p>KB/M emulation configuration and troubleshooting</p>
+<p><a href="#keyboard-mouse-emulation">Jump to section</a></p>
+</li>
+<li>
+<p><strong>Performance</strong></p>
+<hr />
+<p>Input lag, latency issues, and optimization tips</p>
+<p><a href="#performance">Jump to section</a></p>
+</li>
+</ul>
+</div>
+<hr />
+<h2 id="controller-issues">🎮 Controller Issues</h2>
+<h3 class="toc-anchor" id="doubled-controllers-one-physical-controller-controls-multiple-emulated-controllers">Doubled controllers / One physical controller controls multiple emulated controllers</h3>
+<details class="question">
+<summary>Doubled controllers / One physical controller controls multiple emulated controllers</summary>
+<p>You can try one of the two following things:</p>
+<ol>
+<li>
+<p>Ensure that in the Steam Controller configurator for SISR,
+the controller order uses your "real" controllers <strong>before any emulated controllers</strong>  </p>
+</li>
+<li>
+<p>Turn off "Enable Steam Input for Xbox controllers" in Steam settings.<br />
+Otherwise Steam will pass through the emulated controller to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
+controller, which will be passed to Steam, which will it pass to SISR.</p>
+</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Controller identification</p>
+<p>Steams "Identify Controllers" feature (available when re-ordering controller <strong>in Steam</strong>) will
+help you differentiate physical and emulated controllers</p>
+</div>
+</details>
+<h3 class="toc-anchor" id="my-game-still-detects-my-real-ps4dualsensenintendo-controller">My game still detects my real PS4/DualSense/Nintendo controller</h3>
+<details class="question">
+<summary>My game still detects my real PS4/DualSense/Nintendo controller</summary>
+<p>Install and use <a href="https://github.com/nefarius/HidHide">HidHide</a> to hide your physical controllers from games<br />
+Keep the visible to Steam and SISR<br />
+<em>How?</em> <strong>RTFM</strong>...</p>
+<div class="admonition info">
+<p class="admonition-title">HidHide setup</p>
+<p>Automatic HidHide integration will maybe follow<br />
+soon™</p>
+</div>
+</details>
+<h3 class="toc-anchor" id="game-doesnt-recognize-the-controller">Game doesn't recognize the controller</h3>
+<details class="question">
+<summary>Game doesn't recognize the controller</summary>
+<p>Does the game work with regular, real, Xbox 360 controllers?  </p>
+<ul>
+<li>If yes, you are doing it wrong  </li>
+<li>If no, tough luck</li>
+</ul>
+</details>
+<h3 class="toc-anchor" id="touchradial-menus-do-not-work">Touch/Radial menus do not work</h3>
+<details class="question">
+<summary>Touch/Radial menus do not work</summary>
+<p>By default, SISR will <strong>not</strong> draw continuously, which prevents touch/radial menus from showing up<br />
+To make touch/radial menus show up, you can add the <code>--wcd true</code> launch option to enable continuous drawing  </p>
+<p>This can also circumvent issues with the Steam overlay not showing up correctly.</p>
+<p><strong>Do note that this may increase CPU/GPU usage</strong> and
+can potentially negatively affect gaming performance on lower end systems</p>
+</details>
+<h3 class="toc-anchor" id="my-controller-doesnt-work-properly-when-sisr-is-running-and-i-launch-a-game-from-steam">My controller doesn't work properly when SISR is running and I launch a game from Steam</h3>
+<details class="question">
+<summary>My controller doesn't work properly when SISR is running and I launch a game from Steam</summary>
+<p>SISR is meant as supporting-tools for games/applications <strong>outside of Steam</strong> that do not support Steam Input properly.</p>
+<p>Just disable/exit SISR before running your regular (working with Steam Input) games...</p>
+<p>Steam game launch detection is <strong>not yet implemented</strong>.</p>
+</details>
+<h2 id="ui-window-issues">🪟 UI / Window issues</h2>
+<h3 class="toc-anchor" id="i-cant-see-the-ui-the-ui-doesnt-show-up">I can't see the UI / The UI doesn't show up</h3>
+<details class="question">
+<summary>I can't see the UI / The UI doesn't show up</summary>
+<p>It's a system tray app. Right-click the tray icon to toggle the UI (among other things)
+<strong>Or</strong> launch with <code>-w --window-fullscreen false</code> to show the window at startup
+<strong>If</strong> the window runs <strong>as overlay</strong> press <strong><code>Ctrl+Shift+Alt+S</code></strong>
+    or <strong><code>LB+RB+BACK+A</code></strong> (<em>A button needs to be pressed last</em>) to toggle UI visibility.</p>
+</details>
+<h3 class="toc-anchor" id="i-have-toggled-the-ui-but-now-i-cant-get-rid-of-it">I have toggled the UI but now I can't get rid of it</h3>
+<details class="question">
+<summary>I have toggled the UI but now I can't get rid of it</summary>
+<p>Press <strong><code>Ctrl+Shift+Alt+S</code></strong> or <strong><code>LB+RB+BACK+A</code></strong> (<em>"A" button needs to be pressed last</em>) again to toggle UI visibility</p>
+</details>
+<h3 class="toc-anchor" id="my-mouse-is-captured-by-the-overlay-and-i-cant-interact-with-other-windows">My mouse is captured by the overlay and I can't interact with other windows</h3>
+<details class="question">
+<summary>My mouse is captured by the overlay and I can't interact with other windows</summary>
+<p>Press <strong><code>Ctrl+Shift+Alt+S</code></strong> or <strong><code>LB+RB+BACK+A</code></strong> (<em>"A" button needs to be pressed last</em>) to toggle UI visibility</p>
+</details>
+<h2 id="viiper-issues">🐍 VIIPER Issues</h2>
+<h3 class="toc-anchor" id="sisr-says-viiper-is-unavailable">SISR says VIIPER is unavailable</h3>
+<details class="question">
+<summary>SISR says VIIPER is unavailable</summary>
+<ol>
+<li>Is VIIPER running?<br />
+    Start manually: <code>viiper server</code></li>
+<li>Is <code>viiper</code> / <code>viiper.exe</code> next to SISR?
+    SISR tries to auto-start it if not already running as a service and the viiper-address is set to <code>localhost</code></li>
+<li>Firewall blocking the connection?<br />
+    Allow VIIPER through your firewall</li>
+<li>Correct address?<br />
+    Default is <code>localhost:3242</code>. Change with <code>--viiper-address</code></li>
+<li><strong>If</strong> using remote VIIPER: Is the remote machine reachable?<br />
+    Try pinging it</li>
+</ol>
+</details>
+<h3 class="toc-anchor" id="viiper-version-too-old">VIIPER version too old</h3>
+<details class="question">
+<summary>VIIPER version too old</summary>
+<p>SISR enforces a minimum VIIPER version<br />
+VIIPER should come bundled with SISR, so this should not happen</p>
+<p>If you see this error, you likely use VIIPER on another machine or have VIIPER running as a service
+In any case check the <a href="https://alia5.github.io/VIIPER/">VIIPER Documentation</a> for update instructions</p>
+</details>
+<h3 class="toc-anchor" id="usbip-attach-fails">USBIP attach fails</h3>
+<details class="question">
+<summary>USBIP attach fails</summary>
+<p>Ensure you have USBIP set up correctly<br />
+See <a href="../../getting-started/usbip/">USBIP setup</a></p>
+</details>
+<h2 id="steam-integration">🚂 Steam Integration</h2>
+<h3 class="toc-anchor" id="sisr-marker-not-found">SISR marker not found</h3>
+<details class="question">
+<summary>SISR marker not found</summary>
+<p>SISR reports the marker shortcut is missing.</p>
+<p>Create it manually:</p>
+<ol>
+<li>Add SISR as a <strong>non-Steam Game</strong> in Steam</li>
+<li>Set launch options to <code>--marker</code></li>
+<li>Restart Steam and SISR</li>
+</ol>
+<p>See <a href="../../getting-started/installation/">Installation</a></p>
+</details>
+<h3 class="toc-anchor" id="port-8080-conflicts-cef-debugging-is-enabled-but-sisr-could-not-reach-it">Port 8080 conflicts / CEF debugging is enabled, but SISR could not reach it</h3>
+<details class="question">
+<summary>Port 8080 conflicts / CEF debugging is enabled, but SISR could not reach it</summary>
+<p>As do other popular tools, SISR uses the CEF-Debugging option provided by Steam<br />
+and Valve decided to default that to port 8080 (<em>without an easy way to change this permanently</em>)</p>
+<p>Stop the conflicting service/program ¯\_(ツ)_/¯  </p>
+</details>
+<h3 class="toc-anchor" id="steam-installation-could-not-be-found">Steam installation could not be found</h3>
+<details class="question">
+<summary>Steam installation could not be found</summary>
+<p>Ensure Steam is installed and the installation directory exists<br />
+On Windows, check the registry entry for Steam  </p>
+<p>You can also specify the path explicitly with <code>--steam-path</code></p>
+</details>
+<h3 class="toc-anchor" id="failed-to-create-cef-debug-enable-file-in-steam-directory">Failed to create CEF debug enable file in Steam directory</h3>
+<details class="question">
+<summary>Failed to create CEF debug enable file in Steam directory</summary>
+<p>SISR couldn't write to the Steam directory (permissions issue, antivirus, etc.)</p>
+<p>Manually create the file <code>.cef-enable-remote-debugging</code> in your Steam installation directory<br />
+See <a href="../../getting-started/installation/">Installation</a></p>
+</details>
+<h3 class="toc-anchor" id="failed-to-restart-steam">Failed to restart Steam</h3>
+<details class="question">
+<summary>Failed to restart Steam</summary>
+<p>SISR couldn't restart Steam automatically via <code>steam://</code> URL scheme
+Restart Steam manually, then restart SISR</p>
+</details>
+<h3 class="toc-anchor" id="sisr-says-the-overlay-notfier-could-not-be-initialized">SISR says the overlay notfier could not be initialized</h3>
+<details class="question">
+<summary>SISR says the overlay notfier could not be initialized</summary>
+<p>Just tap "<em>Yes</em>" or pass <code>--wcd true</code> as launch options.</p>
+</details>
+<h3 class="toc-anchor" id="this-doesnt-work-with-steam-link-remote-play">This doesn't work with "Steam Link" / "Remote Play"</h3>
+<details class="question">
+<summary>This doesn't work with "Steam Link" / "Remote Play"</summary>
+<p><strong>The short answer:</strong> Don't use SISR with Steam Link / Remote Play.</p>
+<p>The long answer: Don't use SISR with Steam Link / Remote Play.<br />
+Look into setting up Sunshine/Apollo and Moonlight instead.  </p>
+<p>Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.<br />
+I have not yet had the time to write documentation for this<br />
+<sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup></p>
+</details>
+<h2 id="keyboard-mouse-emulation">⌨️🖱️ Keyboard/Mouse Emulation</h2>
+<h3 class="toc-anchor" id="kbm-emulation-is-disabled">KB/M emulation is disabled</h3>
+<details class="question">
+<summary>KB/M emulation is disabled</summary>
+<p>SISR disables KB/M emulation on <strong>localhost/loopback</strong> as it makes no sense there  </p>
+<p>To enable: Run VIIPER on a different machine and run SISR with <code>--viiper-address=&lt;remote-ip&gt;:3242 --keyboard-mouse-emulation=true</code></p>
+</details>
+<h2 id="performance">🏎️ Performance</h2>
+<h3 class="toc-anchor" id="input-lag">Input lag</h3>
+<details class="question">
+<summary>Input lag</summary>
+<p>Check:</p>
+<ul>
+<li>Network latency (if using remote VIIPER): ping the host</li>
+<li>System performance: CPU/GPU usage, background processes</li>
+<li>Game settings: V-sync, frame rate limits</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>USBIP/VIIPER do <strong>not</strong> introduce significant latency<br />
+See <a href="https://alia5.github.io/VIIPER/main/testing/e2e_latency/">VIIPER benchmarks</a></p>
+</div>
+</details>
+<h2 id="still-stuck">Still stuck? 🙄</h2>
+<p>Open an issue on <a href="https://github.com/Alia5/SISR/issues">GitHub</a> with:</p>
+<ul>
+<li>SISR version</li>
+<li>OS and version</li>
+<li>VIIPER version</li>
+<li>Relevant log output (<code>--log-level=debug</code>)</li>
+<li>Steps to reproduce</li>
+</ul>
+<p>No guarantees of support, though.  </p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascript/downloads.js"></script>
+      
+    
+  </body>
+</html>
