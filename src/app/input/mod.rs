@@ -1,5 +1,7 @@
 pub mod context;
 pub mod device;
+pub mod device_info;
+pub mod device_state;
 pub mod event;
 pub mod gui;
 pub mod kbm_events;

@@ -10,10 +10,10 @@ impl EventHandler for Handler {
         &self,
         _subsystems: &Subsystems,
         _event: &Option<RoutedEvent>,
-        sdl_event: &SDL_Event,
+        _sdl_event: &SDL_Event,
     ) {
-        let event_type = SDL_EventType(unsafe { sdl_event.r#type });
-        tracing::trace!(event = ?event_type);
+        // let event_type = SDL_EventType(unsafe { sdl_event.r#type });
+        // tracing::trace!(event = ?event_type);
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

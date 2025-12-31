@@ -24,7 +24,7 @@ impl EventHandler for Handler {
         _event: &Option<RoutedEvent>,
         sdl_event: &SDL_Event,
     ) {
-        let event_type = SDL_EventType(unsafe { sdl_event.r#type });
+        // let event_type = SDL_EventType(unsafe { sdl_event.r#type });
         // tracing::trace!(event = ?event_type); // TODO: log only if enabled via flag
         let which = unsafe { sdl_event.gdevice.which };
         let Ok(ctx) = self.ctx.lock() else {
@@ -47,6 +47,14 @@ impl EventHandler for Handler {
             tracing::error!("Failed to lock Device mutex for SDL id {}", which);
             return;
         };
+        if device.steam_handle == 0 {
+            tracing::trace!(
+                "Ignoring gamepad update complete for SDL id {} because no Steam handle",
+                which
+            );
+            return;
+        }
+
         let device = &mut *device; // ouh boy..
 
         let Some(viiper_device) = device.viiper_device.as_mut() else {

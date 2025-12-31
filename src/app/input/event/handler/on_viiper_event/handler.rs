@@ -4,7 +4,9 @@ use std::sync::{Arc, Mutex};
 use sdl3_sys::events::SDL_Event;
 
 use crate::app::input::context::Context;
-use crate::app::input::device::{DeviceState, ViiperDevice};
+use crate::app::input::device::ViiperDevice;
+use crate::app::input::device_state::DeviceState;
+use crate::app::input::event::handler::on_viiper_event::device_output::{keyboard, xbox360};
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
@@ -148,53 +150,15 @@ impl EventHandler for Handler {
             }
             //
             ViiperEvent::DeviceOutput(output) => match output {
-                // TODO: delegate to ouput_handler
                 DeviceOutput::Xbox360 {
                     device_id,
                     rumble_l,
                     rumble_r,
                 } => {
-                    let Ok(ctx) = self.ctx.lock() else {
-                        tracing::error!("Failed to lock state for VIIPER device output handling");
-                        return;
-                    };
-                    let Some(device_mtx) = ctx.device_for_id(*device_id) else {
-                        tracing::warn!(
-                            "Received device output event for unknown device ID {}",
-                            device_id
-                        );
-                        return;
-                    };
-                    drop(ctx);
-                    let Ok(mut device) = device_mtx.lock() else {
-                        tracing::error!(
-                            "Failed to lock device mutex for VIIPER device output handling"
-                        );
-                        return;
-                    };
-
-                    for d in device.sdl_devices.iter_mut() {
-                        if let Some(gamepad) = d.gamepad.as_mut() {
-                            // FUCK CLIPPY!
-                            if let Err(e) = gamepad.set_rumble(
-                                *rumble_l as u16 * 257,
-                                *rumble_r as u16 * 257,
-                                10000,
-                            ) {
-                                tracing::warn!(
-                                    "Failed to set rumble for device {}: {}",
-                                    device_id,
-                                    e
-                                );
-                            }
-                        } else {
-                            tracing::error!("No gamepad found for device {}", device_id);
-                        }
-                    }
+                    xbox360::handle_output(self.ctx.clone(), device_id, rumble_l, rumble_r);
                 }
-                DeviceOutput::Keyboard { .. } => {
-                    // TODO:
-                    tracing::warn!("Ignoreing Keyboard output! Not implemented");
+                DeviceOutput::Keyboard { device_id, leds } => {
+                    keyboard::handle_output(self.ctx.clone(), device_id, leds);
                 }
             },
             //

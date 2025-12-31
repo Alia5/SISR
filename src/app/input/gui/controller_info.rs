@@ -3,7 +3,7 @@ use egui::{CollapsingHeader, Id, RichText, Vec2};
 
 use crate::app::gui::dialogs::{Dialog, push_dialog};
 use crate::app::input::context::Context;
-use crate::app::input::device::SdlValue;
+use crate::app::input::device_info::SdlValue;
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::sdl_loop;
 
@@ -147,7 +147,7 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                                         .selected_text(selected.clone())
                                         .show_ui(ui, |ui| {
                                             ui.selectable_value(&mut selected, "xbox360".to_string(), "xbox360");
-                                            ui.selectable_value(&mut selected, "dualshock4".to_string(), "dualshock4");
+                                            // ui.selectable_value(&mut selected, "dualshock4".to_string(), "dualshock4");
                                         }
                                     );
                                     if before != selected {

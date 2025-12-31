@@ -131,7 +131,12 @@ impl EventRouter {
             return;
         }
 
-        if hl_event.is_joy() {
+        if hl_event.is_joy()
+            || event_type == SDL_EventType::JOYSTICK_UPDATE_COMPLETE
+            || event_type == SDL_EventType::GAMEPAD_AXIS_MOTION
+            || event_type == SDL_EventType::GAMEPAD_BUTTON_DOWN
+            || event_type == SDL_EventType::GAMEPAD_BUTTON_UP
+        {
             // reduce log spam
             return;
         }

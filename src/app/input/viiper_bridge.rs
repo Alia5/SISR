@@ -11,7 +11,7 @@ use tracing::{error, info, warn};
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
-use viiper_client::{AsyncViiperClient, DeviceInput};
+use viiper_client::{AsyncViiperClient, DeviceInput, DeviceOutput as _};
 
 use crate::app::core::get_tokio_handle;
 use crate::app::input::device::Device;
