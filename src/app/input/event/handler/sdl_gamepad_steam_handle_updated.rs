@@ -28,7 +28,7 @@ impl EventHandler for Handler {
     ) {
         let event_type = SDL_EventType(unsafe { sdl_event.r#type });
         tracing::debug!(event = ?event_type);
-        let which = unsafe { sdl_event.gdevice.which };
+        let which = unsafe { sdl_event.gdevice.which }.0;
 
         let Ok(ctx) = self.ctx.lock() else {
             tracing::error!("Failed to lock Context mutex");

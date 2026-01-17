@@ -1,8 +1,9 @@
 use sdl3::gamepad::Gamepad;
+use sdl3_sys::joystick::SDL_JoystickID;
 
 pub fn get_gamepad_steam_handle(pad: &Gamepad) -> u64 {
     use sdl3::sys::gamepad::SDL_GetGamepadSteamHandle;
-    let instance_id = pad.id().unwrap_or(0);
+    let instance_id = pad.id().unwrap_or(SDL_JoystickID(0)).0;
     if instance_id == 0 {
         tracing::trace!("Cannot get steam handle for device with invalid instance ID 0");
         return 0;

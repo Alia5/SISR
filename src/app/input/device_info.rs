@@ -3,6 +3,7 @@ use sdl3::{
     gamepad::{Axis, Button},
     joystick,
 };
+use sdl3_sys::joystick::SDL_JoystickID;
 
 #[derive(Debug, Clone)]
 pub enum SdlValue {
@@ -92,7 +93,10 @@ impl SDLDeviceInfo {
         if let Some(gp) = gamepad {
             let i = &self.gamepad_infos;
             i.insert("name".into(), SdlValue::OptString(gp.name()));
-            i.insert("id".into(), SdlValue::U32(gp.id().unwrap_or(0)));
+            i.insert(
+                "id".into(),
+                SdlValue::U32(gp.id().unwrap_or(SDL_JoystickID(0)).0),
+            );
             i.insert("path".into(), SdlValue::OptString(gp.path()));
             i.insert("type".into(), SdlValue::String(gp.r#type().string()));
             i.insert(

@@ -2,7 +2,9 @@ use std::mem::discriminant;
 use std::sync::{Arc, Mutex};
 
 use sdl3::event::Event;
+use sdl3::joystick::JoystickId;
 use sdl3_sys::events::SDL_Event;
+use sdl3_sys::joystick::SDL_JoystickID;
 
 use crate::app::input::device::SDLDevice;
 use crate::app::input::event::handler_events::HandlerEvent;
@@ -39,12 +41,16 @@ impl EventHandler for Handler {
         tracing::debug!(event = ?event);
         let (which, joystick, gamepad) = match event {
             Some(RoutedEvent::SdlEvent(event)) => match event {
-                Event::ControllerDeviceAdded { which, .. } => {
-                    (*which, None, subsystems.gamepad.open(*which).ok())
-                }
-                Event::JoyDeviceAdded { which, .. } => {
-                    (*which, subsystems.joystick.open(*which).ok(), None)
-                }
+                Event::ControllerDeviceAdded { which, .. } => (
+                    *which,
+                    None,
+                    subsystems.gamepad.open(SDL_JoystickID(*which)).ok(),
+                ),
+                Event::JoyDeviceAdded { which, .. } => (
+                    *which,
+                    subsystems.joystick.open(SDL_JoystickID(*which)).ok(),
+                    None,
+                ),
                 _ => {
                     tracing::warn!("Received non-device-added event ");
                     return;
