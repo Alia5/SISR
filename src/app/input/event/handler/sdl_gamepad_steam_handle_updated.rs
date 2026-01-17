@@ -8,6 +8,7 @@ use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::sdl_utils::get_gamepad_steam_handle;
 use crate::app::input::viiper_bridge::ViiperBridge;
 use crate::app::window;
+use crate::config::get_config;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -70,13 +71,15 @@ impl EventHandler for Handler {
                 tracing::error!("Failed to lock ViiperBridge mutex");
                 return;
             };
+            let default_type = get_config()
+                .controller_emulation
+                .default_controller_type
+                .unwrap_or_default()
+                .as_str()
+                .to_string();
             viiper.create_device(
                 device.id,
-                device
-                    .viiper_type
-                    .clone()
-                    .unwrap_or("xbox360".to_string())
-                    .as_str(),
+                device.viiper_type.clone().unwrap_or(default_type).as_str(),
             );
         }
         window::request_redraw();

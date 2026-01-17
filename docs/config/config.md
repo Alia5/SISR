@@ -151,6 +151,11 @@ viiper_address = "localhost:3242"
 # Will only work if the specified VIIPER server does not run on localhost
 kbm_emulation = false
 
+[controller_emulation]
+# Default controller type for emulation
+# Allowed: "xbox360", "dualshock4"
+default_controller_type = "xbox360"
+
 [window]
 # Create/Show window at launch
 create = false

@@ -40,6 +40,16 @@ Emulate/forward keyboard and mouse inputs
     Can only be used if the VIIPER-server is running on a different machine.  
     If VIIPER-address resolves to localhost, this option is ignored
 
+### Controller Emulation
+
+#### `--default-controller-type <TYPE>`
+
+Default controller type for emulation
+
+- Allowed: `xbox360`, `dualshock4`
+- Default: `xbox360`
+- Env var: `SISR_DEFAULT_CONTROLLER_TYPE`
+
 ### Window
 
 #### `-w`, `--window-create [true|false]`

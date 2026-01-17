@@ -1,6 +1,6 @@
 use std::{env, path::PathBuf, sync};
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use figment::{
     Figment,
     providers::{Format, Json, Serialized, Toml, Yaml},
@@ -9,6 +9,14 @@ use serde::{Deserialize, Serialize};
 use tracing::{debug, warn};
 
 pub static CONFIG: sync::RwLock<Option<Config>> = sync::RwLock::new(None);
+
+pub fn get_config() -> Config {
+    CONFIG
+        .read()
+        .ok()
+        .and_then(|cfg| cfg.as_ref().cloned())
+        .unwrap_or_default()
+}
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
 #[command(version = option_env!("SISR_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")), about, long_about = None)]
@@ -76,6 +84,9 @@ pub struct Config {
     #[command(flatten)]
     pub steam: SteamOpts,
 
+    #[command(flatten)]
+    pub controller_emulation: ControllerEmulation,
+
     #[serde(skip)]
     #[arg(short, long, action = clap::ArgAction::Count)]
     pub debug: u8,
@@ -83,6 +94,24 @@ pub struct Config {
     #[serde(skip)]
     #[arg(long)]
     pub marker: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, ValueEnum)]
+#[serde(rename_all = "lowercase")]
+#[derive(Default)]
+pub enum ControllerType {
+    #[default]
+    Xbox360,
+    Dualshock4,
+}
+
+impl ControllerType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Xbox360 => "xbox360",
+            Self::Dualshock4 => "dualshock4",
+        }
+    }
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
@@ -154,6 +183,18 @@ pub struct LogFile {
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
+pub struct ControllerEmulation {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "default-controller-type",
+        value_name = "TYPE",
+        env = "SISR_DEFAULT_CONTROLLER_TYPE",
+        help = "Default controller type for emulation (xbox360, dualshock4) [default: xbox360]"
+    )]
+    pub default_controller_type: Option<ControllerType>,
+}
+
+#[derive(Parser, Debug, Serialize, Deserialize, Clone)]
 pub struct SteamOpts {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[arg(
@@ -217,6 +258,9 @@ impl Default for Config {
                 cef_debug_disable: Some(false),
                 steam_launch_timeout_secs: Some(1),
                 steam_path: None,
+            },
+            controller_emulation: ControllerEmulation {
+                default_controller_type: Some(ControllerType::Xbox360),
             },
             debug: 0,
             marker: false,

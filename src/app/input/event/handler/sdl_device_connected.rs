@@ -2,7 +2,6 @@ use std::mem::discriminant;
 use std::sync::{Arc, Mutex};
 
 use sdl3::event::Event;
-use sdl3::joystick::JoystickId;
 use sdl3_sys::events::SDL_Event;
 use sdl3_sys::joystick::SDL_JoystickID;
 
@@ -16,6 +15,7 @@ use crate::app::input::{
     device::Device,
     event::router::{EventHandler, ListenEvent, RoutedEvent},
 };
+use crate::config::get_config;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -128,12 +128,17 @@ impl EventHandler for Handler {
             let device_id = ctx
                 .next_device_id
                 .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            let device_type = "xbox360".to_string(); // TODO: determine viiper type by config (not implemented)
+            let device_type = get_config()
+                .controller_emulation
+                .default_controller_type
+                .unwrap_or_default()
+                .as_str()
+                .to_string();
             let device = Arc::new(Mutex::new(Device {
                 id: device_id,
                 sdl_devices: vec![SDLDevice::new(which, joystick, gamepad)],
                 steam_handle,
-                viiper_type: Some(device_type.clone()), // TODO: determine viiper type by config (not implemented)
+                viiper_type: Some(device_type.clone()),
 
                 viiper_device: None,
             }));
