@@ -151,15 +151,11 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                                         }
                                     );
                                     if before != selected {
-                                        if device.viiper_device.is_none() {
-                                            let device_id = device.id;
-                                            if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
-                                                HandlerEvent::ChangeViiperType { device_id, viiper_type: selected.clone() }
-                                            ) {
-                                                tracing::error!("Failed to send ChangeViiperType event: {}", e);
-                                            }
-                                        } else {
-                                            tracing::error!("Cannot change VIIPER device type while connected");
+                                        let device_id = device.id;
+                                        if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
+                                            HandlerEvent::ChangeViiperType { device_id, viiper_type: selected.clone() }
+                                        ) {
+                                            tracing::error!("Failed to send ChangeViiperType event: {}", e);
                                         }
                                     }
                                 });

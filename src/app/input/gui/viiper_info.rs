@@ -96,6 +96,7 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                         .checkbox(&mut enabled, "Keyboard/mouse emulation")
                         .changed()
                     {
+                        // FUCK CLIPPY
                         if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
                             HandlerEvent::SetKbmEmulation {
                                 enabled,
