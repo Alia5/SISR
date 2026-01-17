@@ -1,5 +1,6 @@
 use std::mem::discriminant;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use sdl3::event::Event;
 use sdl3_sys::events::SDL_Event;
@@ -68,9 +69,45 @@ impl EventHandler for Handler {
             0
         };
 
+        let require_controllers_connected_before_launch = get_config()
+            .controller_emulation
+            .require_controllers_connected_before_launch
+            .unwrap_or(true);
+
         let Ok(ctx) = self.ctx.lock() else {
             tracing::error!("Failed to lock Context mutex");
             return;
+        };
+
+        if require_controllers_connected_before_launch {
+            let Ok(mut first_controller_detected_at) = ctx.first_controller_detected_at.lock()
+            else {
+                tracing::error!("Failed to lock first_controller_detected_at mutex");
+                return;
+            };
+            if first_controller_detected_at.is_none() {
+                *first_controller_detected_at = Some(std::time::Instant::now());
+            } else {
+                // fuck clippy
+                if first_controller_detected_at.unwrap().elapsed().as_secs() >= 1 {
+                    tracing::info!(
+                        "Ignoring controller connection for SDL id {} due to require_controllers_connected_before_launch and time elapsed...",
+                        which
+                    );
+                    return;
+                }
+            }
+            drop(first_controller_detected_at);
+        }
+
+        let delay_create = if require_controllers_connected_before_launch {
+            let Ok(first_time) = ctx.first_controller_detected_at.lock() else {
+                tracing::error!("Failed to lock first_controller_detected_at mutex");
+                return;
+            };
+            first_time.map(|instant| Duration::from_secs(1).saturating_sub(instant.elapsed()))
+        } else {
+            None
         };
 
         if let Some(gp) = &gamepad {
@@ -146,11 +183,21 @@ impl EventHandler for Handler {
             tracing::info!("Added new device {:?}", device.clone().lock().ok());
 
             if steam_handle != 0 {
-                let Ok(viiper) = self.viiper_bridge.lock() else {
-                    tracing::error!("Failed to lock ViiperBridge mutex");
-                    return;
-                };
-                viiper.create_device(device_id, device_type.as_str());
+                let viiper_bridge = self.viiper_bridge.clone();
+
+                std::thread::spawn(move || {
+                    if let Some(remaining) = delay_create
+                        && remaining > Duration::ZERO
+                    {
+                        std::thread::sleep(remaining);
+                    }
+
+                    let Ok(viiper) = viiper_bridge.lock() else {
+                        tracing::error!("Failed to lock ViiperBridge mutex");
+                        return;
+                    };
+                    viiper.create_device(device_id, device_type.as_str());
+                });
             }
 
             return;
@@ -186,18 +233,29 @@ impl EventHandler for Handler {
         tracing::info!("Added SDL id {} to existing device {:?}", which, device);
 
         if device.steam_handle != 0 && device.viiper_device.is_none() {
-            let Ok(viiper) = self.viiper_bridge.lock() else {
-                tracing::error!("Failed to lock ViiperBridge mutex");
-                return;
-            };
-            viiper.create_device(
-                device.id,
-                device
-                    .viiper_type
-                    .clone()
-                    .unwrap_or("xbox360".to_string())
-                    .as_str(),
-            );
+            let default_device_type = get_config()
+                .controller_emulation
+                .default_controller_type
+                .unwrap_or_default()
+                .as_str()
+                .to_string();
+
+            let viiper_bridge = self.viiper_bridge.clone();
+            let device_id = device.id;
+            let viiper_type = device.viiper_type.clone().unwrap_or(default_device_type);
+
+            std::thread::spawn(move || {
+                if let Some(remaining) = delay_create
+                    && remaining > Duration::ZERO
+                {
+                    std::thread::sleep(remaining);
+                }
+                let Ok(viiper) = viiper_bridge.lock() else {
+                    tracing::error!("Failed to lock ViiperBridge mutex");
+                    return;
+                };
+                viiper.create_device(device_id, viiper_type.as_str());
+            });
         }
     }
 

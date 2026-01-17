@@ -2,7 +2,10 @@ use std::sync::{Arc, Mutex, atomic::AtomicU64};
 
 use dashmap::DashMap;
 
-use crate::{app::input::device::Device, config::CONFIG};
+use crate::{
+    app::input::device::Device,
+    config::{CONFIG, get_config},
+};
 
 pub struct Context {
     pub devices: DashMap<u64, Arc<Mutex<Device>>>,
@@ -12,6 +15,7 @@ pub struct Context {
     pub keyboard_mouse_emulation: bool,
     pub steam_overlay_open: bool,
     pub next_device_id: AtomicU64,
+    pub first_controller_detected_at: Arc<Mutex<Option<std::time::Instant>>>,
 }
 impl Context {
     pub fn new(viiper_address: Option<std::net::SocketAddr>) -> Self {
@@ -20,15 +24,10 @@ impl Context {
             viiper_address,
             viiper_available: false,
             viiper_version: None,
-            keyboard_mouse_emulation: CONFIG
-                .read()
-                .expect("WTF: config not initialized")
-                .as_ref()
-                .expect("WTF: config not set")
-                .kbm_emulation
-                .unwrap_or(false),
+            keyboard_mouse_emulation: get_config().kbm_emulation.unwrap_or(false),
             steam_overlay_open: false,
             next_device_id: AtomicU64::new(1),
+            first_controller_detected_at: Arc::new(Mutex::new(None)),
         }
     }
 

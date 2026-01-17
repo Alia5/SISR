@@ -192,6 +192,17 @@ pub struct ControllerEmulation {
         help = "Default controller type for emulation (xbox360, dualshock4) [default: xbox360]"
     )]
     pub default_controller_type: Option<ControllerType>,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "require-controllers-connected-before-launch",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "true",
+        env = "SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH",
+        help = "Require controllers to be connected before launch (true/false) [default: false]"
+    )]
+    pub require_controllers_connected_before_launch: Option<bool>,
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
@@ -261,6 +272,7 @@ impl Default for Config {
             },
             controller_emulation: ControllerEmulation {
                 default_controller_type: Some(ControllerType::Xbox360),
+                require_controllers_connected_before_launch: Some(true),
             },
             debug: 0,
             marker: false,
