@@ -2,6 +2,7 @@
     "MD007": {
         "indent": 4
     },
+    "MD029": false,
     "MD033": false,
     "MD013": {
         "code_blocks": false,

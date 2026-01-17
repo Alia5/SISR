@@ -11,33 +11,6 @@ SISR can be configured via:
     SISR merges defaults + any discovered config files + your explicit `--config` file + CLI overrides  
     (_in that order_)
 
-## Config file discovery
-
-SISR looks for these names and extensions:
-
-- Names: `SISR`, `config`
-- Extensions: `.toml`, `.yaml`, `.yml`, `.json`
-
-Search locations:
-
-- Your platform config directory
-    - Windows: `%APPDATA%\SISR\config` (example: `C:\Users\<UserName>\AppData\Roaming\SISR\config`)
-    - Linux: `$XDG_CONFIG_HOME/sisr` (or `~/.config/sisr`)
-- The directory next to the SISR executable
-
-You can also explicitly provide a config file path via `--config <FILE>`.
-
-### Discovery order and precedence
-
-When multiple sources provide the same configuration option, the latest one in the following is picked:
-
-1. Defaults
-2. Discovered config files (in this exact order):  
-     1. In the platform config dir:
-     2. Next to the SISR executable:
-3. Your explicit `--config <FILE>` (if provided)
-4. CLI flags and environment variables
-
 ## Common options
 
 <style>
@@ -115,6 +88,15 @@ When multiple sources provide the same configuration option, the latest one in t
     </tr>
 
     <tr>
+      <td><code>--default-controller-type &lt;type&gt;</code></td>
+      <td>
+          Set the default controller type that should be emulated<br />
+          Possible values: "xbox360", "dualshock4"
+      </td>
+      <td><code>"xbox360"</code></td>
+    </tr>
+
+    <tr>
       <td>
         <div><code>--kbm</code></div>
         <div><code>--keyboard-mouse-emulation</code></div>
@@ -128,6 +110,33 @@ When multiple sources provide the same configuration option, the latest one in t
     </tr>
   </tbody>
 </table>
+
+## Config file discovery
+
+SISR looks for these names and extensions:
+
+- Names: `SISR`, `config`
+- Extensions: `.toml`, `.yaml`, `.yml`, `.json`
+
+Search locations:
+
+- Your platform config directory
+    - Windows: `%APPDATA%\SISR\config` (example: `C:\Users\<UserName>\AppData\Roaming\SISR\config`)
+    - Linux: `$XDG_CONFIG_HOME/sisr` (or `~/.config/sisr`)
+- The directory next to the SISR executable
+
+You can also explicitly provide a config file path via `--config <FILE>`.
+
+### Discovery order and precedence
+
+When multiple sources provide the same configuration option, the latest one in the following is picked:
+
+1. Defaults
+2. Discovered config files (in this exact order):  
+     1. In the platform config dir:
+     2. Next to the SISR executable:
+3. Your explicit `--config <FILE>` (if provided)
+4. CLI flags and environment variables
 
 ## Full example (default) configuration
 
@@ -155,6 +164,9 @@ kbm_emulation = false
 # Default controller type for emulation
 # Allowed: "xbox360", "dualshock4"
 default_controller_type = "xbox360"
+
+# Require controllers to be connected before launch
+require_controllers_connected_before_launch = true
 
 [window]
 # Create/Show window at launch

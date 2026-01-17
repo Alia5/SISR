@@ -50,6 +50,13 @@ Default controller type for emulation
 - Default: `xbox360`
 - Env var: `SISR_DEFAULT_CONTROLLER_TYPE`
 
+#### `--require-controllers-connected-before-launch [true|false]`
+
+Ignore controllers connected after SISR starts. Prevents controller doubling issues
+
+- Default: `false`
+- Env var: `SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH`
+
 ### Window
 
 #### `-w`, `--window-create [true|false]`

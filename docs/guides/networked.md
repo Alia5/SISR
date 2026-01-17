@@ -25,23 +25,19 @@ An explanation on why this can be preferable over other solutions can be found i
 On the machine that will receive the forwarded controllers/Keyboard/Mouse (e.g. your Gaming PC)
 you will not need to install SISR itself, only it's dependencies, USBIP and VIIPER
 
-!!! tip
-    If the receiving machine runs on 🐧 Linux
-    **and** you have previosly installed SISR,
-    you can skip the installation steps detauled here
-
-    If the receiving machine runs on 🪟 Windows
-    it is **strongly recommended** to use the VIIPER installation script **after** installing SISR on the receiving machine, to get a permanent VIIPER service setup 
-
 ### USBIP
 
 Refer to the [USBIP setup guide](../getting-started/usbip.md)
 
 !!! tip "SISR previously setup"
     If you have previously installed SISR on the receiving machine,
-    USBIP should already be setup correctly
+    USBIP should already be setup correctly and you can skip this step
 
 ### VIIPER
+
+!!! tip "SISR previously setup"
+    If you have previously installed SISR on the receiving machine,
+    VIIPER should already be setup correctly and you can skip this step
 
 VIIPER comes bundled with SISR on Windows, but on Linux it must always be installed as a system service.
 

@@ -46,6 +46,7 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
+  - pymdownx.tilde
   - pymdownx.tabbed:
       alternate_style: true
   - admonition
@@ -65,10 +66,12 @@ nav:
   - Guides:
     - Overview: guides/overview.md
     - Installation: getting-started/installation.md
+    - General Usage: guides/usage.md
+    - Multiple Configurations / GlosSI like usage: guides/multi_configs.md  
     - Networked usage: guides/networked.md
-    - GlosSI like usage: guides/glossi_like.md  
   - Troubleshooting: misc/troubleshooting.md
   - FAQ: misc/faq.md
   - Development:
     - Building: dev/building.md
   - Changelog: changelog/
+  - Downloads: downloads/

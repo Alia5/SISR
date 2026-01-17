@@ -118,22 +118,40 @@
     1. Ensure that in the Steam Controller configurator for SISR,
     the controller order uses your "real" controllers **before any emulated controllers**  
 
-    2. Turn off "Enable Steam Input for Xbox controllers" in Steam settings.  
+    2. Use the `--require-controllers-connected-before-launch` option (_default_) to make SISR ignore controllers that are created after SISR has started
+
+    3. Depending on what controller type you emulate  
+    Turn off `Enable Steam Input for Xbox controllers` or `Playstation Controller support` in Steam settings.  
+    <br />
     Otherwise Steam will pass through the emulated controller to SISR, which will then create another virtual  
     controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-    controller, which will be passed to Steam, which will it pass to SISR.
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual  
+    controller, which will be passed to Steam, which will it pass to SISR....
 
     !!! info "Controller identification"
         Steams "Identify Controllers" feature (available when re-ordering controller **in Steam**) will
         help you differentiate physical and emulated controllers
+    
+    !!! note "Playstation Controllers"
+        Setting the value to "Enabled in Games w/o Support" is perfectly fine too!
+
+### Controllers not detected / need to be connected after SISR starts {.toc-anchor}
+
+??? question "Controllers not detected / need to be connected after SISR starts"
+
+    By default, SISR requires controllers to be connected **before** launch to prevent (**some**) controller doubling issues.
+    
+    If you need to connect controllers after SISR has started, you can disable this behavior:
+    
+    - Add `--require-controllers-connected-before-launch false` as launch argument  
+    See: [Config](../config/config.md)
 
 ### My game still detects my real PS4/DualSense/Nintendo controller {.toc-anchor}
 

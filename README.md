@@ -47,9 +47,9 @@ Expect bugs, crashes, and missing features.
 - ✅ Multiple operation modes
     - Standalone background service
     - Steam overlay window mode
-- 🚧 PS4 controller emulation
-- 🚧 Xbox One controller emulation
-- 🚧 Generic controller emulation
+- ✅ PS4 controller emulation
+- ~~🚧 Xbox One controller emulation~~
+- ~~🚧 Generic controller emulation~~
 - 🚧 Gyro Passthrough
 - 🚧 Bundling multiple devices into a single controller
 - 🚧 Automatic HidHide integration

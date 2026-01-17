@@ -148,7 +148,9 @@ that should setup everything you need to get started with SISR quickly
 
 ### 🎮 First Run
 
-Once you have the prerequisites installed, run SISR and follow the dialogs 😉
+Once you have the prerequisites installed, run SISR via the Desktop or Start-Menu shortcut and follow the dialogs 😉  
+
+Continue to [Post-Installation](#i-post-installation)
 
 ### 🧰 Manual setup
 
