@@ -1061,28 +1061,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#new-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ✨ New Features
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🐛 Fixes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#miscellaneous" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1121,30 +1099,14 @@
   <h1>Main</h1>
 
 <h2 id="changelog-for-development-version">Changelog for Development Version</h2>
-<p>Changes since v0.1.1:</p>
-<h3 id="new-features">✨ New Features</h3>
-<ul>
-<li>Hide cursor when keyboard/mouse forwarding over the network is active</li>
-</ul>
-<h3 id="fixes">🐛 Fixes</h3>
-<ul>
-<li>Fix (UI) SISR API port displaying wrong value</li>
-<li>Improve success of steam overlay open when <code>--wcd true</code> <strong>not</strong> passed</li>
-<li>Fix (#5) controller having wrong config when Steam overlay is open
-      Note that it can sometimes take a few seconds for the controller to become responsive in the overlay
-      <strong>This is a Steam issue</strong> and not a SISR issue</li>
-<li>fix steamdeck ui scaling</li>
-<li>Fix crash on keyboard-input in Steam Gaming mode</li>
-<li>Fix overlay callback in GamingMode (SteamDeck)</li>
-<li>HACK: FIXME: Workaround steam overlay "tab" not spawning</li>
-<li>Fix VIIPER readyness race</li>
-<li>Fix SteamOverlay not working in Gaming mode (SteamOS/Deck)   Disable Input config enforcement in gaming mode, has no benefit there</li>
-</ul>
+<p>Changes since v0.1.2:</p>
 <h3 id="miscellaneous">🔧 Miscellaneous</h3>
 <ul>
-<li>Refactor EventHandling
-      In Prepartion for controller emulation other than xbox360
-      Expect new bugs <strong>or fixes</strong> not otherwise noted.</li>
+<li>Update Deps<ul>
+<li>VIIPER Client (0.4.0)</li>
+<li>SDL (3.4.0)</li>
+</ul>
+</li>
 </ul>
 
 
