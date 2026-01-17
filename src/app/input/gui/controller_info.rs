@@ -147,12 +147,20 @@ pub fn draw(ctx: &Context, ectx: &egui::Context, open: &mut bool) {
                                         .selected_text(selected.clone())
                                         .show_ui(ui, |ui| {
                                             ui.selectable_value(&mut selected, "xbox360".to_string(), "xbox360");
-                                            // ui.selectable_value(&mut selected, "dualshock4".to_string(), "dualshock4");
+                                            ui.selectable_value(&mut selected, "dualshock4".to_string(), "dualshock4");
                                         }
                                     );
                                     if before != selected {
-                                        tracing::error!("Changing VIIPER device type not implemented yet");
-                                        // TODO;
+                                        if device.viiper_device.is_none() {
+                                            let device_id = device.id;
+                                            if let Err(e) = sdl_loop::get_event_sender().push_custom_event(
+                                                HandlerEvent::ChangeViiperType { device_id, viiper_type: selected.clone() }
+                                            ) {
+                                                tracing::error!("Failed to send ChangeViiperType event: {}", e);
+                                            }
+                                        } else {
+                                            tracing::error!("Cannot change VIIPER device type while connected");
+                                        }
                                     }
                                 });
                                 if !enable {

@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use viiper_client::devices::{
+    dualshock4::{Dualshock4Input, Dualshock4Output},
     keyboard::{KeyboardInput, KeyboardOutput},
     mouse::MouseInput,
     xbox360::{Xbox360Input, Xbox360Output},
@@ -36,6 +37,12 @@ impl ViiperDevice {
                 self.state = DeviceState::Xbox360 {
                     input_state: Xbox360Input::default(),
                     output_state: Xbox360Output::default(),
+                };
+            }
+            "dualshock4" => {
+                self.state = DeviceState::Dualshock4 {
+                    input_state: Dualshock4Input::default(),
+                    output_state: Dualshock4Output::default(),
                 };
             }
             "keyboard" => {

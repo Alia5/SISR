@@ -7,6 +7,7 @@ pub enum HandlerEvent {
     IgnoreDevice { device_id: u64 },
     ConnectViiperDevice { device_id: u64 },
     DisconnectViiperDevice { device_id: u64 },
+    ChangeViiperType { device_id: u64, viiper_type: String },
     CefDebugReady { port: u16 },
     OverlayStateChanged { open: bool },
     SetKbmEmulation { enabled: bool, initialize: bool },

@@ -1,4 +1,5 @@
 pub mod cef_debug_ready;
+pub mod change_viiper_type;
 pub mod connect_viiper_device;
 pub mod disconnect_viiper_device;
 pub mod ignore_device;

@@ -6,7 +6,9 @@ use sdl3_sys::events::SDL_Event;
 use crate::app::input::context::Context;
 use crate::app::input::device::ViiperDevice;
 use crate::app::input::device_state::DeviceState;
-use crate::app::input::event::handler::on_viiper_event::device_output::{keyboard, xbox360};
+use crate::app::input::event::handler::on_viiper_event::device_output::{
+    dualshock4, keyboard, xbox360,
+};
 use crate::app::input::event::handler_events::HandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
@@ -156,6 +158,9 @@ impl EventHandler for Handler {
                     rumble_r,
                 } => {
                     xbox360::handle_output(self.ctx.clone(), device_id, rumble_l, rumble_r);
+                }
+                DeviceOutput::Dualshock4 { device_id, output } => {
+                    dualshock4::handle_output(self.ctx.clone(), device_id, output);
                 }
                 DeviceOutput::Keyboard { device_id, leds } => {
                     keyboard::handle_output(self.ctx.clone(), device_id, leds);

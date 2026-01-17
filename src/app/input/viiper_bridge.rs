@@ -8,6 +8,7 @@ use dashmap::DashMap;
 use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc;
 use tracing::{error, info, warn};
+use viiper_client::devices::dualshock4::{self, Dualshock4Output};
 use viiper_client::devices::keyboard;
 use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
@@ -28,6 +29,10 @@ pub enum DeviceOutput {
         device_id: u64,
         rumble_l: u8,
         rumble_r: u8,
+    },
+    Dualshock4 {
+        device_id: u64,
+        output: Dualshock4Output,
     },
     Keyboard {
         device_id: u64,
@@ -265,6 +270,7 @@ impl ViiperBridge {
 
             match device_type.as_str() {
                 "xbox360" => forward_loop!("xbox360", xbox360::Xbox360Input),
+                "dualshock4" => forward_loop!("dualshock4", dualshock4::Dualshock4Input),
                 "keyboard" => forward_loop!("keyboard", keyboard::KeyboardInput),
                 "mouse" => forward_loop!("mouse", mouse::MouseInput),
                 _ => {
@@ -347,6 +353,7 @@ impl ViiperBridge {
     {
         match device_type {
             "xbox360" => Self::process_xbox360_rumble_output(reader, device_id).await,
+            "dualshock4" => Self::process_dualshock4_output(reader, device_id).await,
             "keyboard" => Self::process_keyboard_output(reader, device_id).await,
             _ => {
                 warn!("Unknown device type for output: {}", device_type);
@@ -381,6 +388,42 @@ impl ViiperBridge {
             device_id,
             rumble_l: buf[0],
             rumble_r: buf[1],
+        }));
+        Ok(())
+    }
+
+    async fn process_dualshock4_output<R>(
+        reader: OutputReader<R>,
+        device_id: u64,
+    ) -> std::io::Result<()>
+    where
+        R: tokio::io::AsyncRead + Unpin + Send,
+    {
+        let mut buf = vec![0u8; dualshock4::OUTPUT_SIZE];
+        let mut guard = reader.lock().await;
+        guard.read_exact(&mut buf).await?;
+        drop(guard);
+
+        if buf.len() < dualshock4::OUTPUT_SIZE {
+            warn!(
+                "VIIPER dualshock4 output too short for device {} (len={})",
+                device_id,
+                buf.len()
+            );
+            return Ok(());
+        }
+
+        let Ok(output) = Dualshock4Output::from_bytes(&buf) else {
+            warn!(
+                "Failed to parse VIIPER dualshock4 output for device {}",
+                device_id
+            );
+            return Ok(());
+        };
+
+        Self::push_event(ViiperEvent::DeviceOutput(DeviceOutput::Dualshock4 {
+            device_id,
+            output,
         }));
         Ok(())
     }
