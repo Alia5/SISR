@@ -58,7 +58,7 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y ninja-build cmake pkg-config libgtk-3-dev libxdo-dev
+                  sudo apt-get install -y ninja-build cmake pkg-config libgtk-3-dev libxdo-dev libxss-dev
 
             - name: Install build tools (Windows)
               if: matrix.os == 'windows-latest'
@@ -146,7 +146,7 @@ jobs:
               if: matrix.target.os == 'ubuntu-latest' || matrix.target.os == 'ubuntu-24.04-arm'
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y ninja-build cmake pkg-config libgtk-3-dev libxdo-dev
+                  sudo apt-get install -y ninja-build cmake pkg-config libgtk-3-dev libxdo-dev libxss-dev
 
             - name: Install build tools (Windows)
               if: matrix.target.os == 'windows-latest'
