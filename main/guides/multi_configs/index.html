@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../networked/">
+        <link rel="prev" href="../usage/">
       
       
-        <link rel="next" href="../../misc/troubleshooting/">
+        <link rel="next" href="../networked/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>GlosSI like usage - SISR Documentation</title>
+        <title>Multiple Configurations / GlosSI like usage - SISR Documentation</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#glossi-like-usage" class="md-skip">
+        <a href="#multiple-configurations-glossi-like-usage" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GlosSI like usage
+              Multiple Configurations / GlosSI like usage
             
           </span>
         </div>
@@ -376,6 +376,25 @@
     
   
   Changelog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../downloads/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Downloads
 
       </a>
     </li>
@@ -807,14 +826,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../networked/" class="md-nav__link">
+      <a href="../usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Networked usage
+    General Usage
   
 
     
@@ -851,7 +870,7 @@
   <span class="md-ellipsis">
     
   
-    GlosSI like usage
+    Multiple Configurations / GlosSI like usage
   
 
     
@@ -861,6 +880,34 @@
 
       </a>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1043,6 +1090,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloads
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1081,44 +1155,76 @@
   
 
 
-<h1 id="glossi-like-usage">🎮 GlosSI like usage</h1>
+<h1 id="multiple-configurations-glossi-like-usage">🎮 Multiple Configurations / GlosSI like usage</h1>
 <details class="tip">
-<summary>For existing GlosSI users</summary>
+<summary>For users familiar with GloSC/GlosSI </summary>
 <p>If you are used to GloSC/GlosSI, you may know that GlosSI "required"
 you to create a Steam shortcut to it for each game/application you wanted to use it with.</p>
 <p>SISR is not exactly designed like this, but it can be used in a similar manner.</p>
-<p>However, SISR does <strong>not</strong> launch games for you!<br />
-You have to launch the game/application yourself, <strong>outside of Steam</strong>.</p>
+<div class="admonition warning">
+<p class="admonition-title">No Game Launching</p>
+<p>Unlike GloSC/GlosSI, SISR does <strong>not</strong> launch games for you!  </p>
+</div>
 </details>
-<p>SISR can be used in a similar manner to GloSC/GlosSI, by creating a Steam shortcut
-that launches SISR with a Steam overlay window<br />
-This allows you to have an infinite number of different Steam Input configurations<br />
-It also provides a combined SISR/Steam overlay window for easy access to Steam features</p>
+<p>Aside from launching SISR as a tray application you can also launch SISR from Steam directly.<br />
+This enables you to have per Game/Application Steam Input configurations
+as well as access to Touch/Radial menus and other Steam overlay features.  </p>
+<div class="admonition tip">
+<p class="admonition-title">Read general usage as well</p>
+<p>I would like to encourage you to read the <a href="../usage/">General usage</a> guide as well,
+even if you don't plan to use SISR as a tray application, replacing Steams Desktop configuration.  </p>
+<p>The general usage guide also contains useful information and tips about SISR in general.</p>
+</div>
 <hr />
+<div class="inline end">
 <div class="admonition warning inline end">
 <p class="admonition-title">Marker shortcut</p>
 <p>You should <strong>not</strong> re-use the <em>"SISR Marker"</em> shortcut or add the <code>--marker</code> launch option here!</p>
 </div>
-<ul>
-<li>Add SISR as a non-Steam game in your Steam library<br />
-      Provide the following flags as launch options  <ul>
-<li><code>-w -f</code><br />
-  <sup>show-window, fullscreen</sup><br />
-<br /></li>
-</ul>
-</li>
-</ul>
+
 <div class="admonition tip inline end">
 <p class="admonition-title">Multiple Configurations</p>
 <p>You can add SISR multiple times as non-Steam game to have multiple different Steam Input configurations available!</p>
 </div>
+</div>
+
 <ul>
-<li>Launch the newly created shortcut from Steam<br />
-    This will start SISR and create a combined SISR/Steam overlay and create the emulated controllers</li>
+<li>
+<p><h3><strong>1.</strong> Add SISR as a non-Steam game in your Steam library</h3>
+      Provide the following flags as launch options  </p>
+<ul>
+<li><code>-w -f</code><br />
+  <sup>show-window, fullscreen</sup><br />
+  If you want to use touch- and radial-menus, also add: <code>--wcd true</code></li>
+</ul>
+<p>You can rename the shortcut to something meaningful, like <em>"SISR - Game XYZ"</em>
+  and set any custom icon and images as you see fit</p>
+</li>
 </ul>
 <p><br /></p>
 <ul>
-<li>Launch any game or application <strong>outside of Steam</strong>  </li>
+<li>
+<p><h3> <strong>2.</strong> Connect <strong>all</strong> controllers you want to use</h3></p>
+</li>
+<li>
+<p><h3> <strong>3.</strong> Launch the newly created shortcut from Steam</h3></p>
+<p>This will start SISR and create a combined SISR/Steam overlay and create emulated controllers</p>
+</li>
+</ul>
+<p><br /></p>
+<ul>
+<li><h3> <strong>4.</strong> Launch any game or application</h3>
+   Games/application <strong>should be</strong> launched <strong>outside of Steam</strong> in <strong>most cases</strong><br />
+   There are two main exceptions to this:  <ol>
+<li>If the game/application does <strong>NOT</strong> accept the Steam Overlay / Steam Input <strong>at all</strong>
+    Like but not limited to Windows Store games/apps</li>
+<li>Games with <strong>native</strong> Playstation controller support <strong><em>if</em></strong>  <ul>
+<li>You've set SISR to emulate Playstation controllers instead of Xbox360 controllers</li>
+<li><strong>and</strong> You set <code>Playstation Controller support</code> in Steam settings to <code>Enabled in Games w/o Support</code> or <code>Disabled</code></li>
+</ul>
+</li>
+</ol>
+</li>
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">SISR overlay</p>
@@ -1134,10 +1240,13 @@ To make touch/radial menus show up, you can add the <code>--wcd true</code> laun
 <p><strong>Do note that this may increase CPU/GPU usage</strong> and
 can potentially negatively affect gaming performance on lower end systems</p>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">No Game Launching</p>
-<p>Unlike GloSC/GlosSI, SISR does <strong>not</strong> launch games for you!<br />
-You have to launch the game/application yourself, <strong>outside of Steam</strong>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Playstation Controller emulation</p>
+<p>If you want SISR to emulate a Playstation controller instead of the default Xbox360 controller,
+to circumvent compatibility issues with for example Sony games, you can add the launch option:
+<code>--default-controller-type dualshock4</code>  </p>
+<p>You can also set this permanently in a config file or via environment variable<br />
+See <a href="../../config/config/">Configuration</a></p>
 </div>
 
 

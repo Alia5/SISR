@@ -382,6 +382,25 @@
   
 
       
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../downloads/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Downloads
+
+      </a>
+    </li>
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -806,6 +825,45 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#controller-emulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controller Emulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controller Emulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-default-controller-type-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --default-controller-type &lt;TYPE&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-require-controllers-connected-before-launch-truefalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --require-controllers-connected-before-launch [true|false]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#window" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1110,14 +1168,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/networked/" class="md-nav__link">
+      <a href="../../guides/usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Networked usage
+    General Usage
   
 
     
@@ -1138,14 +1196,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/glossi_like/" class="md-nav__link">
+      <a href="../../guides/multi_configs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    GlosSI like usage
+    Multiple Configurations / GlosSI like usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
   
 
     
@@ -1336,6 +1422,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloads
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1435,6 +1548,45 @@
     <span class="md-ellipsis">
       
         --keyboard-mouse-emulation [true|false], --kbm [true|false]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#controller-emulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controller Emulation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Controller Emulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#-default-controller-type-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --default-controller-type &lt;TYPE&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-require-controllers-connected-before-launch-truefalse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --require-controllers-connected-before-launch [true|false]
       
     </span>
   </a>
@@ -1671,6 +1823,20 @@
 <p>Can only be used if the VIIPER-server is running on a different machine.<br />
 If VIIPER-address resolves to localhost, this option is ignored</p>
 </div>
+<h3 id="controller-emulation">Controller Emulation</h3>
+<h4 id="-default-controller-type-type"><code>--default-controller-type &lt;TYPE&gt;</code></h4>
+<p>Default controller type for emulation</p>
+<ul>
+<li>Allowed: <code>xbox360</code>, <code>dualshock4</code></li>
+<li>Default: <code>xbox360</code></li>
+<li>Env var: <code>SISR_DEFAULT_CONTROLLER_TYPE</code></li>
+</ul>
+<h4 id="-require-controllers-connected-before-launch-truefalse"><code>--require-controllers-connected-before-launch [true|false]</code></h4>
+<p>Ignore controllers connected after SISR starts. Prevents controller doubling issues</p>
+<ul>
+<li>Default: <code>true</code></li>
+<li>Env var: <code>SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH</code></li>
+</ul>
 <h3 id="window">Window</h3>
 <h4 id="-w-window-create-truefalse"><code>-w</code>, <code>--window-create [true|false]</code></h4>
 <p>Create/show window at launch</p>

@@ -13,7 +13,7 @@
       
       
       
-        <link rel="prev" href="../../guides/glossi_like/">
+        <link rel="prev" href="../../guides/networked/">
       
       
         <link rel="next" href="../faq/">
@@ -376,6 +376,25 @@
     
   
   Changelog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../downloads/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Downloads
 
       </a>
     </li>
@@ -804,14 +823,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/networked/" class="md-nav__link">
+      <a href="../../guides/usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Networked usage
+    General Usage
   
 
     
@@ -832,14 +851,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/glossi_like/" class="md-nav__link">
+      <a href="../../guides/multi_configs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    GlosSI like usage
+    Multiple Configurations / GlosSI like usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
   
 
     
@@ -943,6 +990,17 @@
     <span class="md-ellipsis">
       
         Doubled controllers / One physical controller controls multiple emulated controllers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#controllers-not-detected-need-to-be-connected-after-sisr-starts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controllers not detected / need to be connected after SISR starts
       
     </span>
   </a>
@@ -1410,6 +1468,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloads
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1453,6 +1538,17 @@
     <span class="md-ellipsis">
       
         Doubled controllers / One physical controller controls multiple emulated controllers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#controllers-not-detected-need-to-be-connected-after-sisr-starts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Controllers not detected / need to be connected after SISR starts
       
     </span>
   </a>
@@ -1895,18 +1991,23 @@
 the controller order uses your "real" controllers <strong>before any emulated controllers</strong>  </p>
 </li>
 <li>
-<p>Turn off "Enable Steam Input for Xbox controllers" in Steam settings.<br />
+<p>Use the <code>--require-controllers-connected-before-launch</code> option (<em>default</em>) to make SISR ignore controllers that are created after SISR has started</p>
+</li>
+<li>
+<p>Depending on what controller type you emulate<br />
+Turn off <code>Enable Steam Input for Xbox controllers</code> or <code>Playstation Controller support</code> in Steam settings.<br />
+<br />
 Otherwise Steam will pass through the emulated controller to SISR, which will then create another virtual<br />
 controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual
-controller, which will be passed to Steam, which will it pass to SISR.</p>
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR, which will then create another virtual<br />
+controller, which will be passed to Steam, which will it pass to SISR....</p>
 </li>
 </ol>
 <div class="admonition info">
@@ -1914,6 +2015,20 @@ controller, which will be passed to Steam, which will it pass to SISR.</p>
 <p>Steams "Identify Controllers" feature (available when re-ordering controller <strong>in Steam</strong>) will
 help you differentiate physical and emulated controllers</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Playstation Controllers</p>
+<p>Setting the value to "Enabled in Games w/o Support" is perfectly fine too!</p>
+</div>
+</details>
+<h3 class="toc-anchor" id="controllers-not-detected-need-to-be-connected-after-sisr-starts">Controllers not detected / need to be connected after SISR starts</h3>
+<details class="question">
+<summary>Controllers not detected / need to be connected after SISR starts</summary>
+<p>By default, SISR requires controllers to be connected <strong>before</strong> launch to prevent (<strong>some</strong>) controller doubling issues.</p>
+<p>If you need to connect controllers after SISR has started, you can disable this behavior:</p>
+<ul>
+<li>Add <code>--require-controllers-connected-before-launch false</code> as launch argument<br />
+See: <a href="../../config/config/">Config</a></li>
+</ul>
 </details>
 <h3 class="toc-anchor" id="my-game-still-detects-my-real-ps4dualsensenintendo-controller">My game still detects my real PS4/DualSense/Nintendo controller</h3>
 <details class="question">

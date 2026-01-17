@@ -382,6 +382,25 @@
   
 
       
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../downloads/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Downloads
+
+      </a>
+    </li>
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -694,6 +713,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#common-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#config-file-discovery" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -718,17 +748,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common options
-      
-    </span>
-  </a>
   
 </li>
       
@@ -904,14 +923,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/networked/" class="md-nav__link">
+      <a href="../../guides/usage/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Networked usage
+    General Usage
   
 
     
@@ -932,14 +951,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guides/glossi_like/" class="md-nav__link">
+      <a href="../../guides/multi_configs/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    GlosSI like usage
+    Multiple Configurations / GlosSI like usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/networked/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networked usage
   
 
     
@@ -1130,6 +1177,33 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../downloads/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Downloads
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -1157,6 +1231,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#common-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#config-file-discovery" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1181,17 +1266,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#common-options" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Common options
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1239,34 +1313,6 @@
 <p>SISR merges defaults + any discovered config files + your explicit <code>--config</code> file + CLI overrides<br />
 (<em>in that order</em>)</p>
 </div>
-<h2 id="config-file-discovery">Config file discovery</h2>
-<p>SISR looks for these names and extensions:</p>
-<ul>
-<li>Names: <code>SISR</code>, <code>config</code></li>
-<li>Extensions: <code>.toml</code>, <code>.yaml</code>, <code>.yml</code>, <code>.json</code></li>
-</ul>
-<p>Search locations:</p>
-<ul>
-<li>Your platform config directory<ul>
-<li>Windows: <code>%APPDATA%\SISR\config</code> (example: <code>C:\Users\&lt;UserName&gt;\AppData\Roaming\SISR\config</code>)</li>
-<li>Linux: <code>$XDG_CONFIG_HOME/sisr</code> (or <code>~/.config/sisr</code>)</li>
-</ul>
-</li>
-<li>The directory next to the SISR executable</li>
-</ul>
-<p>You can also explicitly provide a config file path via <code>--config &lt;FILE&gt;</code>.</p>
-<h3 id="discovery-order-and-precedence">Discovery order and precedence</h3>
-<p>When multiple sources provide the same configuration option, the latest one in the following is picked:</p>
-<ol>
-<li>Defaults</li>
-<li>Discovered config files (in this exact order):  <ol>
-<li>In the platform config dir:</li>
-<li>Next to the SISR executable:</li>
-</ol>
-</li>
-<li>Your explicit <code>--config &lt;FILE&gt;</code> (if provided)</li>
-<li>CLI flags and environment variables</li>
-</ol>
 <h2 id="common-options">Common options</h2>
 <style>
 #config-options th, #config-options td { padding: 1em 0.5em; place-content: center; }
@@ -1343,6 +1389,15 @@
     </tr>
 
     <tr>
+      <td><code>--default-controller-type &lt;type&gt;</code></td>
+      <td>
+          Set the default controller type that should be emulated<br />
+          Possible values: "xbox360", "dualshock4"
+      </td>
+      <td><code>"xbox360"</code></td>
+    </tr>
+
+    <tr>
       <td>
         <div><code>--kbm</code></div>
         <div><code>--keyboard-mouse-emulation</code></div>
@@ -1357,6 +1412,34 @@
   </tbody>
 </table>
 
+<h2 id="config-file-discovery">Config file discovery</h2>
+<p>SISR looks for these names and extensions:</p>
+<ul>
+<li>Names: <code>SISR</code>, <code>config</code></li>
+<li>Extensions: <code>.toml</code>, <code>.yaml</code>, <code>.yml</code>, <code>.json</code></li>
+</ul>
+<p>Search locations:</p>
+<ul>
+<li>Your platform config directory<ul>
+<li>Windows: <code>%APPDATA%\SISR\config</code> (example: <code>C:\Users\&lt;UserName&gt;\AppData\Roaming\SISR\config</code>)</li>
+<li>Linux: <code>$XDG_CONFIG_HOME/sisr</code> (or <code>~/.config/sisr</code>)</li>
+</ul>
+</li>
+<li>The directory next to the SISR executable</li>
+</ul>
+<p>You can also explicitly provide a config file path via <code>--config &lt;FILE&gt;</code>.</p>
+<h3 id="discovery-order-and-precedence">Discovery order and precedence</h3>
+<p>When multiple sources provide the same configuration option, the latest one in the following is picked:</p>
+<ol>
+<li>Defaults</li>
+<li>Discovered config files (in this exact order):  <ol>
+<li>In the platform config dir:</li>
+<li>Next to the SISR executable:</li>
+</ol>
+</li>
+<li>Your explicit <code>--config &lt;FILE&gt;</code> (if provided)</li>
+<li>CLI flags and environment variables</li>
+</ol>
 <h2 id="full-example-default-configuration">Full example (default) configuration</h2>
 <p>All values are optional.</p>
 <p>🪟 <code>C:\Users\&lt;UserName&gt;\AppData\Roaming\SISR\config\SISR.toml</code><br />
@@ -1375,40 +1458,47 @@
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># Will only work if the specified VIIPER server does not run on localhost</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="n">kbm_emulation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="k">[window]</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Create/Show window at launch</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">create</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Create a transparent fullscreen (borderless) overlay window</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">fullscreen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="k">[controller_emulation]</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Default controller type for emulation</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># Allowed: &quot;xbox360&quot;, &quot;dualshock4&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="n">default_controller_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;xbox360&quot;</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">require_controllers_connected_before_launch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Enable continuous redraw</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># May be used when steam oerlay detection fails or other issues with the steam overlay occur</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="c1"># may increase CPU/GPU usage</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="n">continous_draw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="k">[log]</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="c1"># Logging level</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="c1"># Allowed: &quot;error&quot;, &quot;warn&quot;, &quot;info&quot;, &quot;debug&quot;, &quot;trace&quot;</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;info&quot;</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="c1"># write logs to a file</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="c1"># Default (Linux): ~/.local/share/sisr/SISR.log  (or $XDG_DATA_HOME/sisr/SISR.log)</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Users/&lt;UserName&gt;/AppData/Roaming/SISR/data/SISR.log&quot;</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="c1"># logging level for the file only</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="c1"># If omitted, SISR uses `log.level`</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="n">file_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;info&quot;</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>
-<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="k">[steam]</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="c1"># Disable Steam CEF remote debugging</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="n">cef_debug_disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>
-<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="c1"># Time to wait for Steam to launch (seconds)</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="n">steam_launch_timeout_secs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="k">[window]</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Create/Show window at launch</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">create</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Create a transparent fullscreen (borderless) overlay window</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">fullscreen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="c1"># Enable continuous redraw</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="c1"># May be used when steam oerlay detection fails or other issues with the steam overlay occur</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="c1"># may increase CPU/GPU usage</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="n">continous_draw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="k">[log]</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="c1"># Logging level</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="c1"># Allowed: &quot;error&quot;, &quot;warn&quot;, &quot;info&quot;, &quot;debug&quot;, &quot;trace&quot;</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="n">level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;info&quot;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="c1"># write logs to a file</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="c1"># Default (Linux): ~/.local/share/sisr/SISR.log  (or $XDG_DATA_HOME/sisr/SISR.log)</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="n">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Users/&lt;UserName&gt;/AppData/Roaming/SISR/data/SISR.log&quot;</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="c1"># logging level for the file only</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="c1"># If omitted, SISR uses `log.level`</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="n">file_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;info&quot;</span>
 <a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>
-<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="c1"># explicit Steam path, normally auto inferred to something like:</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="n">steam_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Program Files (x86)/Steam&quot;</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="k">[steam]</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="c1"># Disable Steam CEF remote debugging</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="n">cef_debug_disable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a><span class="c1"># Time to wait for Steam to launch (seconds)</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a><span class="n">steam_launch_timeout_secs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a><span class="c1"># explicit Steam path, normally auto inferred to something like:</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a><span class="n">steam_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Program Files (x86)/Steam&quot;</span>
 </code></pre></div>
 
 
