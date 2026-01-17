@@ -96,9 +96,8 @@ pub struct Config {
     pub marker: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, ValueEnum)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, ValueEnum)]
 #[serde(rename_all = "lowercase")]
-#[derive(Default)]
 pub enum ControllerType {
     #[default]
     Xbox360,
@@ -212,9 +211,9 @@ pub struct SteamOpts {
         long = "disable-steam-cef-debug",
         value_name = "BOOL",
         num_args = 0..=1,
-        default_missing_value = "false",
+        default_missing_value = "true",
         env = "SISR_STEAM_CEF_DEBUG_DISABLE",
-        help = "Disable Steam CEF remote debugging (true/false) [default: false]"
+        help = "Disable Steam CEF remote debugging (true/false) [default: true]"
     )]
     pub cef_debug_disable: Option<bool>,
 

@@ -54,7 +54,7 @@ Default controller type for emulation
 
 Ignore controllers connected after SISR starts. Prevents controller doubling issues
 
-- Default: `false`
+- Default: `true`
 - Env var: `SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH`
 
 ### Window

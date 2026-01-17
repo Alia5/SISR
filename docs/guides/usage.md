@@ -1,7 +1,7 @@
 # General usage of SISR
 
 SISR is designed to be used a tray application that runs in the background,  
-**effectivly replacing Steam's Desktop configuration with added gamepad support**.  
+**effectively replacing Steam's Desktop configuration with added gamepad support**.  
 
 This allows you to use SISR with **any** game or application,
 **regardless** of whether it is launched from Steam or not.
@@ -15,7 +15,7 @@ This allows you to use SISR with **any** game or application,
 
 !!! tip "Non-Tray usage"
     If you do not want tray behaviour and instead prefer to run SISR via Steam
-    with an individial Steam Input configuration per game/application,
+    with an individual Steam Input configuration per game/application,
     refer to the [Multiple Configurations / GlosSI like usage](./multi_configs.md) guide instead.
 
 ---
@@ -27,7 +27,7 @@ This allows you to use SISR with **any** game or application,
     This generally helps to prevent **some** potential controller duplication issue
 
     If you do not want this behaviour and require to have controllers connected/disconnected dynamically,
-    you can disable this behavour  
+    you can disable this behaviour  
     See: [Config](../../config/config)
 
 After [installation](../getting-started/installation.md), simply launch SISR **outside of Steam**
@@ -45,7 +45,7 @@ You can access some SISR options by right-clicking the system tray icon
 | ---------------------- | ---------------------------------------------------------------------- |
 | Show UI                | Shows the SISR UI providing general information and a few more options |
 | Steam Controllerconfig | Opens the Steam Controller configuration for the SISR Marker shortcut  |
-| Force Controllerconfig | Forces Steam to use the Steam Input configuration of the SISR marker shortcut instead ofthe Desktop configuration (or any configuration from launched Steam games)                                    |
+| Force Controllerconfig | Forces Steam to use the Steam Input configuration of the SISR marker shortcut instead of the Desktop configuration (or any configuration from launched Steam games)                                    |
 | Quit                   | Exits the application                                                  |
 
 !!! tip "Tray menu"
@@ -72,7 +72,7 @@ or even allowing you to change the emulated controller type without restarting S
 
 ### Configuration
 
-If you want to change the default configuration of SISR, for example to demulate Playstation controller by default  
+If you want to change the default configuration of SISR, for example to emulate Playstation controller by default  
 you can do by creating a config file in:  
 
 - 🪟 Windows: `C:\Users\<UserName>\AppData\Roaming\SISR\config\SISR.toml`  
