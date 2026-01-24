@@ -16,7 +16,7 @@
         <link rel="prev" href="../multi_configs/">
       
       
-        <link rel="next" href="../../misc/troubleshooting/">
+        <link rel="next" href="../ds4_emulation/">
       
       
         
@@ -1000,6 +1000,34 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ds4_emulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DualShock4 Emulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1304,6 +1332,9 @@
 <p>SISR can be used over the network to forward controllers, Keyboard/Mouse for game streaming scenarios  </p>
 <p>This also allows you to use a Steam Deck (or similar devices)
 as dedicated controllers without the need to stream the entire game</p>
+<p>SISR also forwards any keyboard/mouse inputs <em>(if <code>--kbm=true</code> is passed as launch argument)</em>
+This includes inputs from physical keyboards/mice connected to the hosting machine,
+as well as Steam Input keyboard/mouse bindings and the Steam on-screen keyboard</p>
 <div class="admonition note">
 <p class="admonition-title">No direct Deck passthrough</p>
 <p>SISR does <strong>not</strong> directly passthrough the Decks built-in controller hardware<br />
@@ -1334,10 +1365,8 @@ USBIP should already be setup correctly and you can skip this step</p>
 <p>If you have previously installed SISR on the receiving machine,
 VIIPER should already be setup correctly and you can skip this step</p>
 </div>
-<p>VIIPER comes bundled with SISR on Windows, but on Linux it must always be installed as a system service.</p>
-<p>For networked scenarios you will have to run VIIPER on the receiving machine yourself.  </p>
-<p>Instead of always interacting with the receiving machine yourself, VIIPER can be run as a background service
-that automatically starts with the system.  </p>
+<p>For networked scenarios you will have to install <a href="https://alia5.github.io/VIIPER/">VIIPER</a> as a background "service".<br />
+<em>(VIIPER is used by SISR to emulate controllers!)</em></p>
 <p>VIIPER provides <a href="https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script">easy to use installation scripts</a>
 for both Windows and Linux.  </p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Windows</label><label for="__tabbed_1_2">Linux</label></div>
@@ -1411,6 +1440,12 @@ Example Steam shortcut for using a Steam Deck as a dedicated controller</p>
 </ul>
 <p><br />
 <br /></p>
+<div class="admonition info">
+<p class="admonition-title">Multiple device forwarding</p>
+<p>SISR will not only forward the Steam Decks built-in controller,
+but any other controller that is connected to the Deck (or other PC) as well!<br />
+(As long as the controller is picked up by Steam)</p>
+</div>
 <div class="admonition tip">
 <p class="admonition-title">SISR overlay</p>
 <p>If you want to stop/start forwarding or change settings while in-game,
