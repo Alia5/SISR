@@ -1084,6 +1084,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-does-this-compare-to-sunshineapollos-input-only-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How does this compare to Sunshine/Apollo's "input only mode"
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1382,6 +1393,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-does-this-compare-to-sunshineapollos-input-only-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How does this compare to Sunshine/Apollo's "input only mode"
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1569,11 +1591,33 @@ without the need to stream the entire game</p>
 <details class="question">
 <summary>Can I use this with "Steam Link" / "Remote Play"?</summary>
 <p>Theoretically(?)
-But practically don't expect it to work or be a good experience.  </p>
-<p>Look into setting up Sunshine/Apollo and Moonlight instead!<br />
+But don't expect it to also stream your game/display.</p>
+<p>Take a look at the <a href="../../guides/networked/">Networked usage guide</a> for more details</p>
+<p><strong>If</strong> you want game/display-streaming as well, you should<br />
+look into setting up Sunshine/Apollo and Moonlight <br />
 Note that Sunshine/Apollo and Moonlight come with their own remote-input solution, that possibly interferes with SISR.<br />
 I have not yet had the time to write documentation for this<br />
 <sup>If you have used SISR with Sunshine/Apollo and Moonlight successfully, consider contributing to the documentation</sup></p>
+</details>
+<h2 class="toc-anchor" id="how-does-this-compare-to-sunshineapollos-input-only-mode">How does this compare to Sunshine/Apollo's "input only mode"</h2>
+<details class="question">
+<summary>How does this compare to Sunshine/Apollo's <em>input only mode</em></summary>
+<p>Sunshine/Apollo/WhateverTheFuck use the good old, but <em>unmaintained(!)</em> ViGEm driver (on Windows)<br />
+SISR uses a different underlying tool <a href="https://alia5.github.io/VIIPER/stable/">VIIPER</a> for both controller as well as keyboard/mouse inputs.</p>
+<p>At the <strong>current</strong> stage, differences (to an input-only mode) are <em>mostly</em> technical to an end-user... however:</p>
+<ul>
+<li>SISR does not use <em>unmaintained</em> technologies, duh.</li>
+<li>Uses the same input-emulation technique across platforms</li>
+<li>SISRs controller devices are (not yet, lol) blocked by any anticheat (as opposed to ViGEms)</li>
+<li>Emulates mouse/keyboard in a way that is indistinguishable from real hardware, too!</li>
+<li>SISR supports emulating a DS4 controller (as does ViGEm), but with <strong>full gyro-passthrough</strong><br />
+Touchpad passthrough will follow.<br />
+You can even decide this <strong>per device</strong>  </li>
+<li>SISR will (<em>at a later stage</em>, probably™️) support Steam Controller 2 (<em>"Triton"</em>) re-emulation, allowing you to have full Steam-Input functionality on the controller receiving machine, not only on the controller-host (eg. Deck)</li>
+<li>Maybe more to come.</li>
+</ul>
+<p>And of course, SISR is <strong>only</strong> concerned about controllers/input-devices - no display-streaming baggage needed.<br />
+SISR is primarily a tool to circumvent Steam Input issues, after all.</p>
 </details>
 <h2 class="toc-anchor" id="why-would-i-want-to-use-this-instead-of-directly-using-usbipvirtualhere-to-forward-controllers">Why would I want to use this instead of <em>directly</em> using USBIP/VirtualHere to forward controllers?</h2>
 <details class="question">
