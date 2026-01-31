@@ -3,7 +3,7 @@
 set -e
 
 SISR_VERSION="v0.2.1"
-VIIPER_VERSION="0.4.0"
+VIIPER_VERSION="0.4.1"
 
 REPO="Alia5/SISR"
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
