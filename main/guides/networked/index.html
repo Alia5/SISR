@@ -994,6 +994,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#authenticationpassword" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication/Password
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1338,6 +1349,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#authenticationpassword" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication/Password
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1454,6 +1476,15 @@ Make sure a USBIP-client is installed and configured before installing VIIPER.</
 </div>
 </div>
 <p>Refer to the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a> for more details and information</p>
+<h3 id="authenticationpassword">Authentication/Password</h3>
+<p>VIIPER <strong>requires</strong> a password to connect (from non-localhost) for security reasons.  </p>
+<p>You can find or change the password (on the machine running VIIPER) in:</p>
+<ul>
+<li><strong>Windows</strong>:               <code>%APPDATA%\\VIIPER\\viiper.key.txt</code></li>
+<li><strong>Linux (user)</strong>:    <code>~/.config/github.com/Alia5/viiper/viiper.key.txt</code></li>
+<li><strong>Linux (root/systemd)</strong>:  <code>/etc/viiper/viiper.key.txt</code></li>
+</ul>
+<p>You can also set a custom password by creating/modifying the file above <strong>and restarting the VIIPER service</strong></p>
 <h2 id="controller-hosting-machine-eg-steam-deck">Controller hosting machine (e.g. Steam Deck)</h2>
 <p>On the machine that will host the physical controllers/Keyboard/Mouse (e.g. your Steam Deck)
 USBIP and VIIPER are not required, only SISR itself</p>
@@ -1464,7 +1495,7 @@ USBIP and VIIPER are not required, only SISR itself</p>
 <ul>
 <li>Add SISR as a non-Steam game in your Steam library<br />
       Provide the following flags as launch options  <ul>
-<li><code>-w -f --wcd true --kbm true --viiper-address &lt;RECEIVING_MACHINE_IP&gt;:3242</code><br />
+<li><code>-w -f --wcd true --kbm true --viiper-address &lt;RECEIVING_MACHINE_IP&gt;:3242 --viiper-password &lt;VIIPER_PASSWORD&gt;</code><br />
   <sup>show-window, fullscreen, continuous drawing, keyboard/mouse emulation, other machine address</sup><br />
 <br /></li>
 </ul>

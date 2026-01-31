@@ -1177,6 +1177,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#viiper-authentication-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VIIPER authentication required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#viiper-version-too-old" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1752,6 +1763,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#viiper-authentication-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VIIPER authentication required
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#viiper-version-too-old" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2175,6 +2197,33 @@ can potentially negatively affect gaming performance on lower end systems</p>
     Default is <code>localhost:3242</code>. Change with <code>--viiper-address</code></li>
 <li><strong>If</strong> using remote VIIPER: Is the remote machine reachable?<br />
     Try pinging it</li>
+</ol>
+</details>
+<h3 class="toc-anchor" id="viiper-authentication-required">VIIPER authentication required</h3>
+<details class="question">
+<summary>VIIPER authentication required</summary>
+<p><strong>Error Message:</strong>  </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>VIIPER at &lt;address&gt; requires authentication.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>You either have not provided a password, or the provided password is incorrect.
+</code></pre></div>
+<p>This error occurs when connecting to VIIPER on a <strong>non-localhost</strong> address without providing the correct password.</p>
+<ol>
+<li>
+<p>Find the VIIPER password on the <strong>receiving machine</strong> (where VIIPER is running):  </p>
+<ul>
+<li><strong>Windows</strong>: <code>%APPDATA%\VIIPER\viiper.key.txt</code></li>
+<li><strong>Linux (user)</strong>: <code>~/.config/github.com/Alia5/viiper/viiper.key.txt</code></li>
+<li><strong>Linux (root/systemd)</strong>: <code>/etc/viiper/viiper.key.txt</code></li>
+</ul>
+</li>
+<li>
+<p>Provide the password to SISR using one of these methods:  </p>
+<ul>
+<li>Launch argument: <code>--viiper-password &lt;password&gt;</code></li>
+<li>Config file: <code>viiper_password = "&lt;password&gt;"</code></li>
+<li>Environment variable: <code>SISR_VIIPER_PASSWORD=&lt;password&gt;</code></li>
+</ul>
+</li>
 </ol>
 </details>
 <h3 class="toc-anchor" id="viiper-version-too-old">VIIPER version too old</h3>
