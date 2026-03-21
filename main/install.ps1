@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $sisrVersion = "dev-snapshot"
-$viiperVersion = "dev-snapshot"
+$viiperVersion = "0.5.0"
 
 $repo = "Alia5/SISR"
 $apiUrl = "https://api.github.com/repos/$repo/releases/latest"
