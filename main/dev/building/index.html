@@ -1437,9 +1437,6 @@
   SDL3 is built from source via CMake w/ Ninja</li>
 <li>Node.js
   Required to build the javascript parts interacting with Steams CEF remote debugging interface</li>
-<li>pnpm<br />
-  is just better than npm<br />
-<a href="https://pnpm.io/installation">pnpm.io</a></li>
 </ul>
 <div class="admonition info">
 <p class="admonition-title">SDL3</p>
@@ -1460,8 +1457,8 @@
 <h2 id="build">Build</h2>
 <p>Build the CEF injectee first, then build SISR</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span>cef_injectee
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>pnpm<span class="w"> </span>install
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>pnpm<span class="w"> </span>run<span class="w"> </span>build
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>npm<span class="w"> </span>install
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>npm<span class="w"> </span>run<span class="w"> </span>build
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nb">cd</span><span class="w"> </span>..
 </code></pre></div>
 <p>Then build SISR:</p>
