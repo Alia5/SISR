@@ -54,7 +54,7 @@ impl EventHandler for Handler {
             thread::spawn(|| {
                 for _ in 0..60 {
                     thread::sleep(std::time::Duration::from_millis(16));
-                    window::request_redraw();
+                    window::event::request_redraw_without_webview();
                 }
             });
         }
@@ -122,11 +122,11 @@ impl EventHandler for Handler {
                 return;
             }
 
-            match window::get_event_sender().send_event(crate::app::window::RunnerEvent::ToggleUi())
-            {
-                Ok(_) => tracing::debug!("Successfully sent ToggleUi event to window"),
-                Err(e) => tracing::error!("Failed to send ToggleUi to window: {e}"),
-            }
+            // match window::get_event_sender().send_event(crate::app::window::RunnerEvent::ToggleUi())
+            // {
+            //     Ok(_) => tracing::debug!("Successfully sent ToggleUi event to window"),
+            //     Err(e) => tracing::error!("Failed to send ToggleUi to window: {e}"),
+            // }
         }
     }
 

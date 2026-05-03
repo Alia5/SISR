@@ -1,12 +1,9 @@
-pub mod core;
-pub mod gui;
-pub mod signals;
-pub mod steam_utils;
-pub mod tray;
-pub mod updater;
-pub mod window;
-
-pub use core::App;
-
-pub mod hid_hooks;
-pub mod input;
+mod api;
+mod assets;
+mod hid_hooks;
+mod input;
+pub mod runner;
+mod signals;
+pub mod steam;
+mod tray;
+mod window;

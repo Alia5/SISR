@@ -15,9 +15,9 @@ pub const SDL_HINTS: &[(&str, &str)] = &[
     (hint::names::JOYSTICK_HIDAPI_JOY_CONS, "1"),
     (hint::names::JOYSTICK_HIDAPI_NINTENDO_CLASSIC, "1"),
     // (hint::names::JOYSTICK_HIDAPI_COMBINE_JOY_CONS, "1"),
-    (hint::names::JOYSTICK_HIDAPI_XBOX, "1"),
-    (hint::names::JOYSTICK_HIDAPI_XBOX_360, "1"),
-    (hint::names::JOYSTICK_HIDAPI_XBOX_ONE, "1"),
+    (hint::names::JOYSTICK_HIDAPI_XBOX, "0"), // causes crash for some odd reason when enabled?
+    (hint::names::JOYSTICK_HIDAPI_XBOX_360, "0"), // causes crash for some odd reason when enabled?
+    (hint::names::JOYSTICK_HIDAPI_XBOX_ONE, "0"), // causes crash for some odd reason when enabled?
     // (hint::names::JOYSTICK_RAWINPUT, "1"),
     // (hint::names::JOYSTICK_RAWINPUT_CORRELATE_XINPUT, "1"),
     (hint::names::JOYSTICK_ENHANCED_REPORTS, "1"),

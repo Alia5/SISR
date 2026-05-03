@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use sdl3_sys::events::SDL_Event;
 
 use crate::app::input::context::Context;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::{self, Subsystems};
 use crate::app::input::viiper_bridge::ViiperBridge;
@@ -36,7 +36,7 @@ impl EventHandler for Handler {
             }
         };
         let version = match event {
-            HandlerEvent::ViiperReady { version } => version,
+            InputHandlerEvent::ViiperReady { version } => version,
             _ => {
                 tracing::warn!("Received non-ViiperReady event ");
                 return;
@@ -52,7 +52,7 @@ impl EventHandler for Handler {
         ctx.viiper_version = Some(version.clone());
         if ctx.keyboard_mouse_emulation {
             tracing::info!("Enabling keyboard/mouse emulation due to Viiper being ready");
-            _ = sdl_loop::get_event_sender().push_custom_event(HandlerEvent::SetKbmEmulation {
+            _ = sdl_loop::get_event_sender().push_custom_event(InputHandlerEvent::SetKbmEmulation {
                 enabled: true,
                 initialize: true,
             });
@@ -66,12 +66,12 @@ impl EventHandler for Handler {
 
         viiper.set_ready(version);
 
-        window::request_redraw();
+        window::event::request_redraw();
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![ListenEvent::HandlerEvent(discriminant(
-            &HandlerEvent::ViiperReady {
+            &InputHandlerEvent::ViiperReady {
                 version: String::new(),
             },
         ))]

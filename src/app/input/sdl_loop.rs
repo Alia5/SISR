@@ -1,8 +1,6 @@
-use std::sync::{Arc, Mutex, OnceLock};
 use std::panic;
+use std::sync::{Arc, Mutex, OnceLock};
 
-use crate::app::App;
-use crate::app::gui::dispatcher::GuiDispatcher;
 use crate::app::input::context::Context;
 use crate::app::input::event::handler::{
     cef_debug_ready, change_viiper_type, connect_viiper_device, disconnect_viiper_device,
@@ -11,12 +9,12 @@ use crate::app::input::event::handler::{
     sdl_gamepad_steam_handle_updated, sdl_gamepad_update_complete, sdl_sensor_update,
     set_kbm_emulation, viiper_ready,
 };
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::kbm_context::KbmContext;
 use crate::app::input::event::router::EventRouter;
-use crate::app::input::gui::bottom_bar::BottomBar;
 use crate::app::input::sdl_hints;
 use crate::app::input::viiper_bridge::ViiperBridge;
+use crate::app::runner::AppRunner;
 use sdl3::event::EventSender;
 use sdl3::sys::events::{SDL_Event, SDL_PollEvent, SDL_WaitEvent};
 use sdl3::{EventSubsystem, GamepadSubsystem, JoystickSubsystem};
@@ -42,15 +40,11 @@ pub struct InputLoop {
     subsystems: Subsystems,
     router: EventRouter,
     _viiper_bridge: Arc<Mutex<ViiperBridge>>,
-    _context: Arc<Mutex<Context>>,
-    _gui_dispatcher: Arc<Mutex<GuiDispatcher>>,
+    context: Arc<Mutex<Context>>,
 }
 
 impl InputLoop {
-    pub fn new(
-        viiper_address: Option<std::net::SocketAddr>,
-        gui_dispatcher: Arc<Mutex<GuiDispatcher>>,
-    ) -> Self {
+    pub fn new(viiper_address: Option<std::net::SocketAddr>) -> Self {
         tracing::trace!("SDL_Init");
 
         for (hint_name, hint_value) in sdl_hints::SDL_HINTS {
@@ -68,6 +62,7 @@ impl InputLoop {
             //     env::set_var(hint_name, hint_value);
             // }
         }
+
         let sdl = match sdl3::init() {
             Ok(sdl) => sdl,
             Err(_e) => {
@@ -90,7 +85,7 @@ impl InputLoop {
 
         let events = match sdl.event() {
             Ok(event_subsystem) => {
-                if let Err(e) = event_subsystem.register_custom_event::<HandlerEvent>() {
+                if let Err(e) = event_subsystem.register_custom_event::<InputHandlerEvent>() {
                     tracing::error!("Failed to register VIIPER disconnect event: {}", e);
                 }
 
@@ -118,11 +113,12 @@ impl InputLoop {
             }
         };
 
+        tracing::debug!("Initializing input context and VIIPER bridge");
         let viiper_pass = crate::config::get_config().viiper_password.clone();
-
         let viiper_bridge = Arc::new(Mutex::new(ViiperBridge::new(viiper_address, viiper_pass)));
         let context = Arc::new(Mutex::new(Context::new(viiper_address)));
 
+        tracing::debug!("Initializing keyboard/mouse emulation context");
         let kbm_context = Arc::new(Mutex::new(KbmContext::default()));
 
         tracing::debug!("Registering SDL event handlers");
@@ -195,32 +191,16 @@ impl InputLoop {
             )),
         ]);
 
-        tracing::debug!("Registering GUI callbacks");
-        let Ok(dispatcher) = gui_dispatcher.lock() else {
-            panic!("Failed to lock GUI dispatcher mutex");
-        };
-        let uictx = context.clone();
-        let bottom_bar = Arc::new(Mutex::new(BottomBar::new()));
-        dispatcher.register_callback(move |ectx| {
-            let Ok(ctx) = uictx.lock() else {
-                tracing::error!("Failed to lock Context mutex for GUI drawing");
-                return;
-            };
-            let Ok(mut bb) = bottom_bar.lock() else {
-                tracing::error!("Failed to lock BottomBar mutex for GUI drawing");
-                return;
-            };
-            bb.draw(&ctx, ectx);
-        });
-        drop(dispatcher);
-
         Self {
             subsystems: sdl_systems,
             router,
-            _context: context,
+            context,
             _viiper_bridge: viiper_bridge,
-            _gui_dispatcher: gui_dispatcher,
         }
+    }
+
+    pub fn get_ctx(&self) -> Arc<Mutex<Context>> {
+        self.context.clone()
     }
 
     pub fn run(&mut self) {
@@ -251,7 +231,7 @@ impl InputLoop {
             }
         }
         tracing::trace!("SDL loop exiting");
-        App::shutdown();
+        AppRunner::shutdown();
     }
 
     fn process_one(

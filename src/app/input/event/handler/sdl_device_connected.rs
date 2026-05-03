@@ -7,7 +7,7 @@ use sdl3_sys::events::SDL_Event;
 use sdl3_sys::joystick::SDL_JoystickID;
 
 use crate::app::input::device::SDLDevice;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::sdl_loop::{self, Subsystems};
 use crate::app::input::sdl_utils::{get_gamepad_steam_handle, try_get_real_vid_pid_from_gamepad};
 use crate::app::input::viiper_bridge::ViiperBridge;
@@ -16,6 +16,7 @@ use crate::app::input::{
     device::Device,
     event::router::{EventHandler, ListenEvent, RoutedEvent},
 };
+use crate::app::window;
 use crate::config::get_config;
 
 pub struct Handler {
@@ -111,6 +112,8 @@ impl EventHandler for Handler {
                 steam_handle,
                 which
             );
+                    window::event::request_redraw();
+
             return;
         }
 
@@ -139,6 +142,8 @@ impl EventHandler for Handler {
                         "Ignoring controller connection for SDL id {} due to require_controllers_connected_before_launch and time elapsed...",
                         which
                     );
+                            window::event::request_redraw();
+
                     return;
                 }
             }
@@ -189,7 +194,7 @@ impl EventHandler for Handler {
                 };
                 if d.sdl_devices.is_empty() {
                     _ = sdl_loop::get_event_sender()
-                        .push_custom_event(HandlerEvent::IgnoreDevice { device_id: d.id })
+                        .push_custom_event(InputHandlerEvent::IgnoreDevice { device_id: d.id })
                         .inspect_err(|e| {
                             tracing::error!(
                                 "Failed to send ignore device event for ignored gamepad {}; {}",
@@ -202,6 +207,8 @@ impl EventHandler for Handler {
                     "Ignoring SDL device connection for SDL id {} due to existing VIIPER device",
                     which
                 );
+                        window::event::request_redraw();
+
                 return;
             }
         }
@@ -271,6 +278,7 @@ impl EventHandler for Handler {
                     viiper.create_device(device_id, device_type.as_str());
                 });
             }
+            window::event::request_redraw();
 
             return;
         };
@@ -352,6 +360,7 @@ impl EventHandler for Handler {
                 viiper.create_device(device_id, viiper_type.as_str());
             });
         }
+        window::event::request_redraw();
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

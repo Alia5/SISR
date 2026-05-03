@@ -110,8 +110,6 @@ jobs:
                         **Hold on there buddy!**  
                         Do not download SISR directly from here, and instead use the available [installation scripts](https://alia5.github.io/SISR/stable/getting-started/installation/) or read the [manual installation guide](https://alia5.github.io/SISR/stable/getting-started/installation/) first!
                         
-                      Try reading the [Installation Guide](https://alia5.github.io/SISR/main/getting-started/installation/) before downloading SISR from here!
-
                       ${{ needs.generate-changelog.outputs.changelog }}
                   files: |
                       ./release_files/*

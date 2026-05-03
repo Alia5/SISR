@@ -133,6 +133,43 @@ pub fn rehook(export_name: &str) {
     }
 }
 
+pub fn unhook_all() {
+    for target in [
+        "HidD_FreePreparsedData",
+        "HidD_GetAttributes",
+        "HidD_GetPreparsedData",
+        "HidD_GetProductString",
+        "HidP_GetButtonCaps",
+        "HidP_GetCaps",
+        "HidP_GetData",
+        "HidP_GetUsageValue",
+        "HidP_GetUsages",
+        "HidP_GetValueCaps",
+        "HidP_MaxDataListLength",
+    ] {
+        unhook(target);
+    }
+}
+
+pub fn unhook(export_name: &str) {
+    match export_name {
+        "HidD_FreePreparsedData" => uninstall_detour::<HidDFreePreparsedDataFn>(export_name),
+        "HidD_GetAttributes" => uninstall_detour::<HidDGetAttributesFn>(export_name),
+        "HidD_GetPreparsedData" => uninstall_detour::<HidDGetPreparsedDataFn>(export_name),
+        "HidD_GetProductString" => uninstall_detour::<HidDGetProductStringFn>(export_name),
+        "HidP_GetButtonCaps" => uninstall_detour::<HidPGetButtonCapsFn>(export_name),
+        "HidP_GetCaps" => uninstall_detour::<HidPGetCapsFn>(export_name),
+        "HidP_GetData" => uninstall_detour::<HidPGetDataFn>(export_name),
+        "HidP_GetUsageValue" => uninstall_detour::<HidPGetUsageValueFn>(export_name),
+        "HidP_GetUsages" => uninstall_detour::<HidPGetUsagesFn>(export_name),
+        "HidP_GetValueCaps" => uninstall_detour::<HidPGetValueCapsFn>(export_name),
+        "HidP_MaxDataListLength" => uninstall_detour::<HidPMaxDataListLengthFn>(export_name),
+        _ => {
+            tracing::error!("unhook: unknown export name: {}", export_name);
+        }
+    }
+}
+
 fn resolve_steam_jmp_target(entry: usize) -> Option<usize> {
     // Steam replaces the export entry with a JMP.
     unsafe {
@@ -250,6 +287,32 @@ where
     tracing::info!("{target}: installed");
 }
 
+fn uninstall_detour<F>(target: &str)
+where
+    F: Copy + Function,
+{
+    let Some(detour_ptr) = detour_funcs().get(target).map(|ptr| *ptr) else {
+        tracing::trace!("{target}: no detour installed");
+        steam_funcs().remove(target);
+        return;
+    };
+
+    let detour = unsafe { &*(detour_ptr as *const GenericDetour<F>) };
+    if let Err(e) = unsafe { detour.disable() } {
+        tracing::error!("{target}: detour disable failed: {e}");
+        return;
+    }
+
+    if let Some((_, detour_ptr)) = detour_funcs().remove(target) {
+        unsafe {
+            drop(Box::from_raw(detour_ptr as *mut GenericDetour<F>));
+        }
+    }
+    steam_funcs().remove(target);
+
+    tracing::info!("{target}: uninstalled");
+}
+
 type HidPGetCapsFn = extern "system" fn(preparsed_data: *const c_void, caps: *mut c_void) -> i32;
 
 type HidDFreePreparsedDataFn = extern "system" fn(preparsed_data: *mut c_void) -> u8;
@@ -329,12 +392,12 @@ extern "system" fn hook_hidp_getcaps(preparsed_data: *const c_void, caps: *mut c
     };
     // let ret = steam(preparsed_data, caps);
 
-    tracing::trace!(
-        "hook_hidp_getcaps called: preparsed_data={:?} caps={:?} -> {}",
-        preparsed_data,
-        caps,
-        ret
-    );
+    // tracing::trace!(
+    //     "hook_hidp_getcaps called: preparsed_data={:?} caps={:?} -> {}",
+    //     preparsed_data,
+    //     caps,
+    //     ret
+    // );
 
     ret
 }

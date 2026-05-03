@@ -1,11 +1,12 @@
-use dashmap::DashMap;
+use std::collections::BTreeMap;
 use sdl3::{
     gamepad::{Axis, Button},
     joystick,
 };
 use sdl3_sys::joystick::SDL_JoystickID;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, utoipa::ToSchema)]
+#[serde(untagged)]
 pub enum SdlValue {
     String(String),
     OptString(Option<String>),
@@ -14,7 +15,8 @@ pub enum SdlValue {
     HexU16(Option<u16>),
     U32(u32),
     Bool(bool),
-    Nested(DashMap<String, SdlValue>),
+    #[schema(value_type = Object)]
+    Nested(BTreeMap<String, SdlValue>),
 }
 
 impl std::fmt::Display for SdlValue {
@@ -35,10 +37,10 @@ impl std::fmt::Display for SdlValue {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, serde::Serialize, serde::Deserialize, utoipa::ToSchema)]
 pub struct SDLDeviceInfo {
-    pub joystick_infos: DashMap<String, SdlValue>,
-    pub gamepad_infos: DashMap<String, SdlValue>,
+    pub joystick_infos: BTreeMap<String, SdlValue>,
+    pub gamepad_infos: BTreeMap<String, SdlValue>,
 }
 
 impl SDLDeviceInfo {
@@ -48,7 +50,7 @@ impl SDLDeviceInfo {
         gamepad: &Option<sdl3::gamepad::Gamepad>,
     ) {
         if let Some(js) = joystick {
-            let i = &self.joystick_infos;
+            let i = &mut self.joystick_infos;
             i.insert("name".into(), SdlValue::String(js.name()));
             i.insert("id".into(), SdlValue::U32(js.id()));
             i.insert("guid".into(), SdlValue::String(js.guid().string()));
@@ -72,19 +74,19 @@ impl SDLDeviceInfo {
                 );
             }
 
-            let axes = DashMap::new();
+            let mut axes = BTreeMap::new();
             for i in 0..js.num_axes() {
                 axes.insert(format!("Axis {}", i), SdlValue::String("✅".into()));
             }
             i.insert("axes".into(), SdlValue::Nested(axes));
 
-            let buttons = DashMap::new();
+            let mut buttons = BTreeMap::new();
             for i in 0..js.num_buttons() {
                 buttons.insert(format!("Button {}", i), SdlValue::String("✅".into()));
             }
             i.insert("buttons".into(), SdlValue::Nested(buttons));
 
-            let hats = DashMap::new();
+            let mut hats = BTreeMap::new();
             for i in 0..js.num_hats() {
                 hats.insert(format!("Hat {}", i), SdlValue::String("✅".into()));
             }
@@ -92,7 +94,7 @@ impl SDLDeviceInfo {
         }
 
         if let Some(gp) = gamepad {
-            let i = &self.gamepad_infos;
+            let i = &mut self.gamepad_infos;
             i.insert("name".into(), SdlValue::OptString(gp.name()));
             i.insert(
                 "id".into(),
@@ -149,7 +151,7 @@ impl SDLDeviceInfo {
                 i.insert("mapping".into(), SdlValue::String(mapping));
             }
 
-            let axes = DashMap::new();
+            let mut axes = BTreeMap::new();
             for axis in [
                 Axis::LeftX,
                 Axis::LeftY,
@@ -165,7 +167,7 @@ impl SDLDeviceInfo {
             }
             i.insert("axes".into(), SdlValue::Nested(axes));
 
-            let buttons = DashMap::new();
+            let mut buttons = BTreeMap::new();
             for button in [
                 Button::South,
                 Button::East,

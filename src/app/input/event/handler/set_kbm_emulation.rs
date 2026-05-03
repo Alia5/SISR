@@ -3,15 +3,15 @@ use std::sync::{Arc, Mutex};
 
 use sdl3_sys::events::SDL_Event;
 
-use crate::app::gui::dialogs::{self, Dialog, push_dialog};
 use crate::app::input::context::Context;
 use crate::app::input::device::Device;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::kbm_context::KbmContext;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::viiper_bridge::ViiperBridge;
-use crate::app::window::{self, RunnerEvent};
+use crate::app::window;
+use crate::app::window::event::WindowRunnerEvent;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -48,7 +48,7 @@ impl EventHandler for Handler {
             }
         };
         let (enabled, initialize) = match event {
-            HandlerEvent::SetKbmEmulation {
+            InputHandlerEvent::SetKbmEmulation {
                 enabled,
                 initialize,
             } => (*enabled, *initialize),
@@ -58,24 +58,23 @@ impl EventHandler for Handler {
             }
         };
 
-        if !initialize && window::is_kbm_emulation_enabled() == enabled {
+        let Ok(mut context) = self.ctx.lock() else {
+            tracing::error!("Failed to lock Context mutex");
+            return;
+        };
+        if !initialize && context.keyboard_mouse_emulation == enabled {
             tracing::info!(
                 "KBM emulation already {}",
                 if enabled { "enabled" } else { "disabled" }
             );
             return;
         }
-        window::set_kbm_emulation_enabled(enabled);
-        let Ok(mut context) = self.ctx.lock() else {
-            tracing::error!("Failed to lock Context mutex");
-            return;
-        };
         context.keyboard_mouse_emulation = enabled;
         drop(context);
         tracing::info!("KBM emulation toggled: {}", enabled);
 
         if let Err(e) =
-            window::get_event_sender().send_event(RunnerEvent::SetKbmCursorGrab(enabled))
+            window::event::get_event_sender().send_event(WindowRunnerEvent::SetKbmCursorGrab(enabled))
         {
             tracing::warn!("Failed to notify window about KB/M cursor grab toggle: {e}");
         }
@@ -89,30 +88,10 @@ impl EventHandler for Handler {
         kbm_ctx.keyboard_keys.clear();
         kbm_ctx.mouse_buttons = 0;
 
-        // When enabling, show a single OK dialog. On OK we enter capture mode.
-        // except when ebaled via config/cli at startup (initialize=true)
-        if enabled && !initialize {
-            const TITLE: &str = "KB/M emulation";
-            let already_open = dialogs::REGISTRY
-                .get()
-                .map(|r| r.snapshot_dialogs().iter().any(|d| d.title == TITLE))
-                .unwrap_or(false);
-
-            if !already_open {
-                let msg = "KB/M emulation enabled.\n\n\
-UI will be hidden and the cursor will be captured when you enter capture mode.\n\n\
-Toggle UI/capture:\n\
-  Keyboard: Ctrl+Shift+Alt+S\n\
-  Gamepad:  LB+RB+Back+A";
-                _ = push_dialog(Dialog::new_ok(TITLE, msg, move || {
-                    if let Err(e) = window::get_event_sender()
-                        .send_event(crate::app::window::RunnerEvent::EnterCaptureMode())
-                    {
-                        tracing::warn!("Failed to enter capture mode after KB/M OK: {e}");
-                    }
-                }))
-                .inspect_err(|e| tracing::warn!("Failed to push KB/M emulation dialog: {e}"));
-            }
+        if let Err(e) = window::event::get_event_sender()
+            .send_event(WindowRunnerEvent::EnterCaptureMode())
+        {
+            tracing::warn!("Failed to enter capture mode: {e}");
         }
 
         if enabled {
@@ -202,12 +181,12 @@ Toggle UI/capture:\n\
             kbm_ctx.keyboard_id = None;
         }
 
-        window::request_redraw();
+        window::event::request_redraw();
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![ListenEvent::HandlerEvent(discriminant(
-            &HandlerEvent::SetKbmEmulation {
+            &InputHandlerEvent::SetKbmEmulation {
                 enabled: false,
                 initialize: false,
             },

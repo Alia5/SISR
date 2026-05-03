@@ -58,6 +58,7 @@ impl EventHandler for Handler {
             );
             return;
         };
+        
         let steam_handle = get_gamepad_steam_handle(gp);
         device.steam_handle = steam_handle;
         tracing::info!(
@@ -82,7 +83,7 @@ impl EventHandler for Handler {
                 device.viiper_type.clone().unwrap_or(default_type).as_str(),
             );
         }
-        window::request_redraw();
+        window::event::request_redraw();
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

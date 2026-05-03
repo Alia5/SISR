@@ -5,11 +5,10 @@ use std::sync::{Arc, Mutex};
 use sdl3_sys::events::SDL_Event;
 
 use crate::app::input::context::Context;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
-use crate::app::steam_utils::binding_enforcer::binding_enforcer;
-use crate::app::window;
+use crate::app::steam::binding_enforcer::binding_enforcer;
 use crate::config::CONFIG;
 
 pub struct Handler {
@@ -42,19 +41,19 @@ impl EventHandler for Handler {
             }
         };
         let open = match event {
-            HandlerEvent::OverlayStateChanged { open } => *open,
+            InputHandlerEvent::OverlayStateChanged { open } => *open,
             _ => {
                 tracing::warn!("Received non-OverlayStateChanged event ");
                 return;
             }
         };
 
-        let continous_draw_in_config = CONFIG
+        let _continuous_draw_in_config = CONFIG
             .read()
             .ok()
             .and_then(|c| {
                 c.as_ref()
-                    .map(|cfg| cfg.window.continous_draw.unwrap_or(false))
+                    .map(|cfg| cfg.window.continuous_draw.unwrap_or(false))
             })
             .unwrap_or(false);
 
@@ -82,7 +81,6 @@ impl EventHandler for Handler {
                     enforcer.deactivate();
                 }
             }
-            window::set_continuous_redraw(true);
         } else {
             if self
                 .config_enforce_active_before
@@ -92,23 +90,13 @@ impl EventHandler for Handler {
                 if let Ok(mut enforcer) = binding_enforcer().lock() {
                     enforcer.activate();
                 }
-                window::request_redraw();
             }
-            if continous_draw_in_config {
-                return;
-            }
-            let cont_draw = window::is_continuous_redraw();
-
-            std::thread::spawn(move || {
-                std::thread::sleep(std::time::Duration::from_millis(1000));
-                window::set_continuous_redraw(cont_draw);
-            });
         }
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![ListenEvent::HandlerEvent(discriminant(
-            &HandlerEvent::OverlayStateChanged { open: false },
+            &InputHandlerEvent::OverlayStateChanged { open: false },
         ))]
     }
 }

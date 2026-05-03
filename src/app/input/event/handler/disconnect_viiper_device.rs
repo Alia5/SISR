@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use sdl3_sys::events::SDL_Event;
 
 use crate::app::input::context::Context;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::viiper_bridge::ViiperBridge;
@@ -35,7 +35,7 @@ impl EventHandler for Handler {
             }
         };
         let device_id = match event {
-            HandlerEvent::DisconnectViiperDevice { device_id } => *device_id,
+            InputHandlerEvent::DisconnectViiperDevice { device_id } => *device_id,
             _ => {
                 tracing::warn!("Received non-DisconnectViiperDevice event ");
                 return;
@@ -68,7 +68,7 @@ impl EventHandler for Handler {
 
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![ListenEvent::HandlerEvent(discriminant(
-            &HandlerEvent::DisconnectViiperDevice { device_id: 0 },
+            &InputHandlerEvent::DisconnectViiperDevice { device_id: 0 },
         ))]
     }
 }

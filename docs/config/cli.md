@@ -93,14 +93,14 @@ Window is fully transparent and click-through
 - Default: `true`
 - Env var: `SISR_WINDOW_FULLSCREEN`
 
-#### `--window-continous-draw [true|false]`, `--wcd [true|false]`
+#### `--window-continuous-draw [true|false]`, `--wcd [true|false]`
 
 Continuously update/redraw the window  
 Use when Steam overlay detection fails or other overlay issues occur  
 May increase CPU/GPU usage
 
 - Default: `false`
-- Env var: `SISR_WINDOW_CONTINOUS_DRAW`
+- Env var: `SISR_WINDOW_CONTINUOUS_DRAW`
 
 ### Logging
 

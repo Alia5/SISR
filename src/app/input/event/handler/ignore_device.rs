@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use sdl3_sys::events::SDL_Event;
 
 use crate::app::input::context::Context;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::{self, Subsystems};
 
@@ -34,7 +34,7 @@ impl EventHandler for Handler {
             }
         };
         let device_id = match event {
-            HandlerEvent::IgnoreDevice { device_id } => *device_id,
+            InputHandlerEvent::IgnoreDevice { device_id } => *device_id,
             _ => {
                 tracing::warn!("Received non-IgnoreDevice event ");
                 return;
@@ -80,7 +80,7 @@ impl EventHandler for Handler {
 
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![ListenEvent::HandlerEvent(discriminant(
-            &HandlerEvent::IgnoreDevice { device_id: 0 },
+            &InputHandlerEvent::IgnoreDevice { device_id: 0 },
         ))]
     }
 }

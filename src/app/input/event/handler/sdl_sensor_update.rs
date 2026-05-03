@@ -40,7 +40,6 @@ impl EventHandler for Handler {
     ) {
         // let event_type = SDL_EventType(unsafe { sdl_event.r#type });
         // tracing::trace!(event = ?event_type); // TODO: log only if enabled via flag
-        tracing::trace!(event = ?event);
         let (which, sensor, data) = match event {
             Some(RoutedEvent::SdlEvent(event)) => match event {
                 Event::ControllerSensorUpdated {
@@ -109,11 +108,11 @@ impl EventHandler for Handler {
 
         let device_id = device.id;
         let Some(viiper_device) = device.viiper_device.as_mut() else {
-            tracing::trace!(
-                "No Viiper device found for SDL id {} in device id {}",
-                which,
-                device.id
-            );
+            // tracing::trace!(
+            //     "No Viiper device found for SDL id {} in device id {}",
+            //     which,
+            //     device.id
+            // );
             return;
         };
 

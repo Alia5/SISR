@@ -2,7 +2,7 @@ use crate::app::input::kbm_events;
 use crate::app::input::viiper_bridge::ViiperEvent;
 
 #[derive(Debug)]
-pub enum HandlerEvent {
+pub enum InputHandlerEvent {
     ViiperEvent(ViiperEvent),
     IgnoreDevice { device_id: u64 },
     ConnectViiperDevice { device_id: u64 },

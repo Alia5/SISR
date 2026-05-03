@@ -3,7 +3,7 @@ use std::{collections::HashMap, mem::Discriminant, sync::Arc};
 use sdl3::event::Event;
 use sdl3_sys::events::{SDL_Event, SDL_EventType};
 
-use crate::app::input::{event::handler_events::HandlerEvent, sdl_loop::Subsystems};
+use crate::app::input::{event::handler_events::InputHandlerEvent, sdl_loop::Subsystems};
 
 /// "Variadic" helper for registering multiple handlers.
 ///
@@ -24,13 +24,13 @@ macro_rules! event_router_register {
 #[derive(Debug)]
 pub enum RoutedEvent {
     SdlEvent(Event),
-    UserEvent(HandlerEvent),
+    UserEvent(InputHandlerEvent),
 }
 
 pub enum ListenEvent {
     SdlEventType(SDL_EventType),
     SdlEvent(Discriminant<Event>),
-    HandlerEvent(Discriminant<HandlerEvent>),
+    HandlerEvent(Discriminant<InputHandlerEvent>),
 }
 
 pub trait EventHandler {
@@ -49,7 +49,7 @@ pub struct EventRouter {
     //
     sdl_type_handler_map: HashMap<SDL_EventType, Arc<dyn EventHandler>>,
     sdl_event_handler_map: HashMap<Discriminant<Event>, Arc<dyn EventHandler>>,
-    handler_event_handler_map: HashMap<Discriminant<HandlerEvent>, Arc<dyn EventHandler>>,
+    handler_event_handler_map: HashMap<Discriminant<InputHandlerEvent>, Arc<dyn EventHandler>>,
 }
 
 impl EventRouter {
@@ -102,7 +102,7 @@ impl EventRouter {
         }
         let discriminant = std::mem::discriminant(&hl_event);
         if hl_event.is_user_event()
-            && let Some(handler_event) = hl_event.as_user_event_type::<HandlerEvent>()
+            && let Some(handler_event) = hl_event.as_user_event_type::<InputHandlerEvent>()
         {
             let handler_event_discriminant = std::mem::discriminant(&handler_event);
             if let Some(handler) = self

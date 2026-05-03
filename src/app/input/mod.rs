@@ -3,7 +3,6 @@ pub mod device;
 pub mod device_info;
 pub mod device_state;
 pub mod event;
-pub mod gui;
 pub mod kbm_events;
 pub mod kbm_winit_map;
 pub mod sdl_hints;

@@ -9,11 +9,11 @@ use crate::app::input::device_state::DeviceState;
 use crate::app::input::event::handler::on_viiper_event::device_output::{
     dualshock4, keyboard, xbox360,
 };
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::viiper_bridge::{DeviceOutput, ViiperBridge, ViiperEvent};
-use crate::app::steam_utils::binding_enforcer::binding_enforcer;
+use crate::app::steam::binding_enforcer::binding_enforcer;
 use crate::app::window;
 use crate::config::get_config;
 
@@ -43,7 +43,7 @@ impl EventHandler for Handler {
             }
         };
         let viiper_event = match event {
-            HandlerEvent::ViiperEvent(event) => event,
+            InputHandlerEvent::ViiperEvent(event) => event,
             _ => {
                 tracing::warn!("Received non-ViiperEvent event ");
                 return;
@@ -83,7 +83,7 @@ impl EventHandler for Handler {
                     return;
                 };
                 viiper.connect_device(&device);
-                window::request_redraw();
+                window::event::request_redraw();
             }
             ViiperEvent::DeviceConnected { device_id } => {
                 let Ok(ctx) = self.ctx.lock() else {
@@ -107,7 +107,7 @@ impl EventHandler for Handler {
                 if device.steam_handle != 0 {
                     let Ok(mut enforcer) = binding_enforcer().lock() else {
                         tracing::error!("Failed to lock binding enforcer mutex");
-                        window::request_redraw();
+                        window::event::request_redraw();
 
                         return;
                     };
@@ -119,7 +119,7 @@ impl EventHandler for Handler {
                         enforcer.activate();
                     }
                 }
-                window::request_redraw();
+                window::event::request_redraw();
             }
             //
             ViiperEvent::ServerDisconnected { device_id } => {
@@ -145,7 +145,7 @@ impl EventHandler for Handler {
                 if device.steam_handle != 0 {
                     let Ok(mut enforcer) = binding_enforcer().lock() else {
                         tracing::error!("Failed to lock binding enforcer mutex");
-                        window::request_redraw();
+                        window::event::request_redraw();
 
                         return;
                     };
@@ -153,7 +153,7 @@ impl EventHandler for Handler {
                         enforcer.deactivate();
                     }
                 }
-                window::request_redraw();
+                window::event::request_redraw();
             }
             //
             ViiperEvent::DeviceOutput(output) => match output {
@@ -193,7 +193,7 @@ impl EventHandler for Handler {
                     return;
                 };
                 device.viiper_device = None;
-                window::request_redraw();
+                window::event::request_redraw();
             }
             ViiperEvent::ErrorConnectDevice { device_id } => {
                 tracing::error!("Error connecting VIIPER device with ID {}", device_id);
@@ -216,7 +216,7 @@ impl EventHandler for Handler {
                     return;
                 };
                 device.viiper_device = None;
-                window::request_redraw();
+                window::event::request_redraw();
             }
         };
     }
@@ -224,7 +224,7 @@ impl EventHandler for Handler {
     fn listen_events(&self) -> Vec<ListenEvent> {
         vec![
             // TODO: FIXME: Currently listening for all Viiper events, doesn't care which we pass for discriminant
-            ListenEvent::HandlerEvent(discriminant(&HandlerEvent::ViiperEvent(
+            ListenEvent::HandlerEvent(discriminant(&InputHandlerEvent::ViiperEvent(
                 ViiperEvent::ServerDisconnected { device_id: 0 },
             ))),
         ]

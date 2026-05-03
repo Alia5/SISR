@@ -8,6 +8,7 @@ use crate::app::input::context::Context;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::viiper_bridge::ViiperBridge;
+use crate::app::window;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -104,6 +105,8 @@ impl EventHandler for Handler {
             return;
         };
         bridge.remove_device(device.id);
+                window::event::request_redraw();
+
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

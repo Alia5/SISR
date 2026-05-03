@@ -14,9 +14,9 @@ use viiper_client::devices::mouse;
 use viiper_client::devices::xbox360;
 use viiper_client::{AsyncViiperClient, DeviceInput, DeviceOutput as _};
 
-use crate::app::core::get_tokio_handle;
+use crate::app::runner::get_tokio_handle;
 use crate::app::input::device::Device;
-use crate::app::input::event::handler_events::HandlerEvent;
+use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::sdl_loop;
 
 type OutputReader<R> = Arc<tokio::sync::Mutex<R>>;
@@ -341,7 +341,7 @@ impl ViiperBridge {
 
     fn push_event(event: ViiperEvent) {
         if let Err(e) =
-            sdl_loop::get_event_sender().push_custom_event(HandlerEvent::ViiperEvent(event))
+            sdl_loop::get_event_sender().push_custom_event(InputHandlerEvent::ViiperEvent(event))
         {
             error!("Failed to push VIIPER event: {}", e);
         }

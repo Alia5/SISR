@@ -65,11 +65,11 @@ SISR can be configured via:
     <tr>
       <td>
         <div><code>-wcd</code></div>
-        <div><code>--window-continous-draw  [true|false]</code></div>
+        <div><code>--window-continuous-draw  [true|false]</code></div>
       </td>
       <td>
 
-          Continously update/draw to the window.<br />
+          Continuously update/draw to the window.<br />
           May be used when steam oerlay detection fails
           or other issues with the steam overlay occur
 
@@ -196,7 +196,7 @@ fullscreen = true
 # Enable continuous redraw
 # May be used when steam oerlay detection fails or other issues with the steam overlay occur
 # may increase CPU/GPU usage
-continous_draw = false
+continuous_draw = false
 
 [log]
 # Logging level

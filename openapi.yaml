@@ -1,0 +1,443 @@
+openapi: 3.1.0
+info:
+  title: SISR
+  description: ''
+  license:
+    name: ''
+  version: 0.0.1
+paths:
+  /api/v1/connect_viiper:
+    post:
+      tags:
+      - viiper
+      summary: Connect Viiper
+      description: Connects to Viiper service
+      operationId: connect_viiper
+      responses:
+        '200':
+          description: ''
+        '401':
+          description: VIIPER auth required
+        '409':
+          description: Issue with VIIPER connection
+        '500':
+          description: Unknown error
+        '502':
+          description: Bad gateway - VIIPER not reachable
+  /api/v1/create_marker_shortcut:
+    post:
+      tags:
+      - inject
+      summary: Create Marker Shortcut
+      description: Creates a marker shortcut in Steam
+      operationId: create_marker_shortcut
+      responses:
+        '200':
+          description: ''
+        '409':
+          description: Marker Shortcut present / Steam CEF Debugging not reachable
+        '500':
+          description: Unknown error
+  /api/v1/enable_cef_remote_debug:
+    post:
+      tags:
+      - steam
+      summary: Enable CEF Remote Debugging
+      description: Enables the CEF remote debugging interface of Steam by creating the required file (and restarting Steam)
+      operationId: enable_cef_remote_debug
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/inject_overlay_notifier:
+    post:
+      tags:
+      - inject
+      summary: Inject Overlay Notifier
+      description: Injects overlay notifier into Steams shared context
+      operationId: inject_overlay_notifier
+      responses:
+        '200':
+          description: ''
+        '409':
+          description: Steam CEF Debugging not reachable
+        '500':
+          description: Unknown error
+  /api/v1/input_info:
+    get:
+      tags:
+      - info
+      summary: Get Input Info
+      description: Returns information about the controllers detected
+      operationId: get_input_info
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InputInfoResponse'
+  /api/v1/overlay_state_changed:
+    post:
+      tags:
+      - callback
+      summary: On overlay change
+      description: Callback for when the steam overlay is opened or closed.
+      operationId: on_overlay_state_changed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OverlayStateChangePayload'
+        required: true
+      responses:
+        '200':
+          description: ''
+        '422':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/restart_sisr:
+    post:
+      tags:
+      - ui
+      summary: Restart Application
+      description: Shuts the current SISR instance down and relaunches it with the same arguments.
+      operationId: restart_sisr
+      responses:
+        '200':
+          description: ''
+        '424':
+          description: Failed to schedule restart
+        '501':
+          description: Restart is not implemented on this platform
+  /api/v1/restart_steam:
+    post:
+      tags:
+      - steam
+      summary: Restart Steam
+      description: Attempts to restart Steam
+      operationId: restart_steam
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/show_hide_ui:
+    post:
+      tags:
+      - ui
+      summary: Change UI State
+      description: Changes the UI state (show/hide)
+      operationId: change_ui_state
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeUiStatePayload'
+        required: true
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/shutdown:
+    post:
+      tags:
+      - ui
+      summary: Shutdown Application
+      description: Shuts down the application gracefully
+      operationId: shutdown
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/steam_cef_reachable:
+    get:
+      tags:
+      - steam
+      summary: Get Steam CEF Remote Debugging Reachability
+      description: Returns whether the CEF remote debugging interface of Steam is reachable.
+      operationId: steam_cef_reachable
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteCefReachable'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/steam_status:
+    get:
+      tags:
+      - steam
+      summary: Get Steam Status
+      description: Returns information about Steam, the SISR marker shortcut, and the CEF remote debugging (of Steam)
+      operationId: steam_status
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SteamStatus'
+        '500':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    ChangeUiStatePayload:
+      type: object
+      required:
+      - show
+      properties:
+        show:
+          type: boolean
+    DeviceInfo:
+      type: object
+      required:
+      - steam_handle
+      - has_viiper_device
+      - sdl_device_count
+      - sdl_devices
+      properties:
+        corresponding_device_id:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          minimum: 0
+        has_viiper_device:
+          type: boolean
+        sdl_device_count:
+          type: integer
+          format: int32
+          minimum: 0
+        sdl_devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/SDLDeviceInfo'
+        steam_handle:
+          type: integer
+          format: int64
+          minimum: 0
+        viiper_type:
+          type:
+          - string
+          - 'null'
+    InputInfoResponse:
+      type: object
+      required:
+      - devices
+      - viiper
+      - keyboard_mouse_emulation
+      - steam_overlay_open
+      - fullscreen
+      properties:
+        devices:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DeviceInfo'
+          propertyNames:
+            type: integer
+            format: int64
+            minimum: 0
+        fullscreen:
+          type: boolean
+        keyboard_mouse_emulation:
+          type: boolean
+        steam_overlay_open:
+          type: boolean
+        viiper:
+          $ref: '#/components/schemas/ViiperInfo'
+    OverlayStateChangePayload:
+      type: object
+      required:
+      - open
+      properties:
+        open:
+          type: boolean
+    ProblemDetails:
+      allOf:
+      - oneOf:
+        - default: null
+        description: |-
+          An object containing extensions to this problem details object.
+
+          Note that the extensions will be flattened into the resulting problem details
+          representation.
+
+          See [https://www.rfc-editor.org/rfc/rfc9457.html#name-extension-members]() for more information.
+      - type: object
+        properties:
+          detail:
+            type:
+            - string
+            - 'null'
+            description: |-
+              An optional human-readable description of this problem.
+
+              See [https://www.rfc-editor.org/rfc/rfc9457.html#name-detail]() for more information.
+          instance:
+            type: string
+            format: uri
+            description: |-
+              An optional uri identifying the specific instance of this problem.
+
+              See [https://www.rfc-editor.org/rfc/rfc9457.html#name-instance]() for more information.
+          status:
+            type: integer
+            format: int32
+            description: |-
+              An optional status code for this problem.
+
+              See [https://www.rfc-editor.org/rfc/rfc9457.html#name-status]() for more information.
+            minimum: 0
+          title:
+            type:
+            - string
+            - 'null'
+            description: |-
+              An optional human-readable title for this problem.
+
+              See [https://www.rfc-editor.org/rfc/rfc9457.html#name-title]() for more information.
+          type:
+            type: string
+            format: uri
+            description: |-
+              An optional uri describing the problem type.
+
+              See [https://www.rfc-editor.org/rfc/rfc9457.html#name-type]() for more information.
+      description: RFC 9457 / RFC 7807 problem details
+    RemoteCefReachable:
+      type: object
+      required:
+      - reachable
+      properties:
+        reachable:
+          type: boolean
+    RemoteDebugStatus:
+      type: object
+      required:
+      - enabled
+      - port
+      properties:
+        enabled:
+          type: boolean
+        port:
+          type: integer
+          format: int32
+          minimum: 0
+    SDLDeviceInfo:
+      type: object
+      required:
+      - joystick_infos
+      - gamepad_infos
+      properties:
+        gamepad_infos:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SdlValue'
+          propertyNames:
+            type: string
+        joystick_infos:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SdlValue'
+          propertyNames:
+            type: string
+    SdlValue:
+      oneOf:
+      - type: string
+      - type:
+        - string
+        - 'null'
+      - type: integer
+        format: int32
+        minimum: 0
+      - type:
+        - integer
+        - 'null'
+        format: int32
+        minimum: 0
+      - type:
+        - integer
+        - 'null'
+        format: int32
+        minimum: 0
+      - type: integer
+        format: int32
+        minimum: 0
+      - type: boolean
+      - type: object
+    SteamStatus:
+      type: object
+      required:
+      - no_steam_mode
+      - remote_debug
+      - running
+      - marker_shortcut_present
+      - steam_game_id
+      - launched_via_steam
+      properties:
+        launched_via_steam:
+          type: boolean
+        marker_app_id:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          minimum: 0
+        marker_shortcut_present:
+          type: boolean
+        no_steam_mode:
+          type: boolean
+        path:
+          type:
+          - string
+          - 'null'
+        remote_debug:
+          $ref: '#/components/schemas/RemoteDebugStatus'
+        running:
+          type: boolean
+        steam_game_id:
+          type: integer
+          format: int64
+          minimum: 0
+    ViiperInfo:
+      type: object
+      required:
+      - address_is_loopback
+      - available
+      - bus_ids
+      properties:
+        address:
+          type:
+          - string
+          - 'null'
+        address_is_loopback:
+          type: boolean
+        available:
+          type: boolean
+        bus_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+            minimum: 0
+        version:
+          type:
+          - string
+          - 'null'

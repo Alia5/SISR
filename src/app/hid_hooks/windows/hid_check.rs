@@ -149,14 +149,12 @@ unsafe fn get_hid_export_table() -> Option<(*const u32, *const u32, usize, usize
 }
 
 pub fn enumerate_hid_exports() {
-    let Some(exports_map) = enumerate_hid_exports_from_disk() else {
-        tracing::error!("Failed to enumerate hid.dll exports baseline from disk");
-        return;
-    };
-
-    EXPORTS_BASELINE
-        .set(exports_map)
-        .expect("Failed to set EXPORTS_BASELINE");
+    EXPORTS_BASELINE.get_or_init(|| {
+        enumerate_hid_exports_from_disk().unwrap_or_else(|| {
+            tracing::error!("Failed to enumerate hid.dll exports baseline from disk");
+            HashMap::new()
+        })
+    });
 }
 
 pub fn detect_hid_hooks() -> Vec<String> {

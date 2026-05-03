@@ -93,6 +93,15 @@ pub struct Config {
     )]
     pub update_notify: Option<UpdateNotify>,
 
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "port",
+        value_name = "PORT",
+        env = "SISR_PORT",
+        help = "Port for the SISR API server to listen on [default: 0] (random free port)"
+    )]
+    pub port: Option<u16>,
+
     #[command(flatten)]
     pub window: WindowOpts,
 
@@ -164,17 +173,21 @@ pub struct WindowOpts {
         help = "Create a fullscreen window [default: true]"
     )]
     pub fullscreen: Option<bool>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        alias = "continuous_draw",
+        skip_serializing_if = "Option::is_none"
+    )]
     #[arg(
-        long = "window-continous-draw",
+        long = "window-continuous-draw",
         visible_alias = "wcd",
         value_name = "BOOL",
         num_args = 0..=1,
         default_missing_value = "false",
-        env = "SISR_WINDOW_CONTINOUS_DRAW",
-        help = "Enable continous redraw (true/false) [default: false]"
+        env = "SISR_WINDOW_CONTINUOUS_DRAW",
+        help = "Enable continuous redraw (true/false) [default: false]"
     )]
-    pub continous_draw: Option<bool>,
+    pub continuous_draw: Option<bool>,
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
@@ -296,6 +309,7 @@ impl Default for Config {
             viiper_password: None,
             kbm_emulation: Some(false),
             update_notify: Some(UpdateNotify::Stable),
+            port: Some(0),
             window: WindowOpts {
                 create: Some(false),
                 fullscreen: Some(true),
@@ -363,7 +377,18 @@ impl Config {
     }
 
     pub fn parse() -> Self {
-        let cli_args = <Self as Parser>::parse();
+        let mut cli_args = <Self as Parser>::parse();
+
+        if cli_args.window.continuous_draw.is_none()
+            && let Ok(value) = env::var("SISR_WINDOW_CONTINOUS_DRAW")
+        {
+            match value.parse::<bool>() {
+                Ok(value) => cli_args.window.continuous_draw = Some(value),
+                Err(err) => warn!(
+                    "Ignoring invalid deprecated env var SISR_WINDOW_CONTINOUS_DRAW={value:?}: {err}"
+                ),
+            }
+        }
 
         let candidates = Self::config_candidate_paths();
         debug!("Config candidate paths: {:?}", candidates);
