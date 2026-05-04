@@ -1423,27 +1423,33 @@ SISR achieves this by utilizing <a href="https://github.com/Alia5/VIIPER">VIIPER
 Unlike its predecessor <a href="https://github.com/Alia5/GlosSI">GlosSI</a>, it does not use the unmaintained <a href="https://github.com/ViGEm/ViGEmBus">ViGEm</a> driver.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Highly experimental WIP. Expect bugs, crashes, and missing features.</p>
 </div>
+<p><strong>Highly experimental work in progress.</strong> Everything is subject to change and may or may not work.<br />
+Expect bugs, crashes, and missing features.</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+</div>
+<p>If you are a Youtuber, and intend cover this software (aside from just mentioning it), <strong>consider talking to me first</strong><br />
+You are not required to, but I'd greatly appreciate it.
+- The software is an active WIP, not ready for wide usage, with a bigger update in the next few days.
+- I want to avoid people with significant reach stating false information.<br />
+- If something is unclear, I'm happy to help and/or improve my documentation</p>
 <h2 id="features-roadmap">✨🛣️ Features / Roadmap</h2>
 <ul>
-<li>✅ Steam Input redirection to system level (localhost or network)  <ul>
-<li>Indistinguishable from real hardware</li>
-</ul>
-</li>
-<li>✅ Xbox 360 controller emulation</li>
-<li>✅ Keyboard/Mouse emulation (only in network scenarios)  <ul>
-<li>Allows use of devices like the Steam Deck as dedicated controller</li>
-</ul>
-</li>
-<li>✅ Flexible configuration (CLI, config files, environment variables)</li>
-<li>✅ Multi-platform support (Windows, Linux)</li>
-<li>✅ Multiple operation modes<ul>
-<li>Standalone background service</li>
+<li>Full SteamInput featureset while emulating compatible controllers (indistinguishable from real hardware)</li>
+<li>Xbox360 <em>or</em></li>
+<li>DualShock 4</li>
+<li>*<em>Non Steam Mode</em></li>
+<li>Xbox 360 controller emulation</li>
+<li>Multi-platform support (Windows, Linux)
+   Multiple operation modes<ul>
+<li>Standalone background service (To be improved)</li>
 <li>Steam overlay window mode</li>
 </ul>
 </li>
-<li>✅ PS4 controller emulation</li>
+<li>PS4 controller emulation</li>
+<li>Networked operation across computers</li>
+<li>Use devices like a SteamDeck as dedicated controller without streaming the whole game/display</li>
 <li><del>🚧 Xbox One controller emulation</del></li>
 <li><del>🚧 Generic controller emulation</del></li>
 <li>🚧 Gyro Passthrough</li>
