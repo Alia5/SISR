@@ -337,7 +337,7 @@ impl Default for Config {
             },
             controller_emulation: ControllerEmulation {
                 default_controller_type: Some(ControllerType::Xbox360),
-                require_controllers_connected_before_launch: Some(true),
+                require_controllers_connected_before_launch: Some(false),
                 gyro_passthrough: Some(true),
             },
             debug: 0,
