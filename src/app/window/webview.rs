@@ -1,8 +1,9 @@
 use std::{env, sync::Arc};
 
 use winit::window::Window;
-#[cfg(not(target_os = "linux"))]
 use wry::WebViewBuilder;
+#[cfg(target_os = "linux")]
+use wry::Rect;
 
 use crate::app::api::get_api_port;
 
