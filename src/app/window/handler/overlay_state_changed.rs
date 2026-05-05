@@ -18,7 +18,7 @@ impl EventHandler for Handler {
         _event_loop: &ActiveEventLoop,
         event: &WindowRunnerEvent,
     ) {
-        tracing::trace!("HideWindowHandler received event: {:?}", event);
+        tracing::trace!("OverlayStateChangedHandler received event: {:?}", event);
 
         let overlay_open = match event {
             WindowRunnerEvent::OverlayStateChanged(open) => *open,

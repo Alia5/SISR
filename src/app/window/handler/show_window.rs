@@ -17,7 +17,6 @@ impl EventHandler for Handler {
         event: &WindowRunnerEvent,
     ) {
         tracing::trace!("ShowWindowHandler received event: {:?}", event);
-        tracing::trace!("HideWindowHandler received event: {:?}", event);
 
         let Some(window) = runner.get_window() else {
             tracing::warn!("wtf? no window.");
