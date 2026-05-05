@@ -176,6 +176,13 @@ viiper_password = ""
 # Will only work if the specified VIIPER server does not run on localhost
 kbm_emulation = false
 
+# Update notification channel
+# Allowed: "none", "stable", "prerelease"
+update_notify = "stable"
+
+# SISR API server port (0 = random free port)
+port = 0
+
 [controller_emulation]
 # Default controller type for emulation
 # Allowed: "xbox360", "dualshock4"
@@ -184,7 +191,7 @@ default_controller_type = "xbox360"
 # Enable gyro passthrough for supported controllers
 gyro_passthrough = true
 
-require_controllers_connected_before_launch = true
+require_controllers_connected_before_launch = false
 
 [window]
 # Create/Show window at launch
@@ -196,7 +203,7 @@ fullscreen = true
 # Enable continuous redraw
 # May be used when steam oerlay detection fails or other issues with the steam overlay occur
 # may increase CPU/GPU usage
-continuous_draw = false
+continuous_draw = true
 
 [log]
 # Logging level

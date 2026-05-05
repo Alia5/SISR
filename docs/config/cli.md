@@ -47,6 +47,21 @@ Emulate/forward keyboard and mouse inputs
 - Default: `false`
 - Env var: `SISR_KBM_EMULATION`
 
+#### `--update-notify <CHANNEL>`
+
+Update notification channel
+
+- Allowed: `none`, `stable`, `prerelease`
+- Default: `stable`
+- Env var: `SISR_UPDATE_NOTIFY`
+
+#### `--port <PORT>`
+
+Port for the SISR API server to listen on
+
+- Default: `0` (random free port)
+- Env var: `SISR_PORT`
+
 !!! info "Keyboard/Mouse Emulation"
 
     Can only be used if the VIIPER-server is running on a different machine.  
@@ -66,7 +81,7 @@ Default controller type for emulation
 
 Ignore controllers connected after SISR starts. Prevents controller doubling issues
 
-- Default: `true`
+- Default: `false`
 - Env var: `SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH`
 
 #### `--gyro-passthrough [true|false]`
@@ -99,7 +114,7 @@ Continuously update/redraw the window
 Use when Steam overlay detection fails or other overlay issues occur  
 May increase CPU/GPU usage
 
-- Default: `false`
+- Default: `true`
 - Env var: `SISR_WINDOW_CONTINUOUS_DRAW`
 
 ### Logging
