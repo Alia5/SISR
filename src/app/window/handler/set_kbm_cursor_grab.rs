@@ -49,6 +49,6 @@ impl EventHandler for Handler {
     }
 
     fn listen_events(&self) -> Vec<Discriminant<WindowRunnerEvent>> {
-        vec![discriminant(&WindowRunnerEvent::HideWindow())]
+        vec![discriminant(&WindowRunnerEvent::SetKbmCursorGrab(true))]
     }
 }

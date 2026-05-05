@@ -115,6 +115,8 @@ impl WindowRunner {
         let passthrough = get_config().window.fullscreen.unwrap_or(false)
             && !enabled
             && !self.webview.as_ref().is_some_and(|v| v.is_visible());
+        self.set_passthrough(passthrough); 
+        self.update_cursor_visibility();
     }
 
     pub fn get_window(&self) -> Option<Arc<Window>> {
