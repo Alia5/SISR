@@ -183,9 +183,9 @@ pub struct WindowOpts {
         visible_alias = "wcd",
         value_name = "BOOL",
         num_args = 0..=1,
-        default_missing_value = "false",
+        default_missing_value = "true",
         env = "SISR_WINDOW_CONTINUOUS_DRAW",
-        help = "Enable continuous redraw (true/false) [default: false]"
+        help = "Enable continuous redraw (true/false) [default: true]"
     )]
     pub continuous_draw: Option<bool>,
 }
