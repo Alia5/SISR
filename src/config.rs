@@ -313,7 +313,7 @@ impl Default for Config {
             window: WindowOpts {
                 create: Some(false),
                 fullscreen: Some(true),
-                continous_draw: Some(false),
+                continuous_draw: Some(true),
             },
             log: LogOpts {
                 level: if cfg!(debug_assertions) {
