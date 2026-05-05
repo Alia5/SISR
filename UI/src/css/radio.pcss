@@ -1,0 +1,26 @@
+input[type='radio'] {
+	position: relative;
+	appearance: none;
+	border-radius: 100%;
+	display: grid;
+	place-items: center;
+	width: 1.4em;
+	height: 1.4em;
+	padding: 0;
+	&::before {
+		content: '';
+		width: 50%;
+		height: 50%;
+		border-radius: 100%;
+		transition: all var(--transition-duration) var(--default-ease);
+	}
+	&:checked::before {
+		background-color: var(--text-color);
+	}
+	&:hover,
+	&:focus-visible {
+		& input[type='radio']::before {
+			background-color: color-mix(in srgb, var(--text-color), transparent 75%);
+		}
+	}
+}

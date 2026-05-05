@@ -1,0 +1,74 @@
+hr {
+	opacity: 0.3;
+}
+
+picture,
+img {
+	object-fit: contain;
+	object-position: center;
+	height: fit-content;
+}
+
+pre,
+code {
+	background: var(--card-background-noise);
+}
+
+code {
+	margin: 0.25em;
+	line-height: 1.6;
+}
+
+table {
+	background: var(--card-background-noise);
+	border: 1px solid color-mix(in srgb, var(--text-color), transparent 75%);
+	border-radius: 0.5em;
+	padding: 0;
+	border-spacing: 0;
+	& th {
+		text-align: center;
+		padding: 0.5em 1em;
+	}
+	& thead {
+		position: relative;
+		background-color: color-mix(in srgb, var(--text-color), transparent 90%);
+		&::after {
+			content: '';
+			position: absolute;
+			width: 100%;
+			bottom: 0;
+			display: block;
+			height: 1px;
+			background: color-mix(in srgb, var(--text-color), transparent 50%);
+		}
+	}
+	& tr {
+		& > :nth-child(n) {
+			position: relative;
+			&::after {
+				content: '';
+				position: absolute;
+				width: 1px;
+				height: 100%;
+				right: 0;
+				top: 0;
+				display: block;
+				background: color-mix(in srgb, var(--text-color), transparent 50%);
+			}
+		}
+		& > :last-child {
+			&::after {
+				opacity: 0;
+			}
+		}
+	}
+	& td {
+		padding: 0.5em 1em;
+	}
+	& tbody {
+		& tr:nth-child(even) {
+			background-color: color-mix(in srgb, var(--text-color), transparent 95%);
+		}
+	}
+	width: fit-content;
+}

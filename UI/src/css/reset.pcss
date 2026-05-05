@@ -1,0 +1,128 @@
+:active-view-transition-type(theme) {
+	&::view-transition-old(*),
+	&::view-transition-new(*) {
+		animation-duration: calc(var(--transition-duration) * 3);
+		animation-timing-function: var(--default-ease);
+	}
+
+	&::view-transition-old(*) {
+		animation-name: fade-out;
+	}
+
+	&::view-transition-new(*) {
+		animation-name: fade-in;
+	}
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+	animation-duration: calc(var(--transition-duration) * 2);
+	animation-fill-mode: forwards;
+	animation-timing-function: var(--default-ease);
+}
+
+*,
+::before,
+::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+
+/* Set core root defaults */
+html:focus-within {
+	scroll-behavior: smooth;
+}
+
+/* Make images easier to work with */
+picture,
+img {
+	max-width: 100%;
+	display: block;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+	font: inherit;
+}
+
+body {
+	background: var(--background-noise);
+	color: var(--text-color);
+	width: 100%;
+	font-family:
+		'Noto Sans',
+		'Noto Color Emoji',
+		'Segoe UI',
+		Roboto,
+		Oxygen,
+		Ubuntu,
+		Cantarell,
+		BlinkMacSystemFont,
+		-apple-system,
+		'Open Sans',
+		'Helvetica Neue',
+		sans-serif;
+	font-smoothing: antialiased;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+}
+
+fieldset {
+	border: 1px solid transparent;
+}
+
+ul,
+ol {
+	margin-left: 1.5em;
+}
+
+blockquote {
+	border-left: 0.25em solid var(--text-color);
+	padding: 0.5em;
+	opacity: 0.75;
+	background: var(--card-background-noise);
+	border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+	html:focus-within {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+		animation-delay: 0ms !important;
+	}
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}

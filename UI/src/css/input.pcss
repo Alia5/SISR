@@ -1,0 +1,26 @@
+input:not([type='checkbox']) {
+	background-color: transparent;
+	border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+	padding: 0.5em 1em;
+	color: var(--text-color);
+	border-radius: 0.5rem;
+	box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.25);
+	&::placeholder {
+		color: var(--text-color);
+		opacity: 0.5;
+	}
+}
+
+input {
+	transition: all var(--transition-duration) var(--default-ease);
+	outline: 1px solid transparent;
+	&:hover,
+	&:focus-visible {
+		outline: 0.16em solid var(--color-primary);
+	}
+}
+
+input[type='search']::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+	-webkit-user-modify: read-write !important;
+}

@@ -1,0 +1,55 @@
+a {
+	color: var(--color-primary);
+	text-decoration: none;
+	position: relative;
+
+	transition: all var(--transition-duration) var(--default-ease);
+
+	&:hover,
+	&:focus-within {
+		color: var(--color-primary-active);
+		& + li::after {
+			translate: -100%;
+			--scale-delay: var(--transition-duration);
+			--translate-delay: var(--transition-duration);
+		}
+	}
+
+	outline: 1px solid transparent;
+	outline-offset: 0.25em;
+	border-radius: 0.1em;
+}
+
+a:not(.button):not(.plain) {
+	&:hover,
+	&:focus-visible {
+		outline: 1px solid transparent;
+	}
+}
+
+a:not(.button):not(.plain):has(+ :hover) {
+	&::after {
+		translate: 100%;
+		--scale-delay: var(--transition-duration);
+		--translate-delay: var(--transition-duration);
+	}
+}
+a:not(.button):not(.plain)::after {
+	content: '';
+	height: 0.1em;
+	width: 100%;
+	bottom: 0em;
+	left: 0;
+	position: absolute;
+	background: currentColor;
+	scale: 0 1;
+	transition:
+		scale var(--transition-duration) var(--scale-delay, 0ms) var(--default-ease),
+		translate calc(var(--transition-duration) * 2) var(--translate-delay, 0ms) var(--default-ease);
+}
+a:not(.button):not(.plain):hover,
+a:not(.button):not(.plain):focus-within {
+	&::after {
+		scale: 1 1;
+	}
+}

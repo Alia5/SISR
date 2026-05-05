@@ -1,0 +1,23 @@
+code {
+	border: 1px solid color-mix(in srgb, var(--text-color), transparent 75%);
+	border-radius: 0.5em;
+	padding: 0.33em;
+	max-width: 100%;
+	overflow-x: scroll;
+	box-shadow: inset 1px 1px 1px 0 var(--shadow-color);
+	white-space: nowrap;
+
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+pre {
+	width: 100%;
+	& > code {
+		display: block;
+		padding: 1em;
+		white-space: pre-wrap;
+	}
+}

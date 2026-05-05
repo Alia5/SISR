@@ -1,0 +1,95 @@
+:root[data-theme='dark'] {
+	--text-alpha: 0.95;
+	--effect-alpha: 0.2;
+	--inverse-effect-alpha: 0.5;
+	--bg-alpha: 0.01;
+	--bg-contrast: 1.85;
+	--grad-alpha: 0.209;
+}
+
+:root[data-theme='light'] {
+	--text-alpha: 0.97;
+	--effect-alpha: 0.5;
+	--inverse-effect-alpha: 0.25;
+	--bg-alpha: 0.023;
+	--bg-contrast: 2.85;
+	--grad-alpha: 0.109;
+}
+
+:root {
+	color-scheme: light dark;
+
+	--text-color-dark: rgb(245 245 245 / 0.95);
+	--text-color-light: rgb(10 10 10 / 0.97);
+
+	--text-color: light-dark(var(--text-color-light), var(--text-color-dark));
+	--highlight-color: light-dark(
+		color-mix(in srgb, var(--text-color), var(--color-primary) 50%),
+		color-mix(in srgb, var(--color-primary), var(--text-color) 60%)
+	);
+	--inverse-text-color: light-dark(var(--text-color-dark), var(--text-color-light));
+	--text-muted: color-mix(in srgb, var(--text-color), var(--inverse-text-color) 20%);
+	--color-primary: light-dark(#7e3ddf, #8d54e2);
+	--color-primary-active: color-mix(in srgb, var(--color-primary), var(--text-color) 75%);
+	--card-color: light-dark(#dfdee9ff, #1d1b22ff);
+	--inverse-card-color: light-dark(#211f25ff, #dfdee9ff);
+	--background-color: light-dark(#f8f7fa, #0c0d13);
+	--shadow-color: light-dark(#0f0f0f3f, #0e0e0ea1);
+	--shadow-color-dark: light-dark(#0f0f0f54, #030303c4);
+
+	--background-neutral-alpha: rgba(128, 128, 128, 0.25);
+
+	--transition-duration: 196ms;
+	--default-ease: cubic-bezier(0.85, 0.09, 0.15, 0.91);
+	--ease-vanish: cubic-bezier(0.55, 0, 1, 0.45);
+	--ease-appear: cubic-bezier(0, 0.55, 0.45, 1);
+
+	--border-radius: 1em;
+
+	--scrollbar-bg: hsl(0 0% 50% / 0.1);
+	--thumb-bg: hsl(0 0% 50% / 0.5);
+	--scrollbar-width: 0.65rem;
+
+	-webkit-tap-highlight-color: color-mix(
+		in srgb,
+		light-dark(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.2)),
+		var(--background-neutral-alpha) 75%
+	);
+
+	--card-shadow: 0.1em 0.2em 0.5em 0 var(--shadow-color);
+
+	--card-border-pseudo-gradient: linear-gradient(
+		15deg,
+		light-dark(rgba(6, 6, 12, 0.522), rgba(73, 73, 73, 0.26)) 0%,
+		rgba(82, 82, 82, 0.24) 50%,
+		light-dark(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.295))
+	);
+
+	--bg-noise: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' xmlns:xlink='http://www.w3.org/1999/xlink'><filter id='noice'><feTurbulence type='fractalNoise' baseFrequency='1.24' numOctaves='4' stitchTiles='stitch'></feTurbulence><feColorMatrix type='saturate' values='0'></feColorMatrix><feComponentTransfer><feFuncR type='linear' slope='0.46'></feFuncR><feFuncG type='linear' slope='0.46'></feFuncG><feFuncB type='linear' slope='0.46'></feFuncB><feFuncA type='linear' slope='0.56'></feFuncA></feComponentTransfer><feComponentTransfer><feFuncR type='linear' slope='1.47' intercept='-0.23' /><feFuncG type='linear' slope='1.47' intercept='-0.23' /><feFuncB type='linear' slope='1.47' intercept='-0.23' /></feComponentTransfer></filter><rect width='50' height='50' filter='url(#noice)'></rect></svg>");
+	--bg-noise-transparent: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' xmlns:xlink='http://www.w3.org/1999/xlink'><filter id='noice'><feTurbulence type='fractalNoise' baseFrequency='1.24' numOctaves='4' stitchTiles='stitch'></feTurbulence><feColorMatrix type='saturate' values='0'></feColorMatrix><feComponentTransfer><feFuncR type='linear' slope='0.46'></feFuncR><feFuncG type='linear' slope='0.46'></feFuncG><feFuncB type='linear' slope='0.46'></feFuncB><feFuncA type='linear' slope='0.56'></feFuncA></feComponentTransfer><feComponentTransfer><feFuncR type='linear' slope='1.47' intercept='-0.23' /><feFuncG type='linear' slope='1.47' intercept='-0.23' /><feFuncB type='linear' slope='1.47' intercept='-0.23' /></feComponentTransfer></filter><rect width='50' height='50' filter='url(#noice) opacity(0.25)'></rect></svg>");
+	--noise-filter: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><filter id='noise'><feTurbulence type='fractalNoise' baseFrequency='1.24' numOctaves='4' stitchTiles='stitch'></feTurbulence><feColorMatrix type='saturate' values='0'></feColorMatrix><feComponentTransfer><feFuncR type='linear' slope='0.46'></feFuncR><feFuncG type='linear' slope='0.46'></feFuncG><feFuncB type='linear' slope='0.46'></feFuncB><feFuncA type='linear' slope='0.56'></feFuncA></feComponentTransfer><feComponentTransfer><feFuncR type='linear' slope='1.47' intercept='-0.23' /><feFuncG type='linear' slope='1.47' intercept='-0.23' /><feFuncB type='linear' slope='1.47' intercept='-0.23' /></feComponentTransfer></filter></svg>#noise");
+
+	--noise-card-color: light-dark(
+		color-mix(in srgb, var(--card-color), transparent 23%),
+		color-mix(in srgb, var(--card-color), transparent 12%)
+	);
+	--card-background-noise:
+		linear-gradient(var(--noise-card-color), var(--noise-card-color)), var(--bg-noise);
+
+	--card-glass:
+		linear-gradient(
+			165deg,
+			color-mix(in srgb, var(--card-color), transparent calc(25% / var(--card-glass-bg-opacity, 1)))
+				0%,
+			color-mix(in srgb, var(--card-color), transparent calc(60% / var(--card-glass-bg-opacity, 1)))
+				70%
+		),
+		var(--bg-noise-transparent);
+
+	--noise-background-color: light-dark(
+		color-mix(in srgb, var(--background-color), transparent 18%),
+		color-mix(in srgb, var(--background-color), transparent 7%)
+	);
+	--background-noise:
+		linear-gradient(var(--noise-background-color), var(--noise-background-color)), var(--bg-noise);
+}

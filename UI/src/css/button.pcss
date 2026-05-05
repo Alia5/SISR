@@ -1,0 +1,45 @@
+button,
+.button {
+	text-decoration: none;
+	background-color: transparent;
+	/* border: 1px solid color-mix(in srgb, var(--text-color), transparent 60%); */
+	border: none;
+	outline-offset: -1px;
+	cursor: pointer;
+	outline: 1px solid transparent;
+	padding: 1rem;
+	color: var(--text-color);
+	border-radius: 100vw;
+	box-shadow: 0 1px 4px 0 rgb(0 0 0 / 0.25);
+	display: grid;
+	grid-auto-flow: column;
+	transition: all var(--transition-duration) var(--default-ease);
+
+	&:hover:not(:disabled, .plain),
+	&:focus-visible:not(:disabled, .plain) {
+		outline: 2px solid var(--color-primary);
+		box-shadow: 0 0 1.3em -0.4em var(--color-primary);
+		background-color: color(from var(--color-primary) srgb r g b / 0.4);
+	}
+	&:disabled {
+		cursor: not-allowed;
+	}
+	position: relative;
+
+	&:not(.plain) {
+		background: var(--card-glass);
+		background-color: color(from var(--color-primary) srgb r g b / 0.2);
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: inherit;
+			border: 1px solid transparent;
+			background: var(--card-border-pseudo-gradient) border-box;
+			mask:
+				linear-gradient(black, black) border-box,
+				linear-gradient(black, black) padding-box;
+			mask-composite: subtract;
+		}
+	}
+}

@@ -1,0 +1,99 @@
+input[type='checkbox']:is(.toggle) {
+	appearance: none;
+	--toggle-height: 2em;
+	--toggle-width: 3.5em;
+	--indicator-padding: 0.7em;
+	min-width: var(--toggle-width);
+	position: relative;
+	display: grid;
+	place-items: center;
+
+	border-radius: 100vh;
+
+	&::before {
+		content: '';
+		width: var(--toggle-width);
+		height: var(--toggle-height);
+		background-color: transparent;
+		inset: 0;
+		border-radius: 100vh;
+		border: 1px solid transparent;
+		box-shadow: inset 0 2px 4px var(--shadow-color);
+	}
+	&::after {
+		content: '';
+		position: absolute;
+		--size: calc(var(--toggle-height) - var(--indicator-padding));
+		height: var(--size);
+		width: var(--size);
+		background-color: var(--text-color);
+		border-radius: 100vh;
+		left: calc(var(--indicator-padding) / 2);
+		box-shadow: 0 2px 2px var(--shadow-color);
+		transition: all var(--transition-duration) var(--default-ease);
+	}
+	&:checked {
+		&::after {
+			left: calc(var(--toggle-width) - var(--toggle-height) + (var(--indicator-padding) / 2));
+		}
+	}
+	&:hover,
+	&:focus-visible {
+		cursor: pointer;
+		box-shadow: 0 0 1.3em -0.4em var(--color-primary);
+	}
+}
+
+input[type='checkbox']:not(.toggle) {
+	position: relative;
+	appearance: none;
+	border-radius: 0.25em;
+	display: grid;
+	place-items: center;
+	width: 1.4em;
+	height: 1.4em;
+	padding: 0;
+	border: 1px solid color-mix(in srgb, var(--text-color), transparent 75%);
+
+	&::before {
+		content: '';
+		width: 100%;
+		height: 100%;
+		border-radius: 0.25em;
+		position: absolute;
+		transition: all var(--transition-duration) var(--default-ease);
+	}
+	&:checked::before {
+		background-color: var(--text-color);
+	}
+
+	&::after {
+		position: absolute;
+		content: '';
+		opacity: 0;
+		width: 60%;
+		height: 60%;
+		background-color: var(--inverse-text-color);
+		transition: all var(--transition-duration) var(--default-ease);
+		transform-origin: bottom left;
+		clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+	}
+	&:checked::after {
+		content: '';
+		opacity: 1;
+	}
+
+	&:hover,
+	&:focus-visible {
+		& input[type='checkbox']::before {
+			background-color: color-mix(in srgb, var(--text-color), transparent 75%);
+		}
+	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
+	&:hover {
+		cursor: pointer;
+	}
+}

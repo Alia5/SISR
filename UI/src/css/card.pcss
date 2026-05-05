@@ -1,0 +1,32 @@
+.card {
+	padding: 1em;
+	position: relative;
+	isolation: isolate;
+
+	&:is(.glass) {
+		background: var(--card-glass);
+		backdrop-filter: blur(6px);
+	}
+	&:not(.glass) {
+		background: var(--card-background-noise);
+		background-color: var(--card-color);
+	}
+
+	border-radius: var(--border-radius);
+	box-shadow: var(--card-shadow);
+
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		border: 1px solid transparent;
+		background: var(--card-border-pseudo-gradient) border-box;
+		mask:
+			linear-gradient(black, black) border-box,
+			linear-gradient(black, black) padding-box;
+		mask-composite: subtract;
+		opacity: 0.5;
+		z-index: -1;
+	}
+}
