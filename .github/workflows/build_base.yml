@@ -36,14 +36,24 @@ jobs:
               with:
                   node-version: "25"
                   cache: "npm"
-                  cache-dependency-path: cef_injectee/package-lock.json
+                  cache-dependency-path: |
+                      CEF_Payloads/package-lock.json
+                      UI/package-lock.json
 
-            - name: Install cef_injectee dependencies
-              working-directory: cef_injectee
-              run: npm install
+            - name: Install CEF_Payloads dependencies
+              working-directory: CEF_Payloads
+              run: npm ci
 
-            - name: Build cef_injectee
-              working-directory: cef_injectee
+            - name: Build CEF_Payloads
+              working-directory: CEF_Payloads
+              run: npm run build
+
+            - name: Install UI dependencies
+              working-directory: UI
+              run: npm ci
+
+            - name: Build UI
+              working-directory: UI
               run: npm run build
 
             - name: Cache Rust dependencies
@@ -117,14 +127,24 @@ jobs:
               with:
                   node-version: "25"
                   cache: "npm"
-                  cache-dependency-path: cef_injectee/package-lock.json
+                  cache-dependency-path: |
+                      CEF_Payloads/package-lock.json
+                      UI/package-lock.json
 
-            - name: Install cef_injectee dependencies
-              working-directory: cef_injectee
-              run: npm install
+            - name: Install CEF_Payloads dependencies
+              working-directory: CEF_Payloads
+              run: npm ci
 
-            - name: Build cef_injectee
-              working-directory: cef_injectee
+            - name: Build CEF_Payloads
+              working-directory: CEF_Payloads
+              run: npm run build
+
+            - name: Install UI dependencies
+              working-directory: UI
+              run: npm ci
+
+            - name: Build UI
+              working-directory: UI
               run: npm run build
 
             - name: Cache Rust dependencies
@@ -235,7 +255,7 @@ jobs:
 
             - name: Upload artifact
               if: ${{ inputs.upload_artifacts }}
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7.0.1
               with:
                   name: SISR-${{ matrix.target.name }}${{ inputs.artifact_suffix }}
                   path: |
@@ -245,7 +265,7 @@ jobs:
 
             - name: Upload AppImage artifact
               if: ${{ inputs.upload_artifacts && (startsWith(matrix.target.name, 'aarch64-linux') || startsWith(matrix.target.name, 'x86_64-linux')) }}
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7.0.1
               with:
                   name: SISR-${{ matrix.target.name }}-AppImage${{ inputs.artifact_suffix }}
                   path: dist/appimage/*.AppImage
