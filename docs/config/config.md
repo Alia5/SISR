@@ -222,12 +222,6 @@ file_level = "info"
 # Support redirecting controllers WITHOUT Steam running
 no_steam = false
 
-# Disable Steam CEF remote debugging
-cef_debug_disable = false
-
-# Time to wait for Steam to launch (seconds)
-steam_launch_timeout_secs = 1
-
 # explicit Steam path, normally auto inferred to something like:
 steam_path = "C:/Program Files (x86)/Steam"
 ```

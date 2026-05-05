@@ -85,8 +85,6 @@ you can do by creating a config file in:
 default_controller_type = "dualshock4"
 
 [steam]
-# allow longer timeout for steam to launch if your computer is a potato ;P
-steam_launch_timeout_secs = 5
 # explicit Steam path, normally not needed and auto-detected
 steam_path = "C:/Program Files (x86)/Steam"
 ```

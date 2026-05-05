@@ -270,26 +270,6 @@ pub struct SteamOpts {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[arg(
-        long = "disable-steam-cef-debug",
-        value_name = "BOOL",
-        num_args = 0..=1,
-        default_missing_value = "true",
-        env = "SISR_STEAM_CEF_DEBUG_DISABLE",
-        help = "Disable Steam CEF remote debugging (true/false) [default: true]"
-    )]
-    pub cef_debug_disable: Option<bool>,
-
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[arg(
-        long = "steam-launch-timeout-secs",
-        value_name = "SECONDS",
-        env = "SISR_STEAM_LAUNCH_TIMEOUT_SECS",
-        help = "Time to wait for Steam to launch in seconds [default: 1]"
-    )]
-    pub steam_launch_timeout_secs: Option<u64>,
-
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[arg(
         long = "steam-path",
         value_name = "PATH",
         env = "SISR_STEAM_PATH",
@@ -331,8 +311,6 @@ impl Default for Config {
             },
             steam: SteamOpts {
                 no_steam: Some(false),
-                cef_debug_disable: Some(false),
-                steam_launch_timeout_secs: Some(1),
                 steam_path: None,
             },
             controller_emulation: ControllerEmulation {

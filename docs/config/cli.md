@@ -150,20 +150,6 @@ Support redirecting controllers WITHOUT Steam running
 - Default: `false`
 - Env var: `SISR_NO_STEAM`
 
-#### `--disable-steam-cef-debug [true|false]`
-
-Disable Steam CEF remote debugging
-
-- Default: `false`
-- Env var: `SISR_STEAM_CEF_DEBUG_DISABLE`
-
-#### `--steam-launch-timeout-secs <SECONDS>`
-
-Time to wait for Steam to launch
-
-- Default: `1`
-- Env var: `SISR_STEAM_LAUNCH_TIMEOUT_SECS`
-
 #### `--steam-path <PATH>`
 
 Explicit Steam installation path  
