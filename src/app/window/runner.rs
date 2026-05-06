@@ -43,6 +43,10 @@ pub struct WindowRunner {
     previous_continuous_draw: bool,
     previous_passthrough_window: bool,
     ctx: Arc<std::sync::Mutex<Context>>,
+    #[cfg(target_os = "linux")]
+    linux_tray: Option<tray::TrayContext>,
+    #[cfg(target_os = "linux")]
+    tray_enabled: bool,
 }
 
 impl WindowRunner {
@@ -75,10 +79,28 @@ impl WindowRunner {
             ctx,
             previous_continuous_draw: false,
             previous_passthrough_window: false,
+            #[cfg(target_os = "linux")]
+            linux_tray: None,
+            #[cfg(target_os = "linux")]
+            tray_enabled: cfg.tray.unwrap_or(true),
         }
     }
 
     pub fn run(&mut self) -> ExitCode {
+        #[cfg(target_os = "linux")]
+        let event_loop = {
+            use winit::platform::x11::EventLoopBuilderExtX11;
+            let mut builder = EventLoop::<WindowRunnerEvent>::with_user_event();
+            if std::env::var_os("WAYLAND_DISPLAY").is_some() {
+                tracing::info!(
+                    "Wayland detected, forcing X11 backend for winit/wry compatibility \
+                     (lb-wry uses gdkx11 and requires X11 window handles)"
+                );
+                builder.with_x11();
+            }
+            builder.build().expect("Failed to create event loop")
+        };
+        #[cfg(not(target_os = "linux"))]
         let event_loop = EventLoop::<WindowRunnerEvent>::with_user_event()
             .build()
             .expect("Failed to create event loop");
@@ -378,6 +400,15 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         tracing::trace!("Window created, visible: {}", initially_visible);
         let gfx = pollster::block_on(Gfx::new(window.clone()));
 
+        // On Linux, the tray must be created on the main thread after GTK is initialized
+        // (gtk::init() is called inside WebView::new() above). GTK events are pumped via
+        // about_to_wait(), so no separate GTK thread is needed.
+        // Must be created before get_event_sender() is called below.
+        #[cfg(target_os = "linux")]
+        if self.tray_enabled {
+            self.linux_tray = Some(tray::TrayContext::new());
+        }
+
         if let Err(e) =
             tray::event::get_event_sender().send(TrayEvent::SetWindowState(webview.is_visible()))
         {
@@ -401,6 +432,7 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         self.update_cursor_visibility();
 
         self.webview = Some(webview);
+
 
         self.previous_webview_visibility = self.webview.as_ref().is_some_and(|v| v.is_visible());
         self.previous_continuous_draw = self.continuous_draw;
@@ -430,6 +462,11 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
             while gtk::events_pending() {
                 gtk::main_iteration_do(false);
             }
+        }
+
+        #[cfg(target_os = "linux")]
+        if let Some(tray) = self.linux_tray.as_mut() {
+            tray.handle_events();
         }
 
         if !self.continuous_draw {

@@ -27,7 +27,7 @@ pub enum TrayMenuEvent {
     ToggleWindow,
 }
 
-struct TrayContext {
+pub struct TrayContext {
     _tray_icon: TrayIcon,
     menu_ids: HashMap<MenuId, TrayMenuEvent>,
     receiver: mpsc::UnboundedReceiver<TrayEvent>,
@@ -35,7 +35,7 @@ struct TrayContext {
 }
 
 impl TrayContext {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let icon = load_icon();
         let menu = Menu::new();
 
@@ -73,7 +73,7 @@ impl TrayContext {
         }
     }
 
-    fn handle_events(&mut self) -> bool {
+    pub fn handle_events(&mut self) -> bool {
         while let Ok(event) = MenuEvent::receiver().try_recv() {
             match self.menu_ids[&event.id] {
                 TrayMenuEvent::Quit => {
@@ -122,11 +122,7 @@ pub fn shutdown() {
     #[cfg(target_os = "linux")]
     {
         GTK_QUIT_REQUESTED.store(true, std::sync::atomic::Ordering::SeqCst);
-        glib::idle_add(|| {
-            gtk::main_quit();
-            glib::ControlFlow::Break
-        });
-        tracing::trace!("Set GTK quit flag and scheduled main_quit");
+        tracing::trace!("Set GTK quit flag");
     }
 }
 

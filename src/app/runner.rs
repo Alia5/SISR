@@ -108,7 +108,15 @@ impl AppRunner {
             .expect("SDL thread died before signaling ready");
 
         tracing::debug!("Spawning tray thread...");
-        let tray_handle = if cfg.tray.unwrap_or(true) {
+        let tray_handle: Option<std::thread::JoinHandle<()>> = if cfg.tray.unwrap_or(true) {
+            #[cfg(target_os = "linux")]
+            {
+                // On Linux the tray is managed on the main thread inside WindowRunner
+                // (GTK must be initialized and pumped from the main thread). The tray
+                // context is created in WindowRunner::resumed() after gtk::init().
+                None
+            }
+            #[cfg(not(target_os = "linux"))]
             Some(thread::spawn(move || {
                 tray::run();
             }))

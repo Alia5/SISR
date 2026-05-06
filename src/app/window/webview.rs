@@ -17,7 +17,16 @@ impl WebView {
         let webview;
 
         #[cfg(target_os = "linux")]
-        let _ = gtk::init();
+        {
+            if std::env::var_os("WAYLAND_DISPLAY").is_some()
+                && std::env::var_os("GDK_BACKEND").is_none()
+            {
+                // lb-wry uses gdkx11 and requires X11 window handles; force GDK to use
+                // X11 (XWayland) when running under Wayland
+                unsafe { std::env::set_var("GDK_BACKEND", "x11") };
+            }
+            let _ = gtk::init();
+        }
 
         let webview_url = if env::var("DEV") == Ok("1".to_string()) {
             "http://localhost:5173/".to_string()
