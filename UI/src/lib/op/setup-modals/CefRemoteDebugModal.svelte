@@ -44,7 +44,7 @@ let loading = $state(false);
 				<button
 					onclick={() => {
 						loading = true;
-						wrapClientError(client.POST('/api/v1/enable_cef_remote_debug'))
+						wrapClientError(client.POST('/api/v1/enable_cef_remote_debug', { body: { restart_sisr: true } }))
 							.catch((e) => {
 								toast({
 									color: 'firebrick',
@@ -54,12 +54,6 @@ let loading = $state(false);
 							.finally(() => {
 								loading = false;
 								invalidateAll();
-								void wrapClientError(client.POST('/api/v1/restart_sisr')).catch((e) => {
-									toast({
-										color: 'firebrick',
-										message: `Failed to restart SISR.\n Error: ${e}`
-									});
-								});
 							});
 					}}>Enable and restart Steam</button>
 			</div>

@@ -21,7 +21,7 @@ const {
 
 let connectViiper = $state<ConnectViiper>()!;
 
-let initialLaunch = localStorage.getItem('initial_setup_complete') !== 'true';
+let initialLaunch = steamStatus.initial_launch;
 
 let showInitialSetupModal = $derived(initialLaunch);
 

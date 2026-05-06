@@ -1,13 +1,25 @@
+use std::{env, ffi::OsString, process::Command};
+
 use axum::{Json, extract::State, response::IntoResponse};
 use problem_details::ProblemDetails;
 use reqwest::StatusCode;
 
 use crate::{
     app::{
-        api::AppState, hid_hooks, steam::{self}
+        api::AppState, hid_hooks, runner::AppRunner, steam::{self}
     },
     config::get_config,
 };
+
+#[derive(serde::Deserialize, serde::Serialize, utoipa::ToSchema)]
+pub struct RestartSteamPayload {
+    #[serde(default = "default_true")]
+    pub restart_sisr: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
 
 /// Restart Steam
 ///
@@ -16,13 +28,22 @@ use crate::{
     post,
     path = "/api/v1/restart_steam",
     tag = "steam",
+    request_body(content = inline(RestartSteamPayload)),
     responses(
         (status = 200),
         (status = 500, description = "Unknown error"),
     )
 )]
-pub async fn restart_steam(State(_state): State<AppState>) -> impl IntoResponse {
-    tracing::debug!("Received request to restart Steam");
+pub async fn restart_steam(
+    State(_state): State<AppState>,
+    body: Option<Json<RestartSteamPayload>>,
+) -> impl IntoResponse {
+    let restart_sisr_after = body.map(|b| b.restart_sisr).unwrap_or(true);
+    tracing::debug!("Received request to restart Steam (restart_sisr={restart_sisr_after})");
+    do_restart_steam(restart_sisr_after).await
+}
+
+pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
 
     if steam::util::steam_running() {
         let _ = steam::util::open_url("steam://exit");
@@ -50,7 +71,7 @@ pub async fn restart_steam(State(_state): State<AppState>) -> impl IntoResponse 
         }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
     }
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
     if !steam::util::launched_via_steam() && !get_config().steam.no_steam.unwrap_or(false) {
 		#[cfg(all(target_os = "windows", target_arch = "x86_64"))]
@@ -94,6 +115,63 @@ pub async fn restart_steam(State(_state): State<AppState>) -> impl IntoResponse 
                 hid_hooks::rehook::rehook(hook);
             }
         }
+    }
+
+    if restart_sisr_after {
+        tracing::debug!("Scheduling SISR self-restart after Steam restart");
+        let Ok(current_exe) = env::current_exe() else {
+            tracing::error!("Failed to resolve current executable for SISR restart");
+            return (StatusCode::OK, Json(serde_json::json!({}))).into_response();
+        };
+        let current_pid = std::process::id();
+        let current_args: Vec<OsString> = env::args_os().skip(1).collect();
+
+        #[cfg(windows)]
+        {
+            let ps_quote = |value: &str| format!("'{}'", value.replace('\'', "''"));
+            let exe = ps_quote(&current_exe.as_os_str().to_string_lossy());
+            let arg_list = if current_args.is_empty() {
+                String::from("@()")
+            } else {
+                format!(
+                    "@({})",
+                    current_args
+                        .iter()
+                        .map(|arg| ps_quote(&arg.to_string_lossy()))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            };
+            let command = format!(
+                "& {{ while (Get-Process -Id {current_pid} -ErrorAction SilentlyContinue) {{ Start-Sleep -Milliseconds 200 }}; Start-Process -FilePath {exe} -ArgumentList {arg_list} }}"
+            );
+            if let Err(e) = Command::new("powershell")
+                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &command])
+                .spawn()
+            {
+                tracing::error!("Failed to schedule SISR restart: {}", e);
+            }
+        }
+        #[cfg(target_os = "linux")]
+        {
+            let pid = current_pid.to_string();
+            if let Err(e) = Command::new("sh")
+                .arg("-lc")
+                .arg("while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; shift; exec \"$@\"")
+                .arg("restart_sisr")
+                .arg(&pid)
+                .arg(&current_exe)
+                .args(&current_args)
+                .spawn()
+            {
+                tracing::error!("Failed to schedule SISR restart: {}", e);
+            }
+        }
+
+        tokio::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+            AppRunner::shutdown();
+        });
     }
 
     (StatusCode::OK, Json(serde_json::json!({}))).into_response()

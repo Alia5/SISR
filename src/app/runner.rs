@@ -175,7 +175,7 @@ impl AppRunner {
         get_tokio_handle().spawn(async move {
             for tab in steam::cef_inject::injector::CLEANUP_TABS {
                 if let Err(e) =
-                    steam::cef_inject::injector::inject_into_tab::<()>(tab, CLEANUP_SCRIPT).await
+                    steam::cef_inject::injector::inject_into_tab_once::<()>(tab, CLEANUP_SCRIPT).await
                 {
                     tracing::error!(
                         "Failed to inject cleanup script into Steam CEF tab '{}': {}",

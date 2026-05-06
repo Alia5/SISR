@@ -58,6 +58,26 @@ pub fn open_url(url: &str) -> Result<(), std::io::Error> {
     Ok(())
 }
 
+pub fn initial_setup_flag_path() -> Option<PathBuf> {
+    directories::ProjectDirs::from("", "", "SISR")
+        .map(|dirs| dirs.data_dir().join(".sisr_initial_setup_done"))
+}
+
+pub fn initial_setup_done() -> bool {
+    initial_setup_flag_path()
+        .map(|p| p.exists())
+        .unwrap_or(false)
+}
+
+pub fn mark_initial_setup_done() {
+    if let Some(path) = initial_setup_flag_path() {
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::File::create(&path);
+    }
+}
+
 pub fn steam_path() -> Option<PathBuf> {
     if let Some(cfg_path) = CONFIG
         .read()

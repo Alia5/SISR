@@ -76,6 +76,7 @@ pub async fn steam_status(
     (
         StatusCode::OK,
         Json(SteamStatus {
+            initial_launch: !steam::util::initial_setup_done(),
             no_steam_mode: get_config().steam.no_steam.unwrap_or(false),
             remote_debug: RemoteDebugStatus {
                 enabled: cef_enable_file_present,
@@ -97,6 +98,7 @@ pub async fn steam_status(
 
 #[derive(Serialize, ToSchema)]
 pub struct SteamStatus {
+    pub initial_launch: bool,
     pub no_steam_mode: bool,
     pub remote_debug: RemoteDebugStatus,
     pub running: bool,

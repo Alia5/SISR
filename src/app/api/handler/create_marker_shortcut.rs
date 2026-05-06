@@ -82,6 +82,7 @@ pub async fn create_marker_shortcut(State(_state): State<AppState>) -> impl Into
                 "Injection reported error, but marker shortcut now exists (appid: {}); treating as success",
                 marker_after_error
             );
+            steam::util::mark_initial_setup_done();
             return (StatusCode::OK, Json(serde_json::json!({}))).into_response();
         }
 
@@ -89,6 +90,7 @@ pub async fn create_marker_shortcut(State(_state): State<AppState>) -> impl Into
             .with_detail(format!("{}", e))
             .into_response();
     }
+    steam::util::mark_initial_setup_done();
 
     (StatusCode::OK, Json(serde_json::json!({}))).into_response()
 }

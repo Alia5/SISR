@@ -45,24 +45,22 @@ impl WebView {
         #[cfg(target_os = "linux")]
         {
             webview = if std::env::var_os("WAYLAND_DISPLAY").is_some() {
-                WebViewBuilder::new()
+                let mut builder = WebViewBuilder::new()
                     .with_url(&webview_url)
-                    .with_transparent(true)
-                    .build(window.as_ref())
-                    .expect("Failed to build webview")
+                    .with_transparent(true);
+                builder.build(window.as_ref()).expect("Failed to build webview")
             } else {
-                WebViewBuilder::new()
+                let mut builder = WebViewBuilder::new()
                     .with_url(&webview_url)
                     .with_transparent(true)
-                    .with_bounds(bounds)
-                    .build_as_child(window.as_ref())
-                    .unwrap_or_else(|_| {
-                        WebViewBuilder::new()
-                            .with_url(&webview_url)
-                            .with_transparent(true)
-                            .build(window.as_ref())
-                            .expect("Failed to build webview")
-                    })
+                    .with_bounds(bounds);
+                builder.build_as_child(window.as_ref()).unwrap_or_else(|_| {
+                    WebViewBuilder::new()
+                        .with_url(&webview_url)
+                        .with_transparent(true)
+                        .build(window.as_ref())
+                        .expect("Failed to build webview")
+                })
             };
         }
 

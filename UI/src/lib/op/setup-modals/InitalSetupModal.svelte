@@ -53,8 +53,9 @@ let loading = $state(false);
 				<button
 					onclick={async () => {
 						loading = true;
+
 						try {
-							await wrapClientError(client.POST('/api/v1/enable_cef_remote_debug'));
+							await wrapClientError(client.POST('/api/v1/enable_cef_remote_debug', { body: { restart_sisr: false } }));
 						} catch (e) {
 							loading = false;
 							toast({
@@ -73,7 +74,6 @@ let loading = $state(false);
 							});
 							return;
 						}
-						localStorage.setItem('initial_setup_complete', 'true');
 						loading = false;
 						invalidateAll();
 						void wrapClientError(client.POST('/api/v1/restart_sisr')).catch((e) => {
