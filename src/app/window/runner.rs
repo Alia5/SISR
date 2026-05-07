@@ -296,26 +296,26 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         &mut self,
         _event_loop: &ActiveEventLoop,
         _device_id: winit::event::DeviceId,
-        _event: DeviceEvent,
+        event: DeviceEvent,
     ) {
-        // TODO: is this even needed?
-
-        // if self.ui_visible {
-        //     return;
-        // }
-        // if !is_kbm_emulation_enabled() {
-        //     return;
-        // }
-
-        // if let DeviceEvent::MouseMotion { delta: (dx, dy) } = event {
-        //     let dx = dx as f32;
-        //     let dy = dy as f32;
-        //     if dx != 0.0 || dy != 0.0 {
-        //         self.try_push_kbm_event(HandlerEvent::KbmPointerEvent(
-        //             kbm_events::KbmPointerEvent::motion(dx, dy),
-        //         ));
-        //     }
-        // }
+        if self.webview.as_ref().is_some_and(|v| v.is_visible()) {
+            return;
+        }
+        if !self.is_kbm_enabled() {
+            return;
+        }
+        if let DeviceEvent::MouseMotion { delta: (dx, dy) } = event
+            && (dx != 0.0 || dy != 0.0)
+        {
+            // CLIPPY!
+            if let Err(e) = crate::app::input::sdl_loop::get_event_sender().push_custom_event(
+                crate::app::input::event::handler_events::InputHandlerEvent::KbmPointerEvent(
+                    crate::app::input::kbm_events::KbmPointerEvent::motion(dx as f32, dy as f32),
+                ),
+            ) {
+                tracing::trace!("Failed to push mouse motion KBM event to SDL: {e}");
+            }
+        }
     }
 
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
@@ -442,9 +442,12 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         // self.window_ready.notify_one();
 
         let window = window_clone.clone();
+        let kbm_at_startup = self.is_kbm_enabled();
         std::thread::spawn(move || {
             std::thread::sleep(Duration::from_millis(100));
-            window.set_visible(initially_visible);
+            // KBM requires a visible window for cursor-grab; keep it shown even when
+            // the UI is not configured to be visible at startup.
+            window.set_visible(initially_visible || kbm_at_startup);
         });
     }
 

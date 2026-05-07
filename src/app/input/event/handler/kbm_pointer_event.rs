@@ -10,9 +10,10 @@ use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::kbm_events;
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::input::viiper_bridge::ViiperBridge;
+use viiper_client::devices::mouse::MouseInput;
 
 pub struct Handler {
-    _ctx: Arc<Mutex<Context>>,
+    ctx: Arc<Mutex<Context>>,
     viiper_bridge: Arc<Mutex<ViiperBridge>>,
     kbm_ctx: Arc<Mutex<KbmContext>>,
 }
@@ -23,7 +24,7 @@ impl Handler {
         kbm_ctx: Arc<Mutex<KbmContext>>,
     ) -> Self {
         Self {
-            _ctx: ctx,
+            ctx,
             viiper_bridge,
             kbm_ctx,
         }
@@ -45,7 +46,7 @@ impl EventHandler for Handler {
                 return;
             }
         };
-        let (_dx, _dy, _wheel, _pan, _button, _button_down) = match event {
+        let (dx, dy, wheel, pan, button, button_down) = match event {
             InputHandlerEvent::KbmPointerEvent(kbm_events::KbmPointerEvent {
                 dx,
                 dy,
@@ -68,52 +69,57 @@ impl EventHandler for Handler {
                 return;
             }
         };
-        // if !window::is_kbm_emulation_enabled() {
-        //     return;
-        // }
-        // let Ok(mut kbm_ctx) = self.kbm_ctx.lock() else {
-        //     tracing::error!("Failed to lock kbm_ctx ");
-        //     return;
-        // };
+        let Ok(ctx) = self.ctx.lock() else {
+            tracing::error!("Failed to lock context");
+            return;
+        };
+        if !ctx.keyboard_mouse_emulation {
+            return;
+        }
+        drop(ctx);
+        let Ok(mut kbm_ctx) = self.kbm_ctx.lock() else {
+            tracing::error!("Failed to lock kbm_ctx ");
+            return;
+        };
 
-        // let mouse_id = match kbm_ctx.mouse_id {
-        //     Some(id) => id,
-        //     None => {
-        //         tracing::warn!("No virtual mouse device available");
-        //         return;
-        //     }
-        // };
+        let mouse_id = match kbm_ctx.mouse_id {
+            Some(id) => id,
+            None => {
+                tracing::warn!("No virtual mouse device available");
+                return;
+            }
+        };
 
-        // if button != 0 {
-        //     let max_button = u8::BITS as u8;
-        //     if button <= max_button {
-        //         let shift = button - 1;
-        //         if let Some(mask) = 1u8.checked_shl(shift as u32) {
-        //             if button_down {
-        //                 kbm_ctx.mouse_buttons |= mask;
-        //             } else {
-        //                 kbm_ctx.mouse_buttons &= !mask;
-        //             }
-        //         }
-        //     }
-        // }
-        // let buttons = kbm_ctx.mouse_buttons;
-        // drop(kbm_ctx);
+        if button != 0 {
+            let max_button = u8::BITS as u8;
+            if button <= max_button {
+                let shift = button - 1;
+                if let Some(mask) = 1u8.checked_shl(shift as u32) {
+                    if button_down {
+                        kbm_ctx.mouse_buttons |= mask;
+                    } else {
+                        kbm_ctx.mouse_buttons &= !mask;
+                    }
+                }
+            }
+        }
+        let buttons = kbm_ctx.mouse_buttons;
+        drop(kbm_ctx);
 
-        // let Ok(viiper) = self.viiper_bridge.lock() else {
-        //     tracing::error!("Failed to lock ViiperBridge");
-        //     return;
-        // };
-        // viiper.update_device_state(
-        //     mouse_id,
-        //     MouseInput {
-        //         dx,
-        //         dy,
-        //         buttons,
-        //         wheel,
-        //         pan,
-        //     },
-        // );
+        let Ok(viiper) = self.viiper_bridge.lock() else {
+            tracing::error!("Failed to lock ViiperBridge");
+            return;
+        };
+        viiper.update_device_state(
+            mouse_id,
+            MouseInput {
+                dx,
+                dy,
+                buttons,
+                wheel,
+                pan,
+            },
+        );
     }
 
     fn listen_events(&self) -> Vec<ListenEvent> {

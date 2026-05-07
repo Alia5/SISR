@@ -12,6 +12,7 @@ use crate::app::input::{
     event::router::{EventHandler, ListenEvent, RoutedEvent},
 };
 use crate::app::window;
+use crate::app::window::event::WindowRunnerEvent;
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -122,11 +123,13 @@ impl EventHandler for Handler {
                 return;
             }
 
-            // match window::get_event_sender().send_event(crate::app::window::RunnerEvent::ToggleUi())
-            // {
-            //     Ok(_) => tracing::debug!("Successfully sent ToggleUi event to window"),
-            //     Err(e) => tracing::error!("Failed to send ToggleUi to window: {e}"),
-            // }
+
+
+            match window::event::get_event_sender().send_event(WindowRunnerEvent::ToggleUi(None))
+            {
+                Ok(_) => tracing::debug!("Successfully sent ToggleUi event to window"),
+                Err(e) => tracing::error!("Failed to send ToggleUi to window: {e}"),
+            }
         }
     }
 

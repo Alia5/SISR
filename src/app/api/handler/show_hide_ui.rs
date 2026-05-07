@@ -23,7 +23,7 @@ pub async fn change_ui_state(
 ) -> impl IntoResponse {
     tracing::debug!("Received request to change UI state: {:?}", body.show);
 
-    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(body.show)) {
+    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(body.show))) {
         tracing::error!("Failed to send ToggleUi event: {:?}", e);
         return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": "Failed to change UI state"}))).into_response();
     }

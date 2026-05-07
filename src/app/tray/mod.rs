@@ -84,7 +84,7 @@ impl TrayContext {
                 TrayMenuEvent::ToggleWindow => {
                     tracing::debug!("Toggle window requested from tray menu");
                     let show = self.toggle_window_item.text() == "Show UI";
-                    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(show)) {
+                    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(show))) {
                         tracing::error!("Failed to send ToggleUi event: {:?}", e);
                     }
                 }

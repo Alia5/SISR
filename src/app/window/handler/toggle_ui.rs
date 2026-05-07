@@ -1,7 +1,7 @@
 use std::mem::{Discriminant, discriminant};
 
 use winit::event_loop::ActiveEventLoop;
-use winit::window::{Fullscreen, WindowLevel};
+use winit::window::{CursorGrabMode, Fullscreen, WindowLevel};
 
 use crate::{
     app::{
@@ -27,24 +27,28 @@ impl EventHandler for Handler {
     ) {
         tracing::trace!("ToggleUiHandler received event: {:?}", event);
 
-        let show = match event {
-            WindowRunnerEvent::ToggleUi(show) => *show,
-            _ => return,
-        };
-
         let Some(window) = runner.get_window() else {
             tracing::warn!("wtf? no window.");
             return;
         };
+        let win_create = get_config().window.create.unwrap_or(false);
+        let fullscreen = get_config().window.fullscreen.unwrap_or(true);
+        let kbm_enabled = runner.is_kbm_enabled();
+
         let Some(wv) = runner.get_webview_mut() else {
             tracing::warn!("Webview not initialized");
             return;
         };
 
-        let win_create = get_config().window.create.unwrap_or(false);
-        let fullscreen = get_config().window.fullscreen.unwrap_or(true);
+        let show = match event {
+            WindowRunnerEvent::ToggleUi(Some(show)) => *show,
+            WindowRunnerEvent::ToggleUi(None) => !wv.is_visible(),
+            _ => return,
+        };
 
-        let should_hide_window = !win_create || !fullscreen;
+        // When KBM is active the window must stay visible for cursor-grab to work;
+        // only the webview should be toggled.
+        let should_hide_window = (!win_create || !fullscreen) && !kbm_enabled;
 
         if !show {
             tracing::info!("Hiding UI");
@@ -60,7 +64,14 @@ impl EventHandler for Handler {
                     tracing::error!("Failed to send HideWindow event: {:?}", e);
                 }
             }
-            runner.set_passthrough(true);
+
+            runner.set_passthrough(fullscreen && !kbm_enabled);
+            if kbm_enabled {
+                if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
+                    tracing::warn!("Failed to confine cursor to window: {e}");
+                }
+                runner.update_cursor_visibility();
+            }
         } else {
             tracing::info!("Showing UI");
             if fullscreen {
@@ -77,6 +88,8 @@ impl EventHandler for Handler {
                 }
             }
             runner.set_passthrough(false);
+            _ = window.set_cursor_grab(winit::window::CursorGrabMode::None);
+            runner.update_cursor_visibility();
         }
         if let Err(e) =
             tray::event::get_event_sender().send(TrayEvent::SetWindowState(show))
@@ -86,6 +99,6 @@ impl EventHandler for Handler {
     }
 
     fn listen_events(&self) -> Vec<Discriminant<WindowRunnerEvent>> {
-        vec![discriminant(&WindowRunnerEvent::ToggleUi(false))]
+        vec![discriminant(&WindowRunnerEvent::ToggleUi(None))]
     }
 }

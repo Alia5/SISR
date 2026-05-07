@@ -39,20 +39,25 @@ impl InputForward {
                     && self.modifiers.alt_key()
                 {
                     tracing::trace!("Toggle UI keybinding pressed");
-                    let Some(window) = window else {
-                        return;
-                    };
-                    // if self.ui_visible {
-                    //     self.ui_visible = false;
-                    //     if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
-                    //         tracing::warn!("Failed to confine cursor to window: {e}");
-                    //     }
-                    // } else {
-                    //     self.ui_visible = true;
-                    //     _ = window.set_cursor_grab(CursorGrabMode::None);
-                    //     self.try_push_kbm_event(HandlerEvent::KbmReleaseAll());
-                    // }
-                    window.request_redraw();
+                    self.try_push_kbm_event(InputHandlerEvent::KbmReleaseAll());
+                    if let Err(e) = crate::app::window::event::get_event_sender()
+                        .send_event(crate::app::window::event::WindowRunnerEvent::ToggleUi(None))
+                    {
+                        tracing::error!("Failed to send ToggleUi to window: {e}");
+                    }
+                    return;
+                }
+
+                if capture_forward {
+                    if let PhysicalKey::Code(code) = event.physical_key
+                        && let Some(scancode) =
+                            crate::app::input::kbm_winit_map::keycode_to_sdl_scancode(code)
+                    {
+                        let down = matches!(event.state, ElementState::Pressed);
+                        self.try_push_kbm_event(InputHandlerEvent::KbmKeyEvent(
+                            kbm_events::KbmKeyEvent { scancode, down },
+                        ));
+                    }
                 }
             }
             WindowEvent::CursorMoved { position, .. } => {

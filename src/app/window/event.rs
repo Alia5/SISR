@@ -8,7 +8,7 @@ pub enum WindowRunnerEvent {
     Redraw(),
     ShowWindow(),
     HideWindow(),
-    ToggleUi(bool),
+    ToggleUi(Option<bool>),
     EnterCaptureMode(),
     SetKbmCursorGrab(bool),
     OverlayStateChanged(bool),
