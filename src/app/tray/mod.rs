@@ -6,12 +6,13 @@ use std::rc::Rc;
 
 use tokio::sync::mpsc;
 use tracing::{Level, Span};
-use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem};
+use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 
 use crate::app::assets::ICON_BYTES;
 use crate::app::tray::event::TrayEvent;
 use crate::app::window::event::{WindowRunnerEvent, get_event_sender};
+use crate::config::get_config;
 
 use super::runner::AppRunner;
 
@@ -24,14 +25,16 @@ static GTK_QUIT_REQUESTED: std::sync::atomic::AtomicBool =
 
 pub enum TrayMenuEvent {
     Quit,
-    ToggleWindow,
+    ToggleUI,
+    ToggleSteamOverlayEnabled,
 }
 
 pub struct TrayContext {
     _tray_icon: TrayIcon,
     menu_ids: HashMap<MenuId, TrayMenuEvent>,
     receiver: mpsc::UnboundedReceiver<TrayEvent>,
-    toggle_window_item: MenuItem,
+    toggle_ui_item: MenuItem,
+    enable_steam_overlay_item: CheckMenuItem,
 }
 
 impl TrayContext {
@@ -46,10 +49,20 @@ impl TrayContext {
         menu.append(&version_entry)
             .expect("Failed to add version entry");
 
-        let toggle_window_item = MenuItem::new("Hide UI", true, None);
-        menu.append(&toggle_window_item)
+        let toggle_ui_item = MenuItem::new("Hide UI", true, None);
+        menu.append(&toggle_ui_item)
             .expect("Failed to add toggle window item");
-        menu_ids.insert(toggle_window_item.id().clone(), TrayMenuEvent::ToggleWindow);
+        menu_ids.insert(toggle_ui_item.id().clone(), TrayMenuEvent::ToggleUI);
+
+        let enable_steam_overlay_item = CheckMenuItem::new(
+            "Enable Steam Overlay",
+            true,
+            get_config().window.create.unwrap_or(false) && get_config().window.fullscreen.unwrap_or(true),
+            None,
+        );
+        menu.append(&enable_steam_overlay_item)
+            .expect("Failed to add enable steam overlay item");
+        menu_ids.insert(enable_steam_overlay_item.id().clone(), TrayMenuEvent::ToggleSteamOverlayEnabled);
 
         let quit_item = MenuItem::new("Quit", true, None);
         menu.append(&quit_item).expect("Failed to add quit item");
@@ -69,7 +82,8 @@ impl TrayContext {
             _tray_icon: tray_icon,
             menu_ids,
             receiver: rx,
-            toggle_window_item,
+            toggle_ui_item,
+            enable_steam_overlay_item,
         }
     }
 
@@ -81,11 +95,27 @@ impl TrayContext {
                     AppRunner::shutdown();
                     return true;
                 }
-                TrayMenuEvent::ToggleWindow => {
+                TrayMenuEvent::ToggleUI => {
                     tracing::debug!("Toggle window requested from tray menu");
-                    let show = self.toggle_window_item.text() == "Show UI";
+                    let show = self.toggle_ui_item.text() == "Show UI";
                     if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(show))) {
                         tracing::error!("Failed to send ToggleUi event: {:?}", e);
+                    }
+                }
+                TrayMenuEvent::ToggleSteamOverlayEnabled => {
+                    tracing::debug!("Toggle Steam Overlay requested from tray menu");
+                    let fullscreen = self.enable_steam_overlay_item.is_checked();
+                    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::SetFullscreen(fullscreen)) {
+                        tracing::error!("Failed to send SetFullscreen event: {:?}", e);
+                    }
+                    if fullscreen {
+                        if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ShowWindow()) {
+                            tracing::error!("Failed to send ShowWindow event: {:?}", e);
+                        }
+                    } else {
+                        if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::HideWindow()) {
+                            tracing::error!("Failed to send HideWindow event: {:?}", e);
+                        }
                     }
                 }
             }
@@ -95,9 +125,9 @@ impl TrayContext {
             match evt {
                 TrayEvent::SetWindowState(visible) => {
                     if visible {
-                        self.toggle_window_item.set_text("Hide UI");
+                        self.toggle_ui_item.set_text("Hide UI");
                     } else {
-                        self.toggle_window_item.set_text("Show UI");
+                        self.toggle_ui_item.set_text("Show UI");
                     };
                 }
             }

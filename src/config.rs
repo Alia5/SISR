@@ -18,6 +18,15 @@ pub fn get_config() -> Config {
         .unwrap_or_default()
 }
 
+pub fn update_config<F: FnOnce(&mut Config)>(f: F) {
+    if let Ok(mut cfg) = CONFIG.write()
+        && let Some(c) = cfg.as_mut() {
+        f(c);
+    } else {
+        tracing::error!("Failed to acquire write lock on CONFIG");
+    }
+}
+
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
 #[command(version = option_env!("SISR_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")), about, long_about = None)]
 pub struct Config {

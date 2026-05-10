@@ -9,6 +9,7 @@ pub enum WindowRunnerEvent {
     ShowWindow(),
     HideWindow(),
     ToggleUi(Option<bool>),
+    SetFullscreen(bool),
     EnterCaptureMode(),
     SetKbmCursorGrab(bool),
     OverlayStateChanged(bool),

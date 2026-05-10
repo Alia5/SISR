@@ -22,7 +22,11 @@ use crate::{
         window::{
             event::{EVENT_SENDER, WindowRunnerEvent},
             gfx::Gfx,
-            handler::{enter_capture_mode, hide_window, invalidate_svelte_state, overlay_state_changed, quit, redraw, router::EventRouter, set_kbm_cursor_grab, show_window, toggle_ui},
+            handler::{
+                enter_capture_mode, hide_window, invalidate_svelte_state, overlay_state_changed,
+                quit, redraw, router::EventRouter, set_fullscreen, set_kbm_cursor_grab,
+                show_window, toggle_ui,
+            },
             input_forward::InputForward,
             webview::WebView,
         },
@@ -50,8 +54,6 @@ pub struct WindowRunner {
 }
 
 impl WindowRunner {
-
-
     pub fn new(ctx: Arc<std::sync::Mutex<Context>>) -> Self {
         let cfg = get_config();
 
@@ -65,6 +67,7 @@ impl WindowRunner {
         router.register(Arc::new(invalidate_svelte_state::Handler::default()));
         router.register(Arc::new(enter_capture_mode::Handler::default()));
         router.register(Arc::new(set_kbm_cursor_grab::Handler::default()));
+        router.register(Arc::new(set_fullscreen::Handler::default()));
 
         Self {
             window: None,
@@ -134,11 +137,31 @@ impl WindowRunner {
             tracing::error!("Failed to lock Context mutex");
             return;
         }
-        let passthrough = get_config().window.fullscreen.unwrap_or(false)
-            && !enabled
-            && !self.webview.as_ref().is_some_and(|v| v.is_visible());
-        self.set_passthrough(passthrough); 
+        self.recalculate_passthrough();
         self.update_cursor_visibility();
+    }
+
+    pub fn recalculate_passthrough(&mut self) {
+        let passthrough = get_config().window.fullscreen.unwrap_or(true)
+            && !self.is_kbm_enabled()
+            && !self.webview.as_ref().is_some_and(|v| v.is_visible());
+        self.set_passthrough(passthrough);
+    }
+
+    pub fn set_fullscreen(&self, fullscreen: bool) {
+        let Some(window) = self.window.clone() else {
+            tracing::error!("WTF?! No Window!");
+            return;
+        };
+        if fullscreen {
+            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+            window.set_decorations(false);
+            window.set_window_level(WindowLevel::AlwaysOnTop);
+        } else {
+            window.set_fullscreen(None);
+            window.set_decorations(true);
+            window.set_window_level(WindowLevel::Normal);
+        }
     }
 
     pub fn get_window(&self) -> Option<Arc<Window>> {
@@ -187,7 +210,6 @@ impl WindowRunner {
         self.continuous_draw = enable;
     }
 
-
     pub fn restore_continuous_draw(&mut self) {
         self.continuous_draw = self.previous_continuous_draw;
         let sender = crate::app::window::event::get_event_sender();
@@ -203,7 +225,7 @@ impl WindowRunner {
         };
         // Don't enable passthrough if overlay is open
         let guarded_enable = enable && !self.overlay_open;
-        
+
         if self.passthrough_window == guarded_enable {
             return;
         }
@@ -417,10 +439,10 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
 
         self.gfx = Some(gfx);
         self.window = Some(window);
+        self.webview = Some(webview);
 
-        let passthrough = fullscreen && !webview.is_visible() && !self.is_kbm_enabled();
-        self.set_passthrough(passthrough);
-        if !webview.is_visible()
+        self.recalculate_passthrough();
+        if !self.webview.as_ref().is_some_and(|v| v.is_visible())
             && self.is_kbm_enabled()
             && let Some(window) = &self.window
         {
@@ -430,9 +452,6 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
             }
         }
         self.update_cursor_visibility();
-
-        self.webview = Some(webview);
-
 
         self.previous_webview_visibility = self.webview.as_ref().is_some_and(|v| v.is_visible());
         self.previous_continuous_draw = self.continuous_draw;
@@ -544,8 +563,8 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
             _ => {}
         }
 
-        let capture_forward = !self.webview.as_ref().is_some_and(|v| v.is_visible()) 
-            && self.is_kbm_enabled();
+        let capture_forward =
+            !self.webview.as_ref().is_some_and(|v| v.is_visible()) && self.is_kbm_enabled();
 
         self.input_forwarder
             .handle_input(&self.window, event_loop, &event, capture_forward);

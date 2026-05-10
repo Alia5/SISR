@@ -1,7 +1,7 @@
 use std::mem::{Discriminant, discriminant};
 
 use winit::event_loop::ActiveEventLoop;
-use winit::window::{CursorGrabMode, Fullscreen, WindowLevel};
+use winit::window::CursorGrabMode;
 
 use crate::{
     app::{
@@ -35,14 +35,9 @@ impl EventHandler for Handler {
         let fullscreen = get_config().window.fullscreen.unwrap_or(true);
         let kbm_enabled = runner.is_kbm_enabled();
 
-        let Some(wv) = runner.get_webview_mut() else {
-            tracing::warn!("Webview not initialized");
-            return;
-        };
-
         let show = match event {
             WindowRunnerEvent::ToggleUi(Some(show)) => *show,
-            WindowRunnerEvent::ToggleUi(None) => !wv.is_visible(),
+            WindowRunnerEvent::ToggleUi(None) => !runner.get_webview().map(|wv| wv.is_visible()).unwrap_or(false),
             _ => return,
         };
 
@@ -52,11 +47,11 @@ impl EventHandler for Handler {
 
         if !show {
             tracing::info!("Hiding UI");
-            wv.hide();
+            if let Some(wv) = runner.get_webview_mut() {
+                wv.hide();
+            }
             if fullscreen {
-                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-                window.set_decorations(false);
-                window.set_window_level(WindowLevel::AlwaysOnTop);
+                runner.set_fullscreen(true);
             }
             if should_hide_window {
                 // fuck clippy
@@ -65,7 +60,7 @@ impl EventHandler for Handler {
                 }
             }
 
-            runner.set_passthrough(fullscreen && !kbm_enabled);
+            runner.recalculate_passthrough();
             if kbm_enabled {
                 if let Err(e) = window.set_cursor_grab(CursorGrabMode::Confined) {
                     tracing::warn!("Failed to confine cursor to window: {e}");
@@ -75,12 +70,12 @@ impl EventHandler for Handler {
         } else {
             tracing::info!("Showing UI");
             if fullscreen {
-                window.set_fullscreen(None);
-                window.set_decorations(true);
-                window.set_window_level(WindowLevel::Normal);
+                runner.set_fullscreen(false);
                 // let _ = window.request_inner_size(winit::dpi::LogicalSize::new(1280.0, 720.0));
             }
-            wv.show();
+            if let Some(wv) = runner.get_webview_mut() {
+                wv.show();
+            }
             if !window.is_visible().unwrap_or(false) {
                 // fuck clippy
                 if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ShowWindow()) {

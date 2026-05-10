@@ -2,9 +2,9 @@ use std::mem::{Discriminant, discriminant};
 
 use winit::event_loop::ActiveEventLoop;
 
-use crate::{app::window::{
+use crate::app::window::{
     self, event::WindowRunnerEvent, handler::router::EventHandler, runner::WindowRunner
-}, config::get_config};
+};
 
 #[derive(Default)]
 pub struct Handler {}
@@ -23,10 +23,7 @@ impl EventHandler for Handler {
             return;
         };
         wv.hide();
-        runner.set_passthrough(
-            get_config().window.fullscreen.unwrap_or(false)
-            && !runner.is_kbm_enabled()
-        );
+        runner.recalculate_passthrough();
         runner.update_cursor_visibility();
         window::event::request_redraw();
     }

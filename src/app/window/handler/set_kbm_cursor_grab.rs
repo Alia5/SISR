@@ -2,9 +2,9 @@ use std::mem::{Discriminant, discriminant};
 
 use winit::event_loop::ActiveEventLoop;
 
-use crate::{app::window::{
-    self, event::WindowRunnerEvent, handler::router::EventHandler, runner::WindowRunner
-}, config::get_config};
+use crate::app::window::{
+    event::WindowRunnerEvent, handler::router::EventHandler, runner::WindowRunner
+};
 
 #[derive(Default)]
 pub struct Handler {}
@@ -30,10 +30,7 @@ impl EventHandler for Handler {
         if window.is_visible() == Some(false) {
             return;
         }
-        let passthrough = get_config().window.fullscreen.unwrap_or(false)
-            && !runner.get_webview().is_some_and(|wv| wv.is_visible())
-            && !enabled;
-        runner.set_passthrough(passthrough);
+        runner.recalculate_passthrough();
         if !runner.get_webview().is_some_and(|wv| wv.is_visible()) {
             if enabled {
                 if let Err(e) = window.set_cursor_grab(winit::window::CursorGrabMode::Confined) {

@@ -8,3 +8,4 @@ pub mod overlay_state_changed;
 pub mod invalidate_svelte_state;
 pub mod enter_capture_mode;
 pub mod set_kbm_cursor_grab;
+pub mod set_fullscreen;
