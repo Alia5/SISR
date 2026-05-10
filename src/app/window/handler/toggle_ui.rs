@@ -78,7 +78,7 @@ impl EventHandler for Handler {
                 window.set_fullscreen(None);
                 window.set_decorations(true);
                 window.set_window_level(WindowLevel::Normal);
-                let _ = window.request_inner_size(winit::dpi::LogicalSize::new(1280.0, 720.0));
+                // let _ = window.request_inner_size(winit::dpi::LogicalSize::new(1280.0, 720.0));
             }
             wv.show();
             if !window.is_visible().unwrap_or(false) {

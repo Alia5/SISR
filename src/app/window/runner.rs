@@ -531,6 +531,10 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
                 if let Some(gfx) = &mut self.gfx {
                     gfx.resize(size.width, size.height);
                 }
+                #[cfg(target_os = "linux")]
+                if let Some(wv) = &mut self.webview {
+                    wv.resize(size.width, size.height);
+                }
             }
             WindowEvent::RedrawRequested => {
                 if let Some(window) = &self.window {

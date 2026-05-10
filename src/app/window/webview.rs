@@ -120,4 +120,14 @@ impl WebView {
             tracing::warn!("Failed to focus parent window after hiding webview: {e}");
         }
     }
+
+    #[cfg(target_os = "linux")]
+    pub fn resize(&mut self, width: u32, height: u32) {
+        if let Err(e) = self.webview.set_bounds(wry::Rect {
+            position: wry::dpi::LogicalPosition::new(0.0, 0.0).into(),
+            size: wry::dpi::LogicalSize::new(width as f64, height as f64).into(),
+        }) {
+            tracing::warn!("Failed to resize webview: {e}");
+        }
+    }
 }
