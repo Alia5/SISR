@@ -41,8 +41,8 @@ SISR can be configured via:
 
     <tr>
       <td>
-        <div><code>-w</code></div>
-        <div><code>--window-create [true|false]</code></div>
+        <div><code>-w [true|false]</code></div>
+        <div><code>--window-create=[true|false]</code></div>
       </td>
       <td>Create/Show window at launch</td>
       <td><code>false</code></td>
@@ -50,8 +50,8 @@ SISR can be configured via:
 
     <tr>
       <td>
-        <div><code>-f</code></div>
-        <div><code>--window-fullscreen  [true|false]</code></div>
+        <div><code>-f [true|false]</code></div>
+        <div><code>--window-fullscreen=[true|false]</code></div>
       </td>
       <td>
         Create a transparent, borderless,always on top,
@@ -64,13 +64,13 @@ SISR can be configured via:
 
     <tr>
       <td>
-        <div><code>-wcd</code></div>
-        <div><code>--window-continuous-draw  [true|false]</code></div>
+        <div><code>-wcd [true|false]</code></div>
+        <div><code>--window-continuous-draw=[true|false]</code></div>
       </td>
       <td>
 
           Continuously update/draw to the window.<br />
-          May be used when steam oerlay detection fails
+          May be used when steam overlay detection fails
           or other issues with the steam overlay occur
 
       </td>
@@ -201,7 +201,7 @@ create = false
 fullscreen = true
 
 # Enable continuous redraw
-# May be used when steam oerlay detection fails or other issues with the steam overlay occur
+# May be used when steam overlay detection fails or other issues with the steam overlay occur
 # may increase CPU/GPU usage
 continuous_draw = true
 
