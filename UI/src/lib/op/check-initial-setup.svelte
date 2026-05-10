@@ -63,22 +63,27 @@ let showSisrMarkerNotPresentModal = $derived.by(() => {
 });
 
 onMount(() => {
-	if (!showSteamNotRunningModal && !showCefRemoteDebugDisabledModal && !showSisrMarkerNotPresentModal) {
+	if (
+		!showInitialSetupModal &&
+		!showSteamNotRunningModal &&
+		!showCefRemoteDebugDisabledModal &&
+		!showSisrMarkerNotPresentModal
+	) {
 		void connectViiper.connect();
-	} else {
-		void wrapClientError(
-			client.POST('/api/v1/show_hide_ui', {
-				body: {
-					show: true
-				}
-			})
-		).catch((e) => {
-			toast({
-				color: 'firebrick',
-				message: `Failed to minimize SISR.\n Error: ${e}`
-			});
-		});
+		return;
 	}
+	void wrapClientError(
+		client.POST('/api/v1/show_hide_ui', {
+			body: {
+				show: true
+			}
+		})
+	).catch((e) => {
+		toast({
+			color: 'firebrick',
+			message: `Failed to minimize SISR.\n Error: ${e}`
+		});
+	});
 });
 
 let initialSetupModal = $state<Modal>()!;

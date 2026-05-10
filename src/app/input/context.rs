@@ -14,6 +14,7 @@ pub struct Context {
     pub viiper_version: Option<String>,
     pub keyboard_mouse_emulation: bool,
     pub steam_overlay_open: bool,
+    pub ui_visible: bool,
     pub next_device_id: AtomicU64,
     pub first_controller_detected_at: Arc<Mutex<Option<std::time::Instant>>>,
 }
@@ -26,6 +27,7 @@ impl Context {
             viiper_version: None,
             keyboard_mouse_emulation: get_config().kbm_emulation.unwrap_or(false),
             steam_overlay_open: false,
+            ui_visible: get_config().window.create.unwrap_or(false),
             next_device_id: AtomicU64::new(1),
             first_controller_detected_at: Arc::new(Mutex::new(None)),
         }

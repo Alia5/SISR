@@ -8,10 +8,7 @@ use std::{
 
 use crate::{
     app::{
-        api::{self, handler::connect_viiper::SPAWNED_VIIPER}, hid_hooks,
-        input::{context::Context, sdl_loop},
-        signals, steam, tray,
-        window::{self, event::WindowRunnerEvent, runner::WindowRunner},
+        api::{self, handler::connect_viiper::SPAWNED_VIIPER}, hid_hooks, input::{context::Context, sdl_loop}, signals, steam, tray, updater, window::{self, event::WindowRunnerEvent, runner::WindowRunner}
     },
     config::get_config,
 };
@@ -108,6 +105,10 @@ impl AppRunner {
             .expect("SDL thread died before signaling ready");
 
         tracing::debug!("Spawning tray thread...");
+        let sdl_loop_ctx = ctx_rx
+            .recv()
+            .expect("SDL thread died before sending Context");
+
         let tray_handle: Option<std::thread::JoinHandle<()>> = if cfg.tray.unwrap_or(true) {
             #[cfg(target_os = "linux")]
             {
@@ -117,16 +118,15 @@ impl AppRunner {
                 None
             }
             #[cfg(not(target_os = "linux"))]
-            Some(thread::spawn(move || {
-                tray::run();
-            }))
+            {
+                let ctx_for_tray = sdl_loop_ctx.clone();
+                Some(thread::spawn(move || {
+                    tray::run(ctx_for_tray);
+                }))
+            }
         } else {
             None
         };
-
-        let sdl_loop_ctx = ctx_rx
-            .recv()
-            .expect("SDL thread died before sending Context");
 
         tracing::debug!("Spawning API server...");
         let ctx_for_api = sdl_loop_ctx.clone();
@@ -134,6 +134,21 @@ impl AppRunner {
             if let Err(e) = api::listen_and_serve(ctx_for_api).await {
                 tracing::error!("API server error: {}", e);
                 Self::shutdown();
+            }
+        });
+
+        tracing::debug!("Spawning update checker...");
+        async_rt.spawn(async {
+            let Some(version) = updater::check().await else {
+                return;
+            };
+            tray::event::send_and_wake(tray::event::TrayEvent::UpdateAvailable(version.clone()));
+            if updater::should_notify(&version) {
+                window::event::WINDOW_READY.notified().await;
+                if let Some(sender) = window::event::EVENT_SENDER.get() {
+                    let _ = sender.send_event(window::event::WindowRunnerEvent::ToggleUi(Some(true)));
+                    let _ = sender.send_event(window::event::WindowRunnerEvent::InvalidateSvelteState());
+                }
             }
         });
 

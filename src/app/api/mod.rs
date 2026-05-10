@@ -48,7 +48,12 @@ pub async fn listen_and_serve(ctx: Arc<Mutex<Context>>) -> Result<(), std::io::E
                 .routes(routes!(handler::create_marker_shortcut::create_marker_shortcut))
                 .routes(routes!(handler::shutdown::shutdown))
                 .routes(routes!(handler::restart_steam::restart_steam))
-                .routes(routes!(handler::restart_sisr::restart_sisr)),
+                .routes(routes!(handler::restart_sisr::restart_sisr))
+                .routes(routes!(handler::update::get_update))
+                .routes(routes!(handler::update::install_update))
+                .routes(routes!(handler::update::remind_later))
+                .routes(routes!(handler::update::skip_version))
+                .routes(routes!(handler::update::view_on_github)),
         )
         .split_for_parts();
 

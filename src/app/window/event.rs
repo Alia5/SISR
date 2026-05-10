@@ -17,6 +17,7 @@ pub enum WindowRunnerEvent {
 }
 
 pub static EVENT_SENDER: OnceLock<Arc<EventLoopProxy<WindowRunnerEvent>>> = OnceLock::new();
+pub static WINDOW_READY: tokio::sync::Notify = tokio::sync::Notify::const_new();
 
 pub fn get_event_sender() -> Arc<EventLoopProxy<WindowRunnerEvent>> {
     EVENT_SENDER

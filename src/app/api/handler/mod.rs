@@ -10,3 +10,4 @@ pub mod show_hide_ui;
 pub mod shutdown;
 pub mod restart_steam;
 pub mod restart_sisr;
+pub mod update;

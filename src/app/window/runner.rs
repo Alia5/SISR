@@ -20,7 +20,7 @@ use crate::{
         steam,
         tray::{self, event::TrayEvent},
         window::{
-            event::{EVENT_SENDER, WindowRunnerEvent},
+            event::{EVENT_SENDER, WINDOW_READY, WindowRunnerEvent},
             gfx::Gfx,
             handler::{
                 enter_capture_mode, hide_window, invalidate_svelte_state, overlay_state_changed,
@@ -128,6 +128,14 @@ impl WindowRunner {
             .ok()
             .map(|c| c.keyboard_mouse_emulation)
             .unwrap_or(false)
+    }
+
+    pub fn set_ui_visible(&mut self, visible: bool) {
+        if let Ok(mut context) = self.ctx.lock() {
+            context.ui_visible = visible;
+        } else {
+            tracing::error!("Failed to lock Context mutex");
+        }
     }
 
     pub fn set_kbm_emulation_enabled(&mut self, enabled: bool) {
@@ -428,7 +436,7 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         // Must be created before get_event_sender() is called below.
         #[cfg(target_os = "linux")]
         if self.tray_enabled {
-            self.linux_tray = Some(tray::TrayContext::new());
+            self.linux_tray = Some(tray::TrayContext::new(self.ctx.clone()));
         }
 
         if let Err(e) =
@@ -457,8 +465,7 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
         self.previous_continuous_draw = self.continuous_draw;
         self.previous_passthrough_window = self.passthrough_window;
 
-        // self.window_ready.notify_waiters();
-        // self.window_ready.notify_one();
+ 
 
         let window = window_clone.clone();
         let kbm_at_startup = self.is_kbm_enabled();
@@ -467,6 +474,7 @@ impl ApplicationHandler<WindowRunnerEvent> for WindowRunner {
             // KBM requires a visible window for cursor-grab; keep it shown even when
             // the UI is not configured to be visible at startup.
             window.set_visible(initially_visible || kbm_at_startup);
+            WINDOW_READY.notify_one();
         });
     }
 

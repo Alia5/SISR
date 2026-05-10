@@ -10,6 +10,7 @@ import { toast } from '$lib/toaster/toaster.svelte';
 import IcoClose from '~icons/mdi/close';
 import { tooltip } from '$lib/attachments/tooltip.svelte';
 import CheckInitialSetup from '$lib/op/check-initial-setup.svelte';
+import UpdateModal from '$lib/components/UpdateModal.svelte';
 
 let { data }: PageProps = $props();
 
@@ -30,6 +31,12 @@ onMount(() => {
 </script>
 
 <CheckInitialSetup bind:this={setupChecker} steamStatus={data.steamStatus} inputInfo={data.inputInfo} />
+
+{#if data.updateInfo}
+	<UpdateModal
+		updateInfo={data.updateInfo}
+		show={data.updateInfo.update_available && !data.updateInfo.dismissed && !data.updateInfo.skipped} />
+{/if}
 
 <main>
 	<div>

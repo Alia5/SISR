@@ -1,5 +1,6 @@
 pub mod event;
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 #[cfg(target_os = "linux")]
 use std::rc::Rc;
@@ -10,7 +11,9 @@ use tray_icon::menu::{CheckMenuItem, Menu, MenuEvent, MenuId, MenuItem};
 use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 
 use crate::app::assets::ICON_BYTES;
+use crate::app::input::context::Context;
 use crate::app::tray::event::TrayEvent;
+use crate::app::updater;
 use crate::app::window::event::{WindowRunnerEvent, get_event_sender};
 use crate::config::get_config;
 
@@ -27,26 +30,31 @@ pub enum TrayMenuEvent {
     Quit,
     ToggleUI,
     ToggleSteamOverlayEnabled,
+    ShowUpdateDialog,
 }
 
 pub struct TrayContext {
-    _tray_icon: TrayIcon,
+    tray_icon: TrayIcon,
     menu_ids: HashMap<MenuId, TrayMenuEvent>,
     receiver: mpsc::UnboundedReceiver<TrayEvent>,
+    version_item: MenuItem,
     toggle_ui_item: MenuItem,
     enable_steam_overlay_item: CheckMenuItem,
+    quit_item: MenuItem,
+    update_item: Option<MenuItem>,
+    ctx: Arc<Mutex<Context>>,
 }
 
 impl TrayContext {
-    pub fn new() -> Self {
+    pub fn new(ctx: Arc<Mutex<Context>>) -> Self {
         let icon = load_icon();
         let menu = Menu::new();
 
         let mut menu_ids = HashMap::new();
 
-        let version_entry =
+        let version_item =
             MenuItem::new(format!("SISR v{}", env!("CARGO_PKG_VERSION")), false, None);
-        menu.append(&version_entry)
+        menu.append(&version_item)
             .expect("Failed to add version entry");
 
         let toggle_ui_item = MenuItem::new("Hide UI", true, None);
@@ -79,12 +87,28 @@ impl TrayContext {
         event::init(tx);
 
         Self {
-            _tray_icon: tray_icon,
+            tray_icon,
             menu_ids,
             receiver: rx,
+            version_item,
             toggle_ui_item,
             enable_steam_overlay_item,
+            quit_item,
+            update_item: None,
+            ctx,
         }
+    }
+
+    fn rebuild_menu(&mut self) {
+        let menu = Menu::new();
+        if let Some(upd) = &self.update_item {
+            menu.append(upd).ok();
+        }
+        menu.append(&self.version_item).ok();
+        menu.append(&self.toggle_ui_item).ok();
+        menu.append(&self.enable_steam_overlay_item).ok();
+        menu.append(&self.quit_item).ok();
+        self.tray_icon.set_menu(Some(Box::new(menu)));
     }
 
     pub fn handle_events(&mut self) -> bool {
@@ -97,14 +121,18 @@ impl TrayContext {
                 }
                 TrayMenuEvent::ToggleUI => {
                     tracing::debug!("Toggle window requested from tray menu");
-                    let show = self.toggle_ui_item.text() == "Show UI";
+                    let currently_visible = self.ctx.lock().map(|c| c.ui_visible).unwrap_or(false);
+                    let show = !currently_visible;
                     if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(show))) {
                         tracing::error!("Failed to send ToggleUi event: {:?}", e);
                     }
                 }
                 TrayMenuEvent::ToggleSteamOverlayEnabled => {
                     tracing::debug!("Toggle Steam Overlay requested from tray menu");
-                    let fullscreen = self.enable_steam_overlay_item.is_checked();
+                    let cfg = get_config();
+                    let currently_enabled = cfg.window.create.unwrap_or(false) && cfg.window.fullscreen.unwrap_or(true);
+                    let fullscreen = !currently_enabled;
+                    self.enable_steam_overlay_item.set_checked(fullscreen);
                     if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::SetFullscreen(fullscreen)) {
                         tracing::error!("Failed to send SetFullscreen event: {:?}", e);
                     }
@@ -118,6 +146,17 @@ impl TrayContext {
                         }
                     }
                 }
+                TrayMenuEvent::ShowUpdateDialog => {
+                    tracing::debug!("Show update dialog requested from tray menu");
+                    crate::app::updater::clear_dismissed();
+                    crate::app::updater::clear_remind_later();
+                    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(true))) {
+                        tracing::error!("Failed to send ToggleUi event: {:?}", e);
+                    }
+                    if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::InvalidateSvelteState()) {
+                        tracing::error!("Failed to send InvalidateSvelteState event: {:?}", e);
+                    }
+                }
             }
         }
         while let Ok(evt) = self.receiver.try_recv() {
@@ -129,6 +168,18 @@ impl TrayContext {
                     } else {
                         self.toggle_ui_item.set_text("Show UI");
                     };
+                }
+                TrayEvent::UpdateAvailable(version) => {
+                    tracing::info!("Update available notification received: {}", version);
+                    let update_item = MenuItem::new(
+                        format!("\u{2B06} Update available: {}", version),
+                        true,
+                        None,
+                    );
+                    self.menu_ids
+                        .insert(update_item.id().clone(), TrayMenuEvent::ShowUpdateDialog);
+                    self.update_item = Some(update_item);
+                    self.rebuild_menu();
                 }
             }
         }
@@ -156,13 +207,13 @@ pub fn shutdown() {
     }
 }
 
-pub fn run() {
+pub fn run(ctx: Arc<Mutex<Context>>) {
     let span = tracing::span!(Level::INFO, "tray");
-    run_platform(span);
+    run_platform(span, ctx);
 }
 
 #[cfg(windows)]
-fn run_platform(span: Span) {
+fn run_platform(span: Span, ctx: Arc<Mutex<Context>>) {
     use windows_sys::Win32::System::Threading::GetCurrentThreadId;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         DispatchMessageW, GetMessageW, MSG, TranslateMessage, WM_QUIT,
@@ -171,10 +222,10 @@ fn run_platform(span: Span) {
     let thread_id = unsafe { GetCurrentThreadId() };
     TRAY_THREAD_ID.store(thread_id, std::sync::atomic::Ordering::SeqCst);
 
-    let mut ctx = TrayContext::new();
+    let mut tray_ctx = TrayContext::new(ctx);
 
     loop {
-        if ctx.handle_events() {
+        if tray_ctx.handle_events() {
             tracing::event!(parent: &span, Level::DEBUG, "Tray context requested quit, exiting tray loop");
             break;
         }
@@ -193,7 +244,7 @@ fn run_platform(span: Span) {
 }
 
 #[cfg(target_os = "linux")]
-fn run_platform(span: Span) {
+fn run_platform(span: Span, ctx: Arc<Mutex<Context>>) {
     use std::cell::RefCell;
 
     if gtk::init().is_err() {
@@ -201,13 +252,13 @@ fn run_platform(span: Span) {
         return;
     }
 
-    let ctx = Rc::new(RefCell::new(TrayContext::new()));
+    let tray_ctx = Rc::new(RefCell::new(TrayContext::new(ctx)));
     glib::timeout_add_local(std::time::Duration::from_millis(50), move || {
         if GTK_QUIT_REQUESTED.load(std::sync::atomic::Ordering::SeqCst) {
             gtk::main_quit();
             return glib::ControlFlow::Break;
         }
-        if ctx.borrow_mut().handle_events() {
+        if tray_ctx.borrow_mut().handle_events() {
             gtk::main_quit();
             return glib::ControlFlow::Break;
         }

@@ -45,6 +45,15 @@ paths:
       summary: Enable CEF Remote Debugging
       description: Enables the CEF remote debugging interface of Steam by creating the required file (and restarting Steam)
       operationId: enable_cef_remote_debug
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                restart_sisr:
+                  type: boolean
+        required: true
       responses:
         '200':
           description: ''
@@ -121,6 +130,15 @@ paths:
       summary: Restart Steam
       description: Attempts to restart Steam
       operationId: restart_steam
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                restart_sisr:
+                  type: boolean
+        required: true
       responses:
         '200':
           description: ''
@@ -196,6 +214,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+  /api/v1/update:
+    get:
+      tags:
+      - ui
+      summary: Get Update State
+      description: Returns the current update availability and dismissal state
+      operationId: get_update
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateStateResponse'
+        '500':
+          description: Unknown error
+  /api/v1/update/install:
+    post:
+      tags:
+      - ui
+      summary: Install Update
+      description: Runs the install script for the available update
+      operationId: install_update
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/update/remind-later:
+    post:
+      tags:
+      - ui
+      summary: Remind Later
+      description: Dismisses the update notification in-memory until next restart
+      operationId: remind_later
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/update/skip:
+    post:
+      tags:
+      - ui
+      summary: Skip Version
+      description: Persistently skips the current available version
+      operationId: skip_version
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
+  /api/v1/update/view-on-github:
+    post:
+      tags:
+      - ui
+      summary: View on GitHub
+      description: Opens the release page in the default browser
+      operationId: view_on_github
+      responses:
+        '200':
+          description: ''
+        '500':
+          description: Unknown error
 components:
   schemas:
     ChangeUiStatePayload:
@@ -385,6 +467,7 @@ components:
     SteamStatus:
       type: object
       required:
+      - initial_launch
       - no_steam_mode
       - remote_debug
       - running
@@ -392,6 +475,8 @@ components:
       - steam_game_id
       - launched_via_steam
       properties:
+        initial_launch:
+          type: boolean
         launched_via_steam:
           type: boolean
         marker_app_id:
@@ -416,6 +501,25 @@ components:
           type: integer
           format: int64
           minimum: 0
+    UpdateStateResponse:
+      type: object
+      required:
+      - update_available
+      - dismissed
+      - skipped
+      properties:
+        dismissed:
+          type: boolean
+          description: 'In-memory only: cleared on restart (remind later)'
+        skipped:
+          type: boolean
+          description: 'Persisted: skip this version'
+        update_available:
+          type: boolean
+        update_version:
+          type:
+          - string
+          - 'null'
     ViiperInfo:
       type: object
       required:

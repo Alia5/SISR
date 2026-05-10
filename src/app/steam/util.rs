@@ -465,8 +465,16 @@ pub fn unload_steam_overlay() {
         return;
     };
 
-    debug!("Dropping Steam overlay library handle");
-    drop(overlay_lib);
+    #[cfg(windows)]
+    {
+        debug!("Leaking Steam overlay library handle (Windows: FreeLibrary is unsafe for this DLL)");
+        std::mem::forget(overlay_lib);
+    }
+    #[cfg(not(windows))]
+    {
+        debug!("Dropping Steam overlay library handle");
+        drop(overlay_lib);
+    }
     info!("Unloaded Steam overlay library");
 }
 

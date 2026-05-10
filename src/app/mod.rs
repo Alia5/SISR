@@ -6,4 +6,5 @@ pub mod runner;
 mod signals;
 pub mod steam;
 mod tray;
+pub mod updater;
 mod window;

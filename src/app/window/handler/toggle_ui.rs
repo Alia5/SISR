@@ -86,11 +86,8 @@ impl EventHandler for Handler {
             _ = window.set_cursor_grab(winit::window::CursorGrabMode::None);
             runner.update_cursor_visibility();
         }
-        if let Err(e) =
-            tray::event::get_event_sender().send(TrayEvent::SetWindowState(show))
-        {
-            tracing::error!("Failed to send SetWindowState event: {:?}", e);
-        }
+        runner.set_ui_visible(show);
+        tray::event::send_and_wake(TrayEvent::SetWindowState(show));
     }
 
     fn listen_events(&self) -> Vec<Discriminant<WindowRunnerEvent>> {

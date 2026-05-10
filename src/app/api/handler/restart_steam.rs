@@ -52,10 +52,13 @@ pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
             if !steam::util::steam_running() {
                 break;
             }
-            tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
 
     }
+    // hack, wait for registry keys to be removed!
+    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
     steam::util::open_url("steam://open/main")
         .map_err(|e| {
             tracing::error!("Failed to restart Steam: {}", e);
