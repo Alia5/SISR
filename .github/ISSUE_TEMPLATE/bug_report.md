@@ -10,6 +10,7 @@ assignees: ''
 
 - [ ] I have read/searched the documentation
 - [ ] I have searched existing issues to avoid duplicates
+- [ ] I will not include superfluous LLM generated slop for this issue.
 
 ## Bug Description
 <!-- A clear and concise description of the bug -->

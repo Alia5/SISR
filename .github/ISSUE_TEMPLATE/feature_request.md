@@ -10,6 +10,8 @@ assignees: ''
 
 - [ ] I have read/searched the documentation
 - [ ] I have searched existing issues to avoid duplicates
+- [ ] I will not include superfluous LLM generated slop for this issue.
+
 
 ## Is your feature request related to a problem? Please describe
 <!-- A clear and concise description of the problem. Ex. I'm always frustrated when [...] -->
