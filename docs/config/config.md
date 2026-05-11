@@ -188,6 +188,9 @@ port = 0
 # Allowed: "xbox360", "dualshock4"
 default_controller_type = "xbox360"
 
+# Allows / re-uses Steam Desktop Layout instead of SISRs marker
+allow_desktop_config = true
+
 # Enable gyro passthrough for supported controllers
 gyro_passthrough = true
 

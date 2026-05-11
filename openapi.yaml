@@ -6,6 +6,41 @@ info:
     name: ''
   version: 0.0.1
 paths:
+  /api/v1/config:
+    get:
+      tags:
+      - config
+      summary: Get Config File
+      description: |-
+        Returns the contents of the config file at the default config path.
+        Fields not present in the file are omitted.
+      operationId: get_config_file
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigFileData'
+        '404':
+          description: No config file found at default path
+    patch:
+      tags:
+      - config
+      summary: Update Config File
+      description: |-
+        Merges the provided fields into the config file at the default config path.
+        Only fields present in the request body are written; all fields are optional.
+      operationId: update_config_file
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigFileData'
+        required: true
+      responses:
+        '200':
+          description: OK
   /api/v1/connect_viiper:
     post:
       tags:
@@ -59,6 +94,24 @@ paths:
           description: ''
         '500':
           description: Unknown error
+  /api/v1/force_controller_config:
+    post:
+      tags:
+      - steam
+      summary: Set Force Controller Config
+      description: |-
+        Enables or disables Steam input config enforcement.
+        If `app_id` is omitted, defaults to the currently active app id.
+      operationId: set_force_controller_config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetForceControllerConfigRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
   /api/v1/inject_overlay_notifier:
     post:
       tags:
@@ -87,6 +140,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InputInfoResponse'
+  /api/v1/open_steam_controller_config:
+    post:
+      tags:
+      - steam
+      summary: Open Steam Controller Config
+      description: |-
+        Opens the Steam controller configuration overlay for the given app id.
+        If `app_id` is omitted, defaults to the currently active app id (`SteamAppId` env var).
+      operationId: open_steam_controller_config
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: 'null'
+              - $ref: '#/components/schemas/OpenSteamControllerConfigRequest'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: No app id available
   /api/v1/overlay_state_changed:
     post:
       tags:
@@ -287,6 +361,123 @@ components:
       properties:
         show:
           type: boolean
+    ConfigFileControllerEmulation:
+      type: object
+      properties:
+        allow_desktop_config:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        default_controller_type:
+          type:
+          - string
+          - 'null'
+          default: null
+        gyro_passthrough:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        require_controllers_connected_before_launch:
+          type:
+          - boolean
+          - 'null'
+          default: null
+    ConfigFileData:
+      type: object
+      properties:
+        controller_emulation:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ConfigFileControllerEmulation'
+          default: null
+        kbm_emulation:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        log:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ConfigFileLogOpts'
+          default: null
+        port:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          default: null
+          minimum: 0
+        steam:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ConfigFileSteamOpts'
+          default: null
+        tray:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        update_notify:
+          type:
+          - string
+          - 'null'
+          default: null
+        viiper_address:
+          type:
+          - string
+          - 'null'
+          default: null
+        viiper_password:
+          type:
+          - string
+          - 'null'
+          default: null
+        window:
+          oneOf:
+          - type: 'null'
+          - $ref: '#/components/schemas/ConfigFileWindowOpts'
+          default: null
+    ConfigFileLogOpts:
+      type: object
+      properties:
+        level:
+          type:
+          - string
+          - 'null'
+          default: null
+    ConfigFileSteamOpts:
+      type: object
+      properties:
+        no_steam:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        steam_path:
+          type:
+          - string
+          - 'null'
+          default: null
+    ConfigFileWindowOpts:
+      type: object
+      properties:
+        continuous_draw:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        create:
+          type:
+          - boolean
+          - 'null'
+          default: null
+        fullscreen:
+          type:
+          - boolean
+          - 'null'
+          default: null
     DeviceInfo:
       type: object
       required:
@@ -327,6 +518,7 @@ components:
       - keyboard_mouse_emulation
       - steam_overlay_open
       - fullscreen
+      - force_controller_config
       properties:
         devices:
           type: object
@@ -336,6 +528,14 @@ components:
             type: integer
             format: int64
             minimum: 0
+        force_controller_config:
+          type: boolean
+        force_controller_config_app_id:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          minimum: 0
         fullscreen:
           type: boolean
         keyboard_mouse_emulation:
@@ -344,6 +544,15 @@ components:
           type: boolean
         viiper:
           $ref: '#/components/schemas/ViiperInfo'
+    OpenSteamControllerConfigRequest:
+      type: object
+      properties:
+        app_id:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          minimum: 0
     OverlayStateChangePayload:
       type: object
       required:
@@ -464,6 +673,19 @@ components:
         minimum: 0
       - type: boolean
       - type: object
+    SetForceControllerConfigRequest:
+      type: object
+      required:
+      - enforce
+      properties:
+        app_id:
+          type:
+          - integer
+          - 'null'
+          format: int32
+          minimum: 0
+        enforce:
+          type: boolean
     SteamStatus:
       type: object
       required:

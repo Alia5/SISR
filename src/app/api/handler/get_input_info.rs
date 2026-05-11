@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use axum::{Json, extract::State};
 use reqwest::StatusCode;
 
-use crate::{app::{api::AppState, input::device_info::SDLDeviceInfo}, config::get_config};
+use crate::{app::{api::AppState, input::device_info::SDLDeviceInfo, steam::binding_enforcer::binding_enforcer}, config::get_config};
 
 /// Get Input Info
 ///
@@ -34,6 +34,13 @@ pub async fn get_input_info(
         .into_iter()
         .collect();
 
+    let mut config_forced = false;
+    let mut config_forced_app_id = None;
+    if let Ok(enforcer) = binding_enforcer().lock() {
+        config_forced = enforcer.is_active();
+        config_forced_app_id = enforcer.app_id();
+    }
+
     (StatusCode::OK, Json(InputInfoResponse {
         devices: ctx
             .devices
@@ -61,6 +68,8 @@ pub async fn get_input_info(
         keyboard_mouse_emulation: ctx.keyboard_mouse_emulation,
         steam_overlay_open: ctx.steam_overlay_open,
         fullscreen: get_config().window.fullscreen.unwrap_or(true),
+        force_controller_config: config_forced,
+        force_controller_config_app_id: config_forced_app_id,
     }))
 }
 
@@ -71,6 +80,8 @@ pub struct InputInfoResponse {
     pub keyboard_mouse_emulation: bool,
     pub steam_overlay_open: bool,
     pub fullscreen: bool,
+    pub force_controller_config: bool,
+    pub force_controller_config_app_id: Option<u32>,
 }
 
 #[derive(serde::Deserialize, serde::Serialize, utoipa::ToSchema)]

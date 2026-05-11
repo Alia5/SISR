@@ -262,6 +262,16 @@ pub struct ControllerEmulation {
         help = "Enable gyro passthrough for supported controllers (true/false) [default: true]"
     )]
     pub gyro_passthrough: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[arg(
+        long = "allow-desktop-config",
+        value_name = "BOOL",
+        num_args = 0..=1,
+        default_missing_value = "false",
+        env = "SISR_ALLOW_DESKTOP_CONFIG",
+        help = "Allow desktop configuration (true/false) [default: false]"
+    )]
+    pub allow_desktop_config: Option<bool>,
 }
 
 #[derive(Parser, Debug, Serialize, Deserialize, Clone)]
@@ -326,6 +336,7 @@ impl Default for Config {
                 default_controller_type: Some(ControllerType::Xbox360),
                 require_controllers_connected_before_launch: Some(false),
                 gyro_passthrough: Some(true),
+                allow_desktop_config: Some(false),
             },
             debug: 0,
             marker: false,

@@ -6,15 +6,19 @@ import { client, wrapClientError } from '$lib/api/client';
 import { log } from '$lib/log';
 import { onMount } from 'svelte';
 import { toast } from '$lib/toaster/toaster.svelte';
-
-import IcoClose from '~icons/mdi/close';
+import QuickSettingsCard from '$lib/components/MainCards/QuickSettingsCard.svelte';
 import { tooltip } from '$lib/attachments/tooltip.svelte';
 import CheckInitialSetup from '$lib/op/check-initial-setup.svelte';
 import UpdateModal from '$lib/components/UpdateModal.svelte';
 
+import IcoClose from '~icons/mdi/close';
+import IcoSettings from '~icons/mdi/cog';
+
 let { data }: PageProps = $props();
 
 let debugInfoCardVisible = $state(false);
+let quickSettingsVisible = $state(false);
+
 let setupChecker = $state<CheckInitialSetup>()!;
 
 onMount(() => {
@@ -46,13 +50,28 @@ onMount(() => {
 				inputInfo={data.inputInfo}
 				onClose={() => (debugInfoCardVisible = false)} />
 		{/if}
+		{#if quickSettingsVisible}
+			<QuickSettingsCard
+				steamStatusInfo={data.steamStatus}
+				inputInfo={data.inputInfo}
+				onClose={() => (quickSettingsVisible = false)} />
+		{/if}
 	</div>
 	<div>
-		<label class="button" for="steam-card-toggle">
+		<label class="button" for="quickSettingsToggle">
 			<input
 				type="checkbox"
-				id="steam-card-toggle"
-				name="steam-toggle"
+				id="quickSettingsToggle"
+				name="quickSettingsToggle"
+				bind:checked={quickSettingsVisible} />
+			<IcoSettings style="width: 2em; height: 2em;" />
+			<span>Quick Settings</span>
+		</label>
+		<label class="button" for="debugInfoCardToggle">
+			<input
+				type="checkbox"
+				id="debugInfoCardToggle"
+				name="debugInfoCardToggle"
 				bind:checked={debugInfoCardVisible} />
 			<IcoSIAPI style="width: 2em; height: 2em;" />
 			<span>Debug Info</span>
@@ -116,6 +135,7 @@ main {
 	}
 	& > :nth-child(2) {
 		display: grid;
+		grid-auto-flow: column;
 		width: fit-content;
 		place-items: center;
 		padding: 1em;

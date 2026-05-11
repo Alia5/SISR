@@ -16,7 +16,7 @@ use crate::app::steam::binding_enforcer::binding_enforcer;
 use crate::app::tray::event::TrayEvent;
 use crate::app::{steam, updater};
 use crate::app::window::event::{WindowRunnerEvent, get_event_sender};
-use crate::config::get_config;
+use crate::config::{get_config, update_config};
 
 use super::runner::{AppRunner, get_tokio_handle};
 
@@ -83,15 +83,15 @@ impl TrayContext {
         drop(enforcer);
 
         let open_config_item = app_id.map(|_| {
-            let item = MenuItem::new("Show Steam Controllerconfig", true, None);
+            let item = MenuItem::new("Show Steam Input Layout configurator", true, None);
             menu.append(&item)
-                .expect("Failed to add Steam Controllerconfig item");
+                .expect("Failed to add Steam Input Layout configurator item");
             menu_ids.insert(item.id().clone(), TrayMenuEvent::OpenControllerConfig);
             item
         });
 
         let force_config_item = CheckMenuItem::new(
-            "Allow Desktop Config",
+            "Allow Steam Input Desktop Layout",
             app_id.is_some(),
             !enforcer_active,
             None,
@@ -192,8 +192,10 @@ impl TrayContext {
                     tracing::debug!("Toggle Force Controllerconfig requested from tray menu");
                     if let Ok(mut enforcer) = binding_enforcer().lock() {
                         if enforcer.is_active() {
+                            update_config(|c| c.controller_emulation.allow_desktop_config = Some(true));
                             enforcer.deactivate();
                         } else {
+                            update_config(|c| c.controller_emulation.allow_desktop_config = Some(false));
                             enforcer.activate();
                         }
                         // checkbox is inverted: checked = desktop config allowed = NOT enforcing

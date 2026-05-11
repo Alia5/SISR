@@ -116,7 +116,14 @@ impl EventHandler for Handler {
                         return;
                     }
                     if !enforcer.is_active() {
-                        enforcer.activate();
+                        // s
+                        if !get_config()
+                            .controller_emulation
+                            .allow_desktop_config
+                            .unwrap_or(false)
+                        {
+                            enforcer.activate();
+                        }
                     }
                 }
                 window::event::request_redraw();

@@ -9,7 +9,7 @@ use crate::app::input::event::handler_events::InputHandlerEvent;
 use crate::app::input::event::router::{EventHandler, ListenEvent, RoutedEvent};
 use crate::app::input::sdl_loop::Subsystems;
 use crate::app::steam::binding_enforcer::binding_enforcer;
-use crate::config::CONFIG;
+use crate::config::{CONFIG, get_config};
 
 pub struct Handler {
     ctx: Arc<Mutex<Context>>,
@@ -87,8 +87,14 @@ impl EventHandler for Handler {
                 .load(std::sync::atomic::Ordering::Relaxed)
             {
                 tracing::debug!("Re-activating controller binding enforcer after overlay closed");
-                if let Ok(mut enforcer) = binding_enforcer().lock() {
-                    enforcer.activate();
+                if !get_config()
+                    .controller_emulation
+                    .allow_desktop_config
+                    .unwrap_or(false)
+                {
+                    if let Ok(mut enforcer) = binding_enforcer().lock() {
+                        enforcer.activate();
+                    }
                 }
             }
         }

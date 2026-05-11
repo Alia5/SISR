@@ -30,16 +30,8 @@ otherwise pose issues or inconveniences using Steam Input.
 
 ## Enabling DS4 Emulation
 
-There are two ways to enable DS4 emulation in SISR:
-
-1. via CLI-argument / configuration file
+Enabling DS4 emulation in SISR is done via CLI-argument / configuration file
 
     Pass `--default-controller-type=dualshock4` as launch argument to SISR.  
     For permanent configuration see [Configuration](../../../config/config)
 
-2. via SISR UI
-
-    Open the SISR UI by right-clicking the system tray icon and selecting "Show UI"  
-    In the controller-window open the "_VIIPER Device_" dropdown and switch the controller type to `dualshock4`
-
-    ![UI Controller Type Selection](../../assets/SISR-controller-type-select.png)
