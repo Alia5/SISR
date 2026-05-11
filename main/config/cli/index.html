@@ -849,6 +849,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#-update-notify-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --update-notify &lt;CHANNEL&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-port-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --port &lt;PORT&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -939,10 +961,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-window-continous-draw-truefalse-wcd-truefalse" class="md-nav__link">
+  <a href="#-window-continuous-draw-truefalse-wcd-truefalse" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --window-continous-draw [true|false], --wcd [true|false]
+        --window-continuous-draw [true|false], --wcd [true|false]
       
     </span>
   </a>
@@ -1010,28 +1032,6 @@
     <span class="md-ellipsis">
       
         --no-steam [true|false]
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-disable-steam-cef-debug-truefalse" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        --disable-steam-cef-debug [true|false]
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-steam-launch-timeout-secs-seconds" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        --steam-launch-timeout-secs &lt;SECONDS&gt;
       
     </span>
   </a>
@@ -1672,6 +1672,28 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#-update-notify-channel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --update-notify &lt;CHANNEL&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-port-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --port &lt;PORT&gt;
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1762,10 +1784,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-window-continous-draw-truefalse-wcd-truefalse" class="md-nav__link">
+  <a href="#-window-continuous-draw-truefalse-wcd-truefalse" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --window-continous-draw [true|false], --wcd [true|false]
+        --window-continuous-draw [true|false], --wcd [true|false]
       
     </span>
   </a>
@@ -1833,28 +1855,6 @@
     <span class="md-ellipsis">
       
         --no-steam [true|false]
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-disable-steam-cef-debug-truefalse" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        --disable-steam-cef-debug [true|false]
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#-steam-launch-timeout-secs-seconds" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        --steam-launch-timeout-secs &lt;SECONDS&gt;
       
     </span>
   </a>
@@ -1971,6 +1971,19 @@
 <li>Default: <code>false</code></li>
 <li>Env var: <code>SISR_KBM_EMULATION</code></li>
 </ul>
+<h4 id="-update-notify-channel"><code>--update-notify &lt;CHANNEL&gt;</code></h4>
+<p>Update notification channel</p>
+<ul>
+<li>Allowed: <code>none</code>, <code>stable</code>, <code>prerelease</code></li>
+<li>Default: <code>stable</code></li>
+<li>Env var: <code>SISR_UPDATE_NOTIFY</code></li>
+</ul>
+<h4 id="-port-port"><code>--port &lt;PORT&gt;</code></h4>
+<p>Port for the SISR API server to listen on</p>
+<ul>
+<li>Default: <code>0</code> (random free port)</li>
+<li>Env var: <code>SISR_PORT</code></li>
+</ul>
 <div class="admonition info">
 <p class="admonition-title">Keyboard/Mouse Emulation</p>
 <p>Can only be used if the VIIPER-server is running on a different machine.<br />
@@ -1987,7 +2000,7 @@ If VIIPER-address resolves to localhost, this option is ignored</p>
 <h4 id="-require-controllers-connected-before-launch-truefalse"><code>--require-controllers-connected-before-launch [true|false]</code></h4>
 <p>Ignore controllers connected after SISR starts. Prevents controller doubling issues</p>
 <ul>
-<li>Default: <code>true</code></li>
+<li>Default: <code>false</code></li>
 <li>Env var: <code>SISR_REQUIRE_CONTROLLERS_CONNECTED_BEFORE_LAUNCH</code></li>
 </ul>
 <h4 id="-gyro-passthrough-truefalse"><code>--gyro-passthrough [true|false]</code></h4>
@@ -2010,13 +2023,13 @@ Window is fully transparent and click-through</p>
 <li>Default: <code>true</code></li>
 <li>Env var: <code>SISR_WINDOW_FULLSCREEN</code></li>
 </ul>
-<h4 id="-window-continous-draw-truefalse-wcd-truefalse"><code>--window-continous-draw [true|false]</code>, <code>--wcd [true|false]</code></h4>
+<h4 id="-window-continuous-draw-truefalse-wcd-truefalse"><code>--window-continuous-draw [true|false]</code>, <code>--wcd [true|false]</code></h4>
 <p>Continuously update/redraw the window<br />
 Use when Steam overlay detection fails or other overlay issues occur<br />
 May increase CPU/GPU usage</p>
 <ul>
-<li>Default: <code>false</code></li>
-<li>Env var: <code>SISR_WINDOW_CONTINOUS_DRAW</code></li>
+<li>Default: <code>true</code></li>
+<li>Env var: <code>SISR_WINDOW_CONTINUOUS_DRAW</code></li>
 </ul>
 <h3 id="logging">Logging</h3>
 <h4 id="-l-log-level-level"><code>-l</code>, <code>--log-level &lt;LEVEL&gt;</code></h4>
@@ -2047,18 +2060,6 @@ May increase CPU/GPU usage</p>
 <ul>
 <li>Default: <code>false</code></li>
 <li>Env var: <code>SISR_NO_STEAM</code></li>
-</ul>
-<h4 id="-disable-steam-cef-debug-truefalse"><code>--disable-steam-cef-debug [true|false]</code></h4>
-<p>Disable Steam CEF remote debugging</p>
-<ul>
-<li>Default: <code>false</code></li>
-<li>Env var: <code>SISR_STEAM_CEF_DEBUG_DISABLE</code></li>
-</ul>
-<h4 id="-steam-launch-timeout-secs-seconds"><code>--steam-launch-timeout-secs &lt;SECONDS&gt;</code></h4>
-<p>Time to wait for Steam to launch</p>
-<ul>
-<li>Default: <code>1</code></li>
-<li>Env var: <code>SISR_STEAM_LAUNCH_TIMEOUT_SECS</code></li>
 </ul>
 <h4 id="-steam-path-path"><code>--steam-path &lt;PATH&gt;</code></h4>
 <p>Explicit Steam installation path<br />

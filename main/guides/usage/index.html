@@ -1440,16 +1440,20 @@ that are indistinguishable from real hardware and work with any game/application
 </thead>
 <tbody>
 <tr>
-<td>Show UI</td>
-<td>Shows the SISR UI providing general information and a few more options</td>
+<td>Show UI / Hide UI</td>
+<td>Toggles the SISR UI providing general information and a few more options</td>
 </tr>
 <tr>
-<td>Steam Controllerconfig</td>
-<td>Opens the Steam Controller configuration for the SISR Marker shortcut</td>
+<td>Enable Steam Overlay</td>
+<td>Toggles the Steam overlay as borderless-window. Does not work in exclusive fullscreen, <em>use borderless window instead</em>. Does <strong>currently</strong> also <em>not</em> work with UWP games.</td>
 </tr>
 <tr>
-<td>Force Controllerconfig</td>
-<td>Forces Steam to use the Steam Input configuration of the SISR marker shortcut instead of the Desktop configuration (or any configuration from launched Steam games)</td>
+<td>Show Steam Controllerconfig</td>
+<td>Opens the currently used Steam Input configuration</td>
+</tr>
+<tr>
+<td>Allow Desktop Config</td>
+<td>Uses Steams Desktop-Configuration; Otherwise (when <strong>unchecked</strong>) the Steam Input layout of SISR is used and enforced</td>
 </tr>
 <tr>
 <td>Quit</td>
@@ -1487,10 +1491,8 @@ you can do by creating a config file in:  </p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">default_controller_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;dualshock4&quot;</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">[steam]</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># allow longer timeout for steam to launch if your computer is a potato ;P</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">steam_launch_timeout_secs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># explicit Steam path, normally not needed and auto-detected</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">steam_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Program Files (x86)/Steam&quot;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># explicit Steam path, normally not needed and auto-detected</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">steam_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;C:/Program Files (x86)/Steam&quot;</span>
 </code></pre></div>
 <p>For more information and full list of all options see: <a href="../../config/config.md">Configuration</a></p>
 
