@@ -37,7 +37,6 @@ as well as access to Touch/Radial menus and other Steam overlay features.
       Provide the following flags as launch options  
       - `-w -f`  
       <sup>show-window, fullscreen</sup>  
-      If you want to use touch- and radial-menus, also add: `--wcd true`
 
       You can rename the shortcut to something meaningful, like _"SISR - Game XYZ"_
       and set any custom icon and images as you see fit
@@ -66,14 +65,6 @@ as well as access to Touch/Radial menus and other Steam overlay features.
     you can toggle the SISR overlay by using the keyboard-shortcut or controller-chord  
     (**`CTRL+SHIFT+ALT+S`**, **`LB+RB+BACK+A`** _"A" button needs to be pressed last_)
 
-!!! info "Touch/Radial menus"
-    By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  
-    To make touch/radial menus show up, you can add the `--wcd true` launch option to enable continuous drawing  
-
-    This can also circumvent issues with the Steam overlay not showing up correctly.
-
-    **Do note that this may increase CPU/GPU usage** and
-    can potentially negatively affect gaming performance on lower end systems
 
 !!! tip "Playstation Controller emulation"
     If you want SISR to emulate a Playstation controller instead of the default Xbox360 controller,

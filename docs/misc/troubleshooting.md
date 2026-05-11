@@ -174,17 +174,6 @@
     - If yes, you are doing it wrong  
     - If no, tough luck
 
-### Touch/Radial menus do not work {.toc-anchor}
-
-??? question "Touch/Radial menus do not work"
-
-    By default, SISR will **not** draw continuously, which prevents touch/radial menus from showing up  
-    To make touch/radial menus show up, you can add the `--wcd true` launch option to enable continuous drawing  
-
-    This can also circumvent issues with the Steam overlay not showing up correctly.
-
-    **Do note that this may increase CPU/GPU usage** and
-    can potentially negatively affect gaming performance on lower end systems
 
 ### My controller doesn't work properly when SISR is running and I launch a game from Steam {.toc-anchor}
 
@@ -325,12 +314,6 @@
 
     SISR couldn't restart Steam automatically via `steam://` URL scheme
     Restart Steam manually, then restart SISR
-
-### SISR says the overlay notfier could not be initialized {.toc-anchor}
-
-??? question "SISR says the overlay notfier could not be initialized"
-
-    Just tap "_Yes_" or pass `--wcd true` as launch options.
 
 ### This doesn't work with "Steam Link" / "Remote Play" {.toc-anchor}
 
