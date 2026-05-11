@@ -6,6 +6,7 @@ use tokio::sync::mpsc;
 pub enum TrayEvent {
     SetWindowState(bool),
     UpdateAvailable(String),
+    ForceConfigChanged(bool),
 }
 
 static EVENT_SENDER: OnceLock<Arc<mpsc::UnboundedSender<TrayEvent>>> = OnceLock::new();

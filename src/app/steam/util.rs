@@ -540,28 +540,30 @@ pub fn try_set_marker_steam_env() -> anyhow::Result<()> {
     Ok(())
 }
 
-// pub async fn open_controller_config(app_id: u32) {
-//     if cef_debug::ensure::check_enabled().await {
-//         if cef_debug::inject::inject(
-//             "SharedJSContext",
-//             format!("SteamClient.Input.OpenDesktopConfigurator({});", app_id).as_str(),
-//         )
-//         .await
-//         .is_ok()
-//         {
-//             return;
-//         }
-//         tracing::warn!(
-//             "Failed to open Steam Input Configurator via CEF injection, falling back to steam:// URL"
-//         );
-//     }
 
-//     let steam_url = format!("steam://controllerconfig/{}", app_id);
-//     _ = open_steam_url(&steam_url).map_err(|e| {
-//         tracing::error!(
-//             "Failed to open Steam Input Configurator via URL {}: {}",
-//             steam_url,
-//             e
-//         )
-//     });
-// }
+pub async fn open_controller_config(app_id: u32) {
+    use crate::app::steam::cef_inject::{injector, util as cef_util};
+
+    if cef_util::debug_enable_file_present() {
+        let js = format!("SteamClient.Input.OpenDesktopConfigurator({});", app_id);
+        match injector::inject::<serde_json::Value>(&js).await {
+            Ok(_) => return,
+            Err(e) => {
+                tracing::warn!(
+                    "Failed to open Steam Input Configurator via CEF injection ({}), \
+                     falling back to steam:// URL",
+                    e
+                );
+            }
+        }
+    }
+
+    let steam_url = format!("steam://controllerconfig/{}", app_id);
+    if let Err(e) = open_url(&steam_url) {
+        tracing::error!(
+            "Failed to open Steam Input Configurator via URL {}: {}",
+            steam_url,
+            e
+        );
+    }
+}

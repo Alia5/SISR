@@ -41,12 +41,13 @@ that are indistinguishable from real hardware and work with any game/application
 You can access some SISR options by right-clicking the system tray icon  
 ![SISR System Tray Icon](../../assets/SISR-tray.png)
 
-| Option                 | Description                                                            |
-| ---------------------- | ---------------------------------------------------------------------- |
-| Show UI                | Shows the SISR UI providing general information and a few more options |
-| Steam Controllerconfig | Opens the Steam Controller configuration for the SISR Marker shortcut  |
-| Force Controllerconfig | Forces Steam to use the Steam Input configuration of the SISR marker shortcut instead of the Desktop configuration (or any configuration from launched Steam games)                                    |
-| Quit                   | Exits the application                                                  |
+| Option | Description |
+| --- | --- |
+| Show UI / Hide UI | Toggles the SISR UI providing general information and a few more options |
+| Enable Steam Overlay | Toggles the Steam overlay as borderless-window. Does not work in exclusive fullscreen, _use borderless window instead_. Does **currently** also _not_ work with UWP games. |
+| Show Steam Controllerconfig | Opens the currently used Steam Input configuration |
+| Allow Desktop Config | Uses Steams Desktop-Configuration; Otherwise (when **unchecked**) the Steam Input layout of SISR is used and enforced |
+| Quit | Exits the application |
 
 !!! tip "Tray menu"
     The tray menu is also available if you have launched SISR via Steam as described in the [Multiple Configurations / GlosSI like usage](./multi_configs.md) guide.

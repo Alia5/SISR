@@ -4,6 +4,8 @@ use tracing::{debug, error, info, warn};
 use crate::app::{
     signals,
     steam::util::{launched_in_steam_game_mode, open_url},
+    tray::event::{TrayEvent, send_and_wake},
+    window,
 };
 
 #[derive(Debug)]
@@ -68,6 +70,8 @@ impl BindingEnforcer {
             Ok(_) => {
                 info!("Activated Steam binding enforcement for AppId: {}", app_id);
                 self.active = true;
+                send_and_wake(TrayEvent::ForceConfigChanged(true));
+                window::event::request_redraw();
             }
             Err(e) => {
                 error!("Failed to activate Steam binding enforcement: {}", e);
@@ -86,6 +90,8 @@ impl BindingEnforcer {
             Ok(_) => {
                 info!("Activated Steam binding enforcement for AppId: {}", app_id);
                 self.active = true;
+                send_and_wake(TrayEvent::ForceConfigChanged(true));
+                window::event::request_redraw();
             }
             Err(e) => {
                 error!("Failed to activate Steam binding enforcement: {}", e);
@@ -103,6 +109,8 @@ impl BindingEnforcer {
             Ok(_) => {
                 info!("Deactivated Steam binding enforcement");
                 self.active = false;
+                send_and_wake(TrayEvent::ForceConfigChanged(false));
+                window::event::request_redraw();
             }
             Err(e) => {
                 error!("Failed to deactivate Steam binding enforcement: {}", e);

@@ -12,12 +12,13 @@ use tray_icon::{Icon, TrayIcon, TrayIconBuilder};
 
 use crate::app::assets::ICON_BYTES;
 use crate::app::input::context::Context;
+use crate::app::steam::binding_enforcer::binding_enforcer;
 use crate::app::tray::event::TrayEvent;
-use crate::app::updater;
+use crate::app::{steam, updater};
 use crate::app::window::event::{WindowRunnerEvent, get_event_sender};
 use crate::config::get_config;
 
-use super::runner::AppRunner;
+use super::runner::{AppRunner, get_tokio_handle};
 
 #[cfg(windows)]
 static TRAY_THREAD_ID: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
@@ -30,6 +31,8 @@ pub enum TrayMenuEvent {
     Quit,
     ToggleUI,
     ToggleSteamOverlayEnabled,
+    OpenControllerConfig,
+    ToggleForceControllerConfig,
     ShowUpdateDialog,
 }
 
@@ -40,6 +43,8 @@ pub struct TrayContext {
     version_item: MenuItem,
     toggle_ui_item: MenuItem,
     enable_steam_overlay_item: CheckMenuItem,
+    open_config_item: Option<MenuItem>,
+    force_config_item: CheckMenuItem,
     quit_item: MenuItem,
     update_item: Option<MenuItem>,
     ctx: Arc<Mutex<Context>>,
@@ -72,6 +77,29 @@ impl TrayContext {
             .expect("Failed to add enable steam overlay item");
         menu_ids.insert(enable_steam_overlay_item.id().clone(), TrayMenuEvent::ToggleSteamOverlayEnabled);
 
+        let enforcer = binding_enforcer().lock().ok();
+        let app_id = enforcer.as_ref().and_then(|e| e.app_id());
+        let enforcer_active = enforcer.as_ref().map(|e| e.is_active()).unwrap_or(false);
+        drop(enforcer);
+
+        let open_config_item = app_id.map(|_| {
+            let item = MenuItem::new("Show Steam Controllerconfig", true, None);
+            menu.append(&item)
+                .expect("Failed to add Steam Controllerconfig item");
+            menu_ids.insert(item.id().clone(), TrayMenuEvent::OpenControllerConfig);
+            item
+        });
+
+        let force_config_item = CheckMenuItem::new(
+            "Allow Desktop Config",
+            app_id.is_some(),
+            !enforcer_active,
+            None,
+        );
+        menu.append(&force_config_item)
+            .expect("Failed to add Force Controllerconfig item");
+        menu_ids.insert(force_config_item.id().clone(), TrayMenuEvent::ToggleForceControllerConfig);
+
         let quit_item = MenuItem::new("Quit", true, None);
         menu.append(&quit_item).expect("Failed to add quit item");
         menu_ids.insert(quit_item.id().clone(), TrayMenuEvent::Quit);
@@ -93,6 +121,8 @@ impl TrayContext {
             version_item,
             toggle_ui_item,
             enable_steam_overlay_item,
+            open_config_item,
+            force_config_item,
             quit_item,
             update_item: None,
             ctx,
@@ -107,6 +137,10 @@ impl TrayContext {
         menu.append(&self.version_item).ok();
         menu.append(&self.toggle_ui_item).ok();
         menu.append(&self.enable_steam_overlay_item).ok();
+        if let Some(item) = &self.open_config_item {
+            menu.append(item).ok();
+        }
+        menu.append(&self.force_config_item).ok();
         menu.append(&self.quit_item).ok();
         self.tray_icon.set_menu(Some(Box::new(menu)));
     }
@@ -146,10 +180,30 @@ impl TrayContext {
                         }
                     }
                 }
+                TrayMenuEvent::OpenControllerConfig => {
+                    tracing::debug!("Open Steam Controllerconfig requested from tray menu");
+                    if let Some(app_id) = binding_enforcer().lock().ok().and_then(|e| e.app_id()) {
+                        get_tokio_handle().spawn(async move {
+                            steam::util::open_controller_config(app_id).await;
+                        });
+                    }
+                }
+                TrayMenuEvent::ToggleForceControllerConfig => {
+                    tracing::debug!("Toggle Force Controllerconfig requested from tray menu");
+                    if let Ok(mut enforcer) = binding_enforcer().lock() {
+                        if enforcer.is_active() {
+                            enforcer.deactivate();
+                        } else {
+                            enforcer.activate();
+                        }
+                        // checkbox is inverted: checked = desktop config allowed = NOT enforcing
+                        self.force_config_item.set_checked(!enforcer.is_active());
+                    }
+                }
                 TrayMenuEvent::ShowUpdateDialog => {
                     tracing::debug!("Show update dialog requested from tray menu");
-                    crate::app::updater::clear_dismissed();
-                    crate::app::updater::clear_remind_later();
+                    updater::clear_dismissed();
+                    updater::clear_remind_later();
                     if let Err(e) = get_event_sender().send_event(WindowRunnerEvent::ToggleUi(Some(true))) {
                         tracing::error!("Failed to send ToggleUi event: {:?}", e);
                     }
@@ -168,6 +222,10 @@ impl TrayContext {
                     } else {
                         self.toggle_ui_item.set_text("Show UI");
                     };
+                }
+                TrayEvent::ForceConfigChanged(active) => {
+                    // checked = desktop config allowed = NOT forcing
+                    self.force_config_item.set_checked(!active);
                 }
                 TrayEvent::UpdateAvailable(version) => {
                     tracing::info!("Update available notification received: {}", version);
