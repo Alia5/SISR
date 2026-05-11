@@ -13,7 +13,7 @@ elseif ($sisrVersion -match "^v?\d+\.\d+") {
     $apiUrl = "https://api.github.com/repos/$repo/releases/tags/$sisrVersion"
 }
 
-Write-Host "Fetching SISR release: $sisrVersion..." -ForegroundColor Cyan
+Write-Host "Fetching SISR release: $sisrVersion..."
 $releaseData = Invoke-RestMethod -Uri $apiUrl -ErrorAction Stop
 $version = $releaseData.tag_name
 
@@ -40,8 +40,8 @@ else {
 $buildType = if ($version -match "snapshot") { "Snapshot" } else { "Release" }
 $assetName = "SISR-$arch-windows-msvc-$buildType.zip"
 
-Write-Host "Architecture: $arch" -ForegroundColor Cyan
-Write-Host "Looking for asset: $assetName" -ForegroundColor Cyan
+Write-Host "Architecture: $arch"
+Write-Host "Looking for asset: $assetName"
 
 $asset = $releaseData.assets | Where-Object { $_.name -eq $assetName }
 if (-not $asset) {
@@ -50,7 +50,7 @@ if (-not $asset) {
 }
 
 $downloadUrl = $asset.browser_download_url
-Write-Host "Downloading from: $downloadUrl" -ForegroundColor Cyan
+Write-Host "Downloading from: $downloadUrl"
 
 $tempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
 
@@ -62,7 +62,7 @@ try {
     $installDir = Join-Path $env:LOCALAPPDATA "SISR"
     $isUpdate = Test-Path $installDir
     
-    Write-Host "Installing to $installDir..." -ForegroundColor Cyan
+    Write-Host "Installing to $installDir..."
     
     if ($isUpdate) {
         Write-Host "Existing SISR installation detected" -ForegroundColor Yellow
@@ -77,9 +77,19 @@ try {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
     Expand-Archive -Path $tempZip -DestinationPath $installDir -Force
     Write-Host "Extracted SISR to $installDir" -ForegroundColor Green
+
+    Write-Host "Downloading uninstall script..."
+    try {
+        $uninstallScript = Join-Path $installDir "uninstall.ps1"
+        Invoke-WebRequest -Uri "https://alia5.github.io/SISR/stable/uninstall.ps1" -OutFile $uninstallScript -ErrorAction Stop
+        Write-Host "Uninstall script placed at $uninstallScript" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Warning: Could not download uninstall script" -ForegroundColor Yellow
+    }
     
     Write-Host ""
-    Write-Host "Installing VIIPER version: $viiperVersion" -ForegroundColor Cyan
+    Write-Host "Installing VIIPER version: $viiperVersion"
     $viiperInstallVersion = $viiperVersion
     if ($viiperInstallVersion -eq "dev-snapshot") {
         $viiperInstallVersion = "main"
@@ -96,7 +106,7 @@ try {
     }
     
     Write-Host ""
-    Write-Host "Configuring Steam CEF remote debugging..." -ForegroundColor Cyan
+    Write-Host "Configuring Steam CEF remote debugging..."
     
     $steamPaths = @()
     
@@ -109,7 +119,7 @@ try {
     catch {}
     
     $steamPaths += "C:\Program Files (x86)\Steam"
-    $steamPaths += "C:\Program Files\Steam" # will maybe exist in the future?
+    $steamPaths += "C:\Program Files\Steam"
     
     $cefCreated = $false
     foreach ($steamPath in $steamPaths) {
@@ -138,7 +148,7 @@ try {
     }
     
     Write-Host ""
-    Write-Host "Creating shortcuts..." -ForegroundColor Cyan
+    Write-Host "Creating shortcuts..."
     
     $sisrExe = Join-Path $installDir "SISR.exe"
     $WshShell = New-Object -ComObject WScript.Shell
@@ -168,14 +178,44 @@ try {
     catch {
         Write-Host "Warning: Could not create Start Menu shortcut - $($_.Exception.Message)" -ForegroundColor Yellow
     }
+
+    $startMenuNoSteamShortcut = Join-Path $startMenuPath "SISR (No Steam).lnk"
+    try {
+        $shortcut = $WshShell.CreateShortcut($startMenuNoSteamShortcut)
+        $shortcut.TargetPath = $sisrExe
+        $shortcut.Arguments = "--no-steam"
+        $shortcut.WorkingDirectory = $installDir
+        $shortcut.Save()
+        Write-Host "Created Start Menu shortcut (No Steam)" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Warning: Could not create Start Menu shortcut (No Steam) - $($_.Exception.Message)" -ForegroundColor Yellow
+    }
     
+    $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\SISR"
+    try {
+        New-Item -Path $uninstallKey -Force | Out-Null
+        Set-ItemProperty -Path $uninstallKey -Name "DisplayName"      -Value "SISR"
+        Set-ItemProperty -Path $uninstallKey -Name "DisplayVersion"   -Value $version
+        Set-ItemProperty -Path $uninstallKey -Name "Publisher"        -Value "Alia5"
+        Set-ItemProperty -Path $uninstallKey -Name "InstallLocation"  -Value $installDir
+        Set-ItemProperty -Path $uninstallKey -Name "DisplayIcon"      -Value $sisrExe
+        Set-ItemProperty -Path $uninstallKey -Name "UninstallString"  -Value "powershell -ExecutionPolicy Bypass -File `"$(Join-Path $installDir 'uninstall.ps1')`""
+        Set-ItemProperty -Path $uninstallKey -Name "NoModify"         -Value 1 -Type DWord
+        Set-ItemProperty -Path $uninstallKey -Name "NoRepair"         -Value 1 -Type DWord
+        Write-Host "Registered in Windows uninstall list" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Warning: Could not register in Windows uninstall list - $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+
     Write-Host ""
     Write-Host "================================================" -ForegroundColor Green
     Write-Host "SISR installed successfully!" -ForegroundColor Green
     Write-Host "================================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Installation location: $installDir" -ForegroundColor Cyan
-    Write-Host "Executable: $sisrExe" -ForegroundColor Cyan
+    Write-Host "Installation location: $installDir"
+    Write-Host "Executable: $sisrExe"
     Write-Host "You can now run SISR from the Desktop or Start Menu shortcut." -ForegroundColor Green
     Write-Host "" 
     
