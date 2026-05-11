@@ -6,7 +6,10 @@ use reqwest::StatusCode;
 
 use crate::{
     app::{
-        api::AppState, hid_hooks, runner::AppRunner, steam::{self}
+        api::AppState,
+        hid_hooks,
+        runner::AppRunner,
+        steam::{self},
     },
     config::get_config,
 };
@@ -44,7 +47,6 @@ pub async fn restart_steam(
 }
 
 pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
-
     if steam::util::steam_running() {
         let _ = steam::util::open_url("steam://exit");
 
@@ -54,10 +56,22 @@ pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
             }
             tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
-
     }
-    // hack, wait for registry keys to be removed!
-    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    #[cfg(target_os = "windows")]
+    {
+        for _ in 0..10 {
+            let active_user = steam::util::active_user_id();
+            if active_user.is_none() || active_user == Some(0) {
+                break;
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        }
+    }
+    #[cfg(target_os = "linux")]
+    {
+        // hack!
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+    }
 
     steam::util::open_url("steam://open/main")
         .map_err(|e| {
@@ -77,11 +91,11 @@ pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
 
     if !steam::util::launched_via_steam() && !get_config().steam.no_steam.unwrap_or(false) {
-		#[cfg(all(target_os = "windows", target_arch = "x86_64"))]
-		{
-			tracing::debug!("Uninstalling HID detours before unloading Steam overlay");
-			hid_hooks::rehook::unhook_all();
-		}
+        #[cfg(all(target_os = "windows", target_arch = "x86_64"))]
+        {
+            tracing::debug!("Uninstalling HID detours before unloading Steam overlay");
+            hid_hooks::rehook::unhook_all();
+        }
 
         steam::util::unload_steam_overlay();
         // HACK!
@@ -149,7 +163,14 @@ pub async fn do_restart_steam(restart_sisr_after: bool) -> impl IntoResponse {
                 "& {{ while (Get-Process -Id {current_pid} -ErrorAction SilentlyContinue) {{ Start-Sleep -Milliseconds 200 }}; Start-Process -FilePath {exe} -ArgumentList {arg_list} }}"
             );
             if let Err(e) = Command::new("powershell")
-                .args(["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", &command])
+                .args([
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    &command,
+                ])
                 .spawn()
             {
                 tracing::error!("Failed to schedule SISR restart: {}", e);
