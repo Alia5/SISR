@@ -52,6 +52,36 @@ if (-not $asset) {
 $downloadUrl = $asset.browser_download_url
 Write-Host "Downloading from: $downloadUrl"
 
+
+$isElevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$userLocalAppData = $env:LOCALAPPDATA
+$userAppData      = $env:APPDATA
+$userDesktop      = [Environment]::GetFolderPath("Desktop")
+$userHKCU         = "HKCU:"
+if ($isElevated) {
+    $loggedInUser = (Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction SilentlyContinue).UserName
+    if ($loggedInUser -and $loggedInUser -match '\\') {
+        $userName    = $loggedInUser.Split('\')[1]
+        $userProfile = "C:\Users\$userName"
+        if ((Test-Path $userProfile) -and ($userProfile -ne $env:USERPROFILE)) {
+            Write-Host "Running elevated; installing for user: $userName" -ForegroundColor Yellow
+            $userLocalAppData = Join-Path $userProfile "AppData\Local"
+            $userAppData      = Join-Path $userProfile "AppData\Roaming"
+            $userDesktop      = Join-Path $userProfile "Desktop"
+            if (-not (Get-PSDrive -Name HKU -ErrorAction SilentlyContinue)) {
+                New-PSDrive -PSProvider Registry -Root HKEY_USERS -Name HKU | Out-Null
+            }
+            try {
+                $userSid  = (New-Object Security.Principal.NTAccount($userName)).Translate([Security.Principal.SecurityIdentifier]).Value
+                $userHKCU = "HKU:\$userSid"
+            }
+            catch {
+                Write-Host "Warning: Could not resolve SID for $userName; registry entries may land under admin account" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 $tempDir = New-TemporaryFile | ForEach-Object { Remove-Item $_; New-Item -ItemType Directory -Path $_ }
 
 try {
@@ -59,7 +89,7 @@ try {
     Invoke-WebRequest -Uri $downloadUrl -OutFile $tempZip -ErrorAction Stop
     Write-Host "Downloaded successfully" -ForegroundColor Green
     
-    $installDir = Join-Path $env:LOCALAPPDATA "SISR"
+    $installDir = Join-Path $userLocalAppData "SISR"
     $isUpdate = Test-Path $installDir
     
     Write-Host "Installing to $installDir..."
@@ -111,7 +141,7 @@ try {
     $steamPaths = @()
     
     try {
-        $steamPath = (Get-ItemProperty -Path "HKCU:\Software\Valve\Steam" -Name "SteamPath" -ErrorAction SilentlyContinue).SteamPath
+        $steamPath = (Get-ItemProperty -Path "$userHKCU\Software\Valve\Steam" -Name "SteamPath" -ErrorAction SilentlyContinue).SteamPath
         if ($steamPath) {
             $steamPaths += $steamPath
         }
@@ -153,7 +183,7 @@ try {
     $sisrExe = Join-Path $installDir "SISR.exe"
     $WshShell = New-Object -ComObject WScript.Shell
     
-    $desktopPath = [Environment]::GetFolderPath("Desktop")
+    $desktopPath = $userDesktop
     $desktopShortcut = Join-Path $desktopPath "SISR.lnk"
     try {
         $shortcut = $WshShell.CreateShortcut($desktopShortcut)
@@ -166,7 +196,7 @@ try {
         Write-Host "Warning: Could not create desktop shortcut - $($_.Exception.Message)" -ForegroundColor Yellow
     }
     
-    $startMenuPath = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
+    $startMenuPath = Join-Path $userAppData "Microsoft\Windows\Start Menu\Programs"
     $startMenuShortcut = Join-Path $startMenuPath "SISR.lnk"
     try {
         $shortcut = $WshShell.CreateShortcut($startMenuShortcut)
@@ -192,7 +222,7 @@ try {
         Write-Host "Warning: Could not create Start Menu shortcut (No Steam) - $($_.Exception.Message)" -ForegroundColor Yellow
     }
     
-    $uninstallKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\SISR"
+    $uninstallKey = "$userHKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\SISR"
     try {
         New-Item -Path $uninstallKey -Force | Out-Null
         Set-ItemProperty -Path $uninstallKey -Name "DisplayName"      -Value "SISR"
