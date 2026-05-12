@@ -1147,6 +1147,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#does-sisr-require-steam-to-be-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does SISR require Steam to be running?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-sisr-emulate-an-xbox-controller-does-that-mean-i-lose-joystick-to-mouse-or-other-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does SISR emulate an Xbox controller? Does that mean I lose joystick-to-mouse or other features?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#is-gyro-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Is Gyro supported?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-sisr-be-configured-per-game-or-per-application-or-is-it-system-wide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Can SISR be configured per-game or per-application, or is it system-wide?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1472,6 +1516,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#does-sisr-require-steam-to-be-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does SISR require Steam to be running?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#does-sisr-emulate-an-xbox-controller-does-that-mean-i-lose-joystick-to-mouse-or-other-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Does SISR emulate an Xbox controller? Does that mean I lose joystick-to-mouse or other features?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#is-gyro-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Is Gyro supported?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#can-sisr-be-configured-per-game-or-per-application-or-is-it-system-wide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Can SISR be configured per-game or per-application, or is it system-wide?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#common-issues" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1693,6 +1781,37 @@ you don't need to download/setup it separately  </p>
 <li><code>:3242</code> for the control API</li>
 </ul>
 <p>See the <a href="https://alia5.github.io/VIIPER/">VIIPER documentation</a> for more details</p>
+</details>
+<h2 class="toc-anchor" id="does-sisr-require-steam-to-be-running">Does SISR require Steam to be running?</h2>
+<details class="question">
+<summary>Does SISR require Steam to be running?</summary>
+<p>Yes, Steam must still be running in the background.<br />
+SISR gives you the <strong>full functionality of Steam Input without having to launch your games from Steam</strong>,
+but Steam itself still needs to be running.</p>
+</details>
+<h2 class="toc-anchor" id="does-sisr-emulate-an-xbox-controller-does-that-mean-i-lose-joystick-to-mouse-or-other-features">Does SISR emulate an Xbox controller? Does that mean I lose joystick-to-mouse or other features?</h2>
+<details class="question">
+<summary>Does SISR emulate an Xbox controller? Does that mean I lose joystick-to-mouse or other features?</summary>
+<p>Yes, SISR emulates an Xbox controller! But <strong>you don't lose any features doing this!</strong></p>
+<p>Normally, Steam Input itself only "emulates" an Xbox controller anyway (via the overlay, specific to games launched from Steam).  <br />
+Keyboard and Mouse inputs Steam already handles system-wide via virtual inputs; SISR does nothing to them and they work exactly as if SISR weren't there at all.<br />
+<strong>Only</strong> the "controller" part is redirected to the system.  </p>
+<p>All Steam Input features (joystick-to-mouse, action layers, etc.) remain fully available <strong>through Steam's Layout Configurator</strong>.</p>
+</details>
+<h2 class="toc-anchor" id="is-gyro-supported">Is Gyro supported?</h2>
+<details class="question">
+<summary>Is Gyro supported?</summary>
+<p>Yes! It works the same as with any other game that doesn't have explicit Steam Input API support.<br />
+Simply bind <strong>Gyro to Mouse</strong> or <strong>Gyro to Joystick</strong> in Steam Input's Layout Configurator.</p>
+</details>
+<h2 class="toc-anchor" id="can-sisr-be-configured-per-game-or-per-application-or-is-it-system-wide">Can SISR be configured per-game or per-application, or is it system-wide?</h2>
+<details class="question">
+<summary>Can SISR be configured per-game or per-application, or is it system-wide?</summary>
+<p>You can have multiple Steam Input configs with SISR, yes.</p>
+<p>Instead of launching SISR outside of Steam, <strong>add SISR multiple times to Steam</strong> as a non-Steam game<br />
+and launch it from Steam<br />
+Each entry can have its own Steam Input configuration.  <br />
+This way you get per-game (or per-use-case) control over your layout.</p>
 </details>
 <h2 id="common-issues">Common Issues</h2>
 <p>For common issues (doubled controllers, Steam CEF debugging, port conflicts, etc.), see: <a href="../troubleshooting/">Troubleshooting</a></p>
