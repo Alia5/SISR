@@ -1541,7 +1541,7 @@
 
 <h1 id="an-introduction-to-sisr">An introduction to SISR</h1>
 <h2 id="foreword">Foreword</h2>
-<p>My little toy project seems to gather a lot more attention that it really deserves, or needs, so it's time for an introduction
+<p>My little toy project seems to gather a lot more attention than it really deserves, or needs, so it's time for an introduction
 and a short explainer of what SISR is, and how to use it.  </p>
 <p>Let me preface this by saying that SISR works fine, but it is a <strong>toy project</strong> of mine and a work in progress<br />
 I <strong>do not</strong> consider it good enough for wide usage of the average non-technically inclined user.<br />
@@ -1557,8 +1557,8 @@ Or just fuck around and find out.<br />
 <h2 id="okay-so-what-is-sisr">Okay so what is SISR?</h2>
 <p>SISR is the "Steam Input System Redirector".<br />
 It takes inputs that it receives from Steam Input and simply redirects them.<br />
-That can be either to on the same computer, or even another machine across the network.  </p>
-<p>In practice this means, that you can use SISR as a tool to <em>workaround</em> of having to launch your games through Steam
+That can be either to the same computer, or even another machine across the network.  </p>
+<p>In practice this means, that you can use SISR as a tool to <em>workaround</em> having to launch your games through Steam
 in order to use Steam Input, which for instance is "required" for the Steam Controller.  </p>
 <p>However, the approach of "taking Steam Input inputs and redirecting them" makes SISR rather flexible,
 <strong>not specific to any controller</strong>, and allows for different use cases.<br />
@@ -1566,9 +1566,9 @@ I, for example, have used it in the past to use my Steam Deck as a dedicated con
 but I imagine this is not why most of you are interested in SISR.  </p>
 <p>The approach also means that SISR still requires Steam,
 just that you <strong>don't have to launch</strong> your games <strong>through Steam</strong> anymore.<br />
-You <strong>do get</strong> the full functuionality of Steam Input, though, like input-remapping, gyro, action-sets,
+You <strong>do get</strong> the full functionality of Steam Input, though, like input-remapping, gyro, action-sets,
 and all that good stuff.<br />
-<sup>(And yes there is a non-Steam mode, but Iit is <strong>not</strong> the intended use case and only exists because it is a free side-effect)</sup></p>
+<sup>(And yes there is a non-Steam mode, but it is <strong>not</strong> the intended use case and only exists because it is a free side-effect)</sup></p>
 <h2 id="how-to-use-sisr">How to use SISR</h2>
 <h3 id="installation">Installation</h3>
 <p><a href="/getting-started/installation/">Installation</a> is really simple, open up any PowerShell and paste in a single command,
@@ -1586,11 +1586,11 @@ should automatically detect that this is your first time running the App.  </p>
 <ol>
 <li>It will restart or start Steam, and while doing so will enable a debug interface in Steam<br />
    This allows SISR to directly talk to your Steam client</li>
-<li>It will add "SISR Marker"-shortcut to Steam.<br />
-   This shortcuts Steam Input layout will be used when SISR is run from the Desktop or Start menu,
+<li>It will add an "SISR Marker" shortcut to Steam.<br />
+   This shortcut's Steam Input layout will be used when SISR is run from the Desktop or Start menu,
    as opposed to when running from Steam.  </li>
 </ol>
-<p>After this, SISR will restart (or close) and minize itself to the tray menu.</p>
+<p>After this, SISR will restart (or close) and minimize itself to the tray menu.</p>
 <p>If this fails, check out and follow the <a href="/getting-started/installation/#manual-installation">manual installation guide</a></p>
 <h3 id="using-sisr">Using SISR</h3>
 <h4 id="running-sisr-from-the-desktop-or-start-menu">Running SISR from the Desktop or Start menu</h4>
@@ -1606,13 +1606,13 @@ will show up to your operating system as regular old Xbox360 controllers.  </p>
 <strong>You do not lose any Steam Input features</strong>,
 as Steam itself normally does not present any more features to games that are not using the (badly named)
 native Steam Input API.</p>
-<p>Just open up Steam, go to your Library, find the "SISR Marker" shorcut and edit it's Steam Input controller layout.<br />
+<p>Just open up Steam, go to your Library, find the "SISR Marker" shortcut and edit its Steam Input controller layout.<br />
 Here you can still use trackpads, gyro, and everything else Steam Input has to offer.  </p>
 <p><img alt="SISR-Marker-Layout" src="../../assets/SISR-Marker-Layout.gif" /></p>
 <p>The Steam Input controller layout of the <code>SISR Marker</code> essentially acts as a <strong>replacement</strong> of the <code>Steam Desktop Layout</code>,
 <em>while SISR is running</em> when it is run from the Desktop or Start menu.  </p>
 <p>Even touch- and radial-menus work, when the <code>Enable Steam Overlay</code> option is enabled from the tray menu,
-or SISRs configuration makes this the default (<code>-w true -f true</code> flags).</p>
+or SISR's configuration makes this the default (<code>-w true -f true</code> flags).</p>
 <p><img alt="SISR-Desktop-Touch-Menu" src="../../assets/SISR-Desktop-Touch-Menu.gif" /></p>
 <h4 id="running-sisr-from-steam">Running SISR from Steam</h4>
 <p>In case you want to have more than a single Steam Input layout, you can also <strong>run SISR from Steam.</strong>  <br />
