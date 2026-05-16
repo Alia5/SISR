@@ -130,7 +130,7 @@ else
                     echo "Read-only root disabled"
                     STEAMOS_RW_TOGGLED=1
                 else
-                    echo "Warning: Could not disable read-only root. webkit2gtk-4.1 installation may fail."
+                    echo "Warning: Could not disable read-only root. Some operations may fail." 
                 fi
             else
                 echo "Read-only root is already disabled"
