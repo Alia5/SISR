@@ -81,28 +81,82 @@ cp SISR.AppImage "$INSTALL_DIR/SISR.AppImage"
 chmod +x "$INSTALL_DIR/SISR.AppImage"
 echo "Installed SISR AppImage"
 
-IS_STEAMOS=0
-WAS_READONLY=0
+detect_package_manager() {
+    if command -v pacman >/dev/null ; then
+        echo "pacman"
+        return 0
+    fi
+    if command -v apt >/dev/null ; then
+        echo "apt"
+        return 0
+    fi
+    if command -v apt-get >/dev/null ; then
+        echo "apt"
+        return 0
+    fi
+    if command -v dnf >/dev/null ; then
+        echo "dnf"
+        return 0
+    fi
+    return 1
+}
 
-if [ -f /etc/os-release ]; then
-    if grep -qi '^ID=steamos' /etc/os-release; then
-        IS_STEAMOS=1
+is_steamos() {
+    if command -v steamos-readonly >/dev/null; then
+        return 0
+    fi
+    if [ -r /etc/os-release ] && grep -qi '^ID=steamos' /etc/os-release; then
+        return 0
+    fi
+    return 1
+}
+
+STEAMOS_RW_TOGGLED=0
+
+echo ""
+echo "Checking webkit2gtk-4.1 installation..."
+
+if pkg-config --exists webkit2gtk-4.1 2>/dev/null || ldconfig -p 2>/dev/null | grep -q 'libwebkit2gtk-4.1' ; then
+    echo "webkit2gtk-4.1 already installed"
+else
+    echo "webkit2gtk-4.1 not found. Installing..."
+
+    if is_steamos; then
         echo "SteamOS detected"
-        
         if command -v steamos-readonly >/dev/null ; then
             if steamos-readonly status | grep -q "enabled"; then
-                WAS_READONLY=1
                 echo "Read-only root is enabled. Temporarily disabling..."
                 if steamos-readonly disable; then
                     echo "Read-only root disabled"
+                    STEAMOS_RW_TOGGLED=1
                 else
-                    echo "Warning: Could not disable read-only root. Some operations may fail." 
+                    echo "Warning: Could not disable read-only root. webkit2gtk-4.1 installation may fail."
                 fi
             else
                 echo "Read-only root is already disabled"
             fi
         fi
     fi
+
+    PM=$(detect_package_manager) || PM=""
+    case "$PM" in
+        pacman)
+            echo "Installing webkit2gtk-4.1 via pacman..."
+            sudo pacman -S --noconfirm webkit2gtk-4.1 || echo "Warning: webkit2gtk-4.1 installation failed"
+            ;;
+        apt)
+            echo "Installing webkit2gtk-4.1 via apt..."
+            sudo apt update
+            sudo apt install -y libwebkit2gtk-4.1-0 || echo "Warning: webkit2gtk-4.1 installation failed"
+            ;;
+        dnf)
+            echo "Installing webkit2gtk-4.1 via dnf..."
+            sudo dnf install -y webkit2gtk4.1 || echo "Warning: webkit2gtk-4.1 installation failed"
+            ;;
+        *)
+            echo "Warning: Could not detect package manager. Please install webkit2gtk-4.1 manually."
+            ;;
+    esac
 fi
 
 echo ""
@@ -187,14 +241,9 @@ else
     echo "Warning: Could not create desktop entry" 
 fi
 
-if [ $IS_STEAMOS -eq 1 ] && [ $WAS_READONLY -eq 1 ]; then
-    echo ""
+if [ "$STEAMOS_RW_TOGGLED" -eq 1 ]; then
     echo "Re-enabling SteamOS read-only root..."
-    if steamos-readonly enable; then
-        echo "Read-only root re-enabled"
-    else
-        echo "Warning: Could not re-enable read-only root. You may need to do this manually." 
-    fi
+    steamos-readonly enable || echo "Warning: failed to re-enable read-only. You may re-enable it manually later."
 fi
 
 echo ""
