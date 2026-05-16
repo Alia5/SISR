@@ -23,6 +23,7 @@ if (-not $version) {
 }
 
 Write-Host "Version: $version" -ForegroundColor Green
+$docsVersion = $version -replace '^v', ''
 
 $arch = if ([Environment]::Is64BitOperatingSystem) {
     if ((Get-CimInstance Win32_ComputerSystem).SystemType -match "ARM") {
@@ -111,7 +112,32 @@ try {
     Write-Host "Downloading uninstall script..."
     try {
         $uninstallScript = Join-Path $installDir "uninstall.ps1"
-        Invoke-WebRequest -Uri "https://alia5.github.io/SISR/stable/uninstall.ps1" -OutFile $uninstallScript -ErrorAction Stop
+        $uninstallScriptUrl = "https://alia5.github.io/SISR/$docsVersion/uninstall.ps1"
+        $stableUninstallscriptURL = "https://alia5.github.io/SISR/stable/uninstall.ps1"
+
+        $downloadedUninstallScript = $false
+        try {
+            Invoke-WebRequest -Uri $uninstallScriptUrl -OutFile $uninstallScript -ErrorAction Stop
+            $downloadedUninstallScript = $true
+            Write-Host "Downloaded uninstall script from $uninstallScriptUrl" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Warning: Could not download versioned uninstall script from $uninstallScriptUrl" -ForegroundColor Yellow
+            Invoke-WebRequest -Uri $stableUninstallscriptURL -OutFile $uninstallScript -ErrorAction Stop
+            $downloadedUninstallScript = $true
+            Write-Host "Downloaded uninstall script from fallback URL $stableUninstallscriptURL" -ForegroundColor Yellow
+        }
+
+        if ($downloadedUninstallScript) {
+            try {
+                Unblock-File -Path $uninstallScript -ErrorAction Stop
+                Write-Host "Unblocked uninstall script" -ForegroundColor Green
+            }
+            catch {
+                Write-Host "Warning: Could not unblock uninstall script" -ForegroundColor Yellow
+            }
+        }
+
         Write-Host "Uninstall script placed at $uninstallScript" -ForegroundColor Green
     }
     catch {
