@@ -151,8 +151,8 @@ pub fn create_cef_file_elevated(file_path: &Path) -> anyhow::Result<()> {
 #[cfg(target_os = "linux")]
 fn detect_cef_remote_debug_port_linux(default_port: u16) -> u16 {
     const PREFIXES: [&str; 2] = [
-        "--remote-debugging-port=",
-        "--remote-debugging-io-pipes=",
+        "--remote-debugging-port=", //Millennium v2
+        "--remote-debugging-io-pipes=", //Millennium v3 (Beta)
     ];
 
     let Ok(entries) = std::fs::read_dir("/proc") else {
