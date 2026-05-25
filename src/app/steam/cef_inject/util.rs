@@ -150,7 +150,10 @@ pub fn create_cef_file_elevated(file_path: &Path) -> anyhow::Result<()> {
 
 #[cfg(target_os = "linux")]
 fn detect_cef_remote_debug_port_linux(default_port: u16) -> u16 {
-    const PREFIX: &str = "--remote-debugging-port=";
+    const PREFIXES: [&str; 2] = [
+        "--remote-debugging-port=",
+        "--remote-debugging-io-pipes=",
+    ];
 
     let Ok(entries) = std::fs::read_dir("/proc") else {
         return default_port;
@@ -188,7 +191,7 @@ fn detect_cef_remote_debug_port_linux(default_port: u16) -> u16 {
 
         let cmdline = String::from_utf8_lossy(&cmdline).replace('\0', " ");
         for arg in cmdline.split_whitespace() {
-            if let Some(port) = parse_remote_debug_port_arg(arg, PREFIX) {
+            if let Some(port) = parse_remote_debug_port_arg(arg, &PREFIXES) {
                 return port;
             }
         }
@@ -199,7 +202,10 @@ fn detect_cef_remote_debug_port_linux(default_port: u16) -> u16 {
 
 #[cfg(target_os = "windows")]
 fn detect_cef_remote_debug_port_windows(default_port: u16) -> u16 {
-    const PREFIX: &str = "--remote-debugging-port=";
+    const PREFIXES: [&str; 2] = [
+        "--remote-debugging-port=",
+        "--remote-debugging-io-pipes=",
+    ];
 
     use sysinfo::{ProcessesToUpdate, System};
 
@@ -216,7 +222,7 @@ fn detect_cef_remote_debug_port_windows(default_port: u16) -> u16 {
 
         for arg in process.cmd() {
             let arg = arg.to_string_lossy();
-            if let Some(port) = parse_remote_debug_port_arg(arg.trim_matches('"'), PREFIX) {
+            if let Some(port) = parse_remote_debug_port_arg(arg.trim_matches('"'), &PREFIXES) {
                 return port;
             }
         }
@@ -225,11 +231,21 @@ fn detect_cef_remote_debug_port_windows(default_port: u16) -> u16 {
     default_port
 }
 
-fn parse_remote_debug_port_arg(arg: &str, prefix: &str) -> Option<u16> {
-    let port_str = arg.strip_prefix(prefix)?;
-    let port = port_str.parse::<u16>().ok()?;
-    if port == 0 {
-        return None;
+fn parse_remote_debug_port_arg(arg: &str, prefixes: &[&str]) -> Option<u16> {
+    for prefix in prefixes {
+        if let Some(port_str) = arg.strip_prefix(prefix) {
+            let first = port_str.split(',').next().unwrap_or("").trim();
+            let digits: String = first.chars().filter(|c| c.is_ascii_digit()).collect();
+            if !digits.is_empty() {
+                if let Ok(port) = digits.parse::<u16>() {
+                    if port != 0 {
+                        return Some(port);
+                    }
+                }
+            }
+            return None;
+        }
     }
-    Some(port)
+
+    None
 }
