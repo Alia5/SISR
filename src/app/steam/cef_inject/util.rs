@@ -203,8 +203,8 @@ fn detect_cef_remote_debug_port_linux(default_port: u16) -> u16 {
 #[cfg(target_os = "windows")]
 fn detect_cef_remote_debug_port_windows(default_port: u16) -> u16 {
     const PREFIXES: [&str; 2] = [
-        "--remote-debugging-port=",
-        "--remote-debugging-io-pipes=",
+        "--remote-debugging-port=", //Millennium v2
+        "--remote-debugging-io-pipes=", //Millennium v3 (Beta)
     ];
 
     use sysinfo::{ProcessesToUpdate, System};
@@ -232,9 +232,10 @@ fn detect_cef_remote_debug_port_windows(default_port: u16) -> u16 {
 }
 
 fn parse_remote_debug_port_arg(arg: &str, prefixes: &[&str]) -> Option<u16> {
+
     for prefix in prefixes {
         if let Some(port_str) = arg.strip_prefix(prefix) {
-            let first = port_str.split(',').next().unwrap_or("").trim();
+            let first = port_str.split(',').next().unwrap_or("").trim(); // Millennium devs give two ports seperated by a comma but only the first one is needed - Josh
             let digits: String = first.chars().filter(|c| c.is_ascii_digit()).collect();
             if !digits.is_empty() {
                 if let Ok(port) = digits.parse::<u16>() {
@@ -243,7 +244,8 @@ fn parse_remote_debug_port_arg(arg: &str, prefixes: &[&str]) -> Option<u16> {
                     }
                 }
             }
-            return None;
+
+            return Some(DEFAULT_CEF_DEBUG_PORT); // for some reason this fixes everything for millennium detection, so here it is. Does not affect non-millennium clients - Josh
         }
     }
 
