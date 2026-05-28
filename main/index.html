@@ -1454,7 +1454,10 @@
 <p>SISR (pronounced "scissor") redirects Steam Input configurations to the system level (localhost or network).  </p>
 <p>SISR takes controllers it receives from Steam (via Steam Input)
 and forwards them as emulated but more compatible controllers (indistinguishable from real hardware) to the OS.</p>
-<p>It can be used to circumvent issues with games and applications that
+<p>This approach makes SISR unique for controller rebinding tools as it uses the established Steam Input system
+and gives access to it's full feature set, supports every controller Steam supports,
+and provides access to thousands of community configurations (web-browsable on <a href="https://steaminputdb.com/">SteamInputDB</a>).
+It can be used to circumvent issues with games and applications that
 do not support Steam Input or otherwise pose challenges, like (but not limited to):</p>
 <ul>
 <li>Games with aggressive anti-cheat systems</li>
@@ -1483,21 +1486,22 @@ For this Steam must still be running in the background, though. <br />
 <ul>
 <li>Full SteamInput featureset while emulating compatible controllers (indistinguishable from real hardware)</li>
 <li>Xbox360 <em>or</em></li>
-<li>DualShock 4</li>
+<li>DualShock 4<ul>
+<li>Gyro Passthrough</li>
+</ul>
+</li>
 <li>*<em>Non Steam Mode</em></li>
-<li>Xbox 360 controller emulation</li>
 <li>Multi-platform support (Windows, Linux)
    Multiple operation modes<ul>
 <li>Standalone background service (To be improved)</li>
 <li>Steam overlay window mode</li>
 </ul>
 </li>
-<li>PS4 controller emulation</li>
-<li>Networked operation across computers</li>
+<li>Networked operation across computers<ul>
 <li>Use devices like a SteamDeck as dedicated controller without streaming the whole game/display</li>
-<li><del>🚧 Xbox One controller emulation</del></li>
-<li><del>🚧 Generic controller emulation</del></li>
-<li>🚧 Gyro Passthrough</li>
+</ul>
+</li>
+<li>🚧 Xbox One controller emulation</li>
 <li>🚧 Bundling multiple devices into a single controller</li>
 <li>🚧 Automatic HidHide integration</li>
 </ul>

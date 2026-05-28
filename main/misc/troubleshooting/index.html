@@ -2161,7 +2161,7 @@ soon™</p>
 <details class="question">
 <summary>I can't see the UI / The UI doesn't show up</summary>
 <p>It's a system tray app. Right-click the tray icon to toggle the UI (among other things)
-<strong>Or</strong> launch with <code>-w --window-fullscreen false</code> to show the window at startup
+<strong>Or</strong> launch with <code>--w --window.fullscreen false</code> to show the window at startup
 <strong>If</strong> the window runs <strong>as overlay</strong> press <strong><code>Ctrl+Shift+Alt+S</code></strong>
     or <strong><code>LB+RB+BACK+A</code></strong> (<em>A button needs to be pressed last</em>) to toggle UI visibility.</p>
 </details>
@@ -2187,7 +2187,7 @@ soon™</p>
 <li>Firewall blocking the connection?<br />
     Allow VIIPER through your firewall</li>
 <li>Correct address?<br />
-    Default is <code>localhost:3242</code>. Change with <code>--viiper-address</code></li>
+    Default is <code>localhost:3242</code>. Change with <code>--viiper.address</code></li>
 <li><strong>If</strong> using remote VIIPER: Is the remote machine reachable?<br />
     Try pinging it</li>
 </ol>
@@ -2212,8 +2212,8 @@ soon™</p>
 <li>
 <p>Provide the password to SISR using one of these methods:  </p>
 <ul>
-<li>Launch argument: <code>--viiper-password &lt;password&gt;</code></li>
-<li>Config file: <code>viiper_password = "&lt;password&gt;"</code></li>
+<li>Launch argument: <code>--viiper.password &lt;password&gt;</code></li>
+<li>Config file: <code>[viiper] password = "&lt;password&gt;"</code></li>
 <li>Environment variable: <code>SISR_VIIPER_PASSWORD=&lt;password&gt;</code></li>
 </ul>
 </li>
@@ -2258,7 +2258,7 @@ and Valve decided to default that to port 8080 (<em>without an easy way to chang
 <summary>Steam installation could not be found</summary>
 <p>Ensure Steam is installed and the installation directory exists<br />
 On Windows, check the registry entry for Steam  </p>
-<p>You can also specify the path explicitly with <code>--steam-path</code></p>
+<p>You can also specify the path explicitly with <code>--steam.install-dir</code></p>
 </details>
 <h3 class="toc-anchor" id="failed-to-create-cef-debug-enable-file-in-steam-directory">Failed to create CEF debug enable file in Steam directory</h3>
 <details class="question">
@@ -2288,7 +2288,7 @@ I have not yet had the time to write documentation for this<br />
 <details class="question">
 <summary>KB/M emulation is disabled</summary>
 <p>SISR disables KB/M emulation on <strong>localhost/loopback</strong> as it makes no sense there  </p>
-<p>To enable: Run VIIPER on a different machine and run SISR with <code>--viiper-address=&lt;remote-ip&gt;:3242 --keyboard-mouse-emulation=true</code></p>
+<p>To enable: Run VIIPER on a different machine and run SISR with <code>--viiper.address=&lt;remote-ip&gt;:3242 --keyboard-mouse-emulation=true</code></p>
 </details>
 <h2 id="performance">🏎️ Performance</h2>
 <h3 class="toc-anchor" id="input-lag">Input lag</h3>

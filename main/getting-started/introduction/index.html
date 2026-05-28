@@ -1551,9 +1551,11 @@ and only then come back, if SISR is even required at all <em>(which it most like
 <p>This introduction is mostly targeted at those who recently got their shiny new Steam Controller 2 and want
 to use this software on Windows.<br />
 It is dumbed down to what I would consider the bare minimum a user needs to know before getting started.  </p>
-<p>If you are <strong>not</strong> one of those users, check out the rest of the documentation, you'll most likely find everything you need to know there.<br />
+<p>If you are <strong>not</strong> one of those users, check out the rest of the documentation,
+you'll most likely find everything you need to know there.<br />
 Or just fuck around and find out.<br />
-<sup>(<em><strong>Note</strong>: While linux builds exist, this software is <strong>not</strong> really useful on Linux, aside from forwarding SteamInput to another machine</em>)</sup></p>
+<sup>(<em><strong>Note</strong>: While linux builds exist, this software is <strong>not</strong> really
+useful on Linux, aside from forwarding SteamInput to another machine</em>)</sup></p>
 <h2 id="okay-so-what-is-sisr">Okay so what is SISR?</h2>
 <p>SISR is the "Steam Input System Redirector".<br />
 It takes inputs that it receives from Steam Input and simply redirects them.<br />
@@ -1612,12 +1614,13 @@ Here you can still use trackpads, gyro, and everything else Steam Input has to o
 <p>The Steam Input controller layout of the <code>SISR Marker</code> essentially acts as a <strong>replacement</strong> of the <code>Steam Desktop Layout</code>,
 <em>while SISR is running</em> when it is run from the Desktop or Start menu.  </p>
 <p>Even touch- and radial-menus work, when the <code>Enable Steam Overlay</code> option is enabled from the tray menu,
-or SISR's configuration makes this the default (<code>-w true -f true</code> flags).</p>
+or SISR's configuration makes this the default (<code>--w true --f true</code> flags).</p>
 <p><img alt="SISR-Desktop-Touch-Menu" src="../../assets/SISR-Desktop-Touch-Menu.gif" /></p>
 <h4 id="running-sisr-from-steam">Running SISR from Steam</h4>
-<p>In case you want to have more than a single Steam Input layout, you can also <strong>run SISR from Steam.</strong>  <br />
+<p>In case you want to have more than a single Steam Input layout, you can also
+<strong>run SISR from Steam.</strong><br />
 You can even add SISR <strong>multiple times</strong> to Steam, and have a different Steam Input layout for each of those shortcuts.</p>
-<p>To enable the Steam Overlay, add the flags <code>-w true -f true</code> to the launch options of the SISR shortcut in Steam.</p>
+<p>To enable the Steam Overlay, add the flags <code>--w true --f true</code> to the launch options of the SISR shortcut in Steam.</p>
 <p><img alt="SISR from Steam" src="../../assets/SISR-From-Steam.gif" /></p>
 <h3 id="wrapping-up">Wrapping up</h3>
 <p>There's a bit more SISR has to offer, and much more left to actually implement,
