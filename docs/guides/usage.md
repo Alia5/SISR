@@ -76,7 +76,7 @@ or even allowing you to change the emulated controller type without restarting S
 If you want to change the default configuration of SISR, for example to emulate Playstation controller by default  
 you can do by creating a config file in:  
 
-- 🪟 Windows: `C:\Users\<UserName>\AppData\Roaming\SISR\config\SISR.toml`  
+- 🪟 Windows: `%APPDATA%\SISR\config\SISR.toml`  
 - 🐧 Linux: `$XDG_CONFIG_HOME/sisr/SISR.toml`
 
 ### Example: Emulate DualShock4 controllers by default
