@@ -40,19 +40,28 @@ case "$ARCH" in
         ;;
 esac
 
-ASSET_NAME="SISR-${ARCH}.AppImage"
-
 echo "Architecture: $ARCH"
-echo "Looking for asset: $ASSET_NAME"
+
+if [ "$ARCH" = "x86_64" ]; then
+    ARCH_PATTERN='(x86_64|linux_x64)'
+else
+    ARCH_PATTERN='(aarch64|linux_arm64)'
+fi
 
 DOWNLOAD_URL=$(printf '%s' "$RELEASE_DATA" \
     | grep -Eo '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]+"' \
-    | grep "$ASSET_NAME" \
-    | head -n 1 \
-    | cut -d'"' -f4)
+    | cut -d'"' -f4 \
+    | grep -E '/SISR-.*\.AppImage$' \
+    | grep -E "$ARCH_PATTERN" \
+    | head -n 1)
 
 if [ -z "$DOWNLOAD_URL" ]; then
-    echo "Error: Could not find asset $ASSET_NAME" 
+    echo "Error: Could not find AppImage asset for architecture $ARCH" 
+    echo "Available assets:" 
+    printf '%s' "$RELEASE_DATA" \
+        | grep -Eo '"name"[[:space:]]*:[[:space:]]*"[^"]+"' \
+        | cut -d'"' -f4 \
+        | sed 's/^/  - /'
     exit 1
 fi
 

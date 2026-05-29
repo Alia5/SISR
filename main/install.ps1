@@ -39,14 +39,28 @@ else {
 }
 
 $buildType = if ($version -match "snapshot") { "Snapshot" } else { "Release" }
-$assetName = "SISR-$arch-windows-msvc-$buildType.zip"
+$targetName = if ($arch -eq "x86_64") { "windows_x64" } else { "windows_arm64" }
+$assetNameCandidates = @(
+    "SISR-$targetName-$buildType.zip",
+    "SISR-$targetName.zip",
+    "SISR-$arch-windows-msvc-$buildType.zip"
+)
 
 Write-Host "Architecture: $arch"
-Write-Host "Looking for asset: $assetName"
+Write-Host "Looking for asset candidates: $($assetNameCandidates -join ', ')"
 
-$asset = $releaseData.assets | Where-Object { $_.name -eq $assetName }
+$asset = $null
+foreach ($candidate in $assetNameCandidates) {
+    $asset = $releaseData.assets | Where-Object { $_.name -eq $candidate } | Select-Object -First 1
+    if ($asset) {
+        Write-Host "Matched asset: $candidate" -ForegroundColor Green
+        break
+    }
+}
 if (-not $asset) {
-    Write-Host "Error: Could not find asset $assetName" -ForegroundColor Red
+    Write-Host "Error: Could not find matching Windows asset" -ForegroundColor Red
+    Write-Host "Available assets:" -ForegroundColor Yellow
+    $releaseData.assets | ForEach-Object { Write-Host "  - $($_.name)" -ForegroundColor Yellow }
     exit 1
 }
 
