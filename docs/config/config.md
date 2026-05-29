@@ -195,7 +195,7 @@ When multiple sources provide the same configuration option, the latest one in t
 
 All values are optional.
 
-🪟 `C:\Users\<UserName>\AppData\Roaming\SISR\config\SISR.toml`  
+🪟 `%APPDATA%\SISR\config\SISR.toml`  
 🐧 `$XDG_CONFIG_HOME/sisr/SISR.toml`
 
 ```toml
