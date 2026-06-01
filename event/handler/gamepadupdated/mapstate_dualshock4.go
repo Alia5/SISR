@@ -86,7 +86,17 @@ func ds4TouchpadClickPassthrough(gp *sdl.Gamepad, state *encoding.BinaryMarshale
 		return
 	}
 
-	if gp.GetButton(sdl.GamepadButtonTouchpad) {
+	clicked := gp.GetButton(sdl.GamepadButtonTouchpad)
+
+	// SDL never fires GamepadButtonTouchpad for dual-touchpad controllers (e.g. Steam Controller 2).
+	// Instead the click state is encoded in finger pressure: >= 1.0 means full pressure.
+	if !clicked && gp.NumTouchpads() >= 2 {
+		_, _, _, _, p0 := gp.GetTouchpadFinger(0, 0)
+		_, _, _, _, p1 := gp.GetTouchpadFinger(1, 0)
+		clicked = p0 >= 0.33 || p1 >= 0.33
+	}
+
+	if clicked {
 		s.Buttons |= dualshock4.ButtonTouchpadClick
 	} else {
 		s.Buttons &^= dualshock4.ButtonTouchpadClick
