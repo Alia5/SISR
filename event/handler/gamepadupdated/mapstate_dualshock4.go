@@ -93,7 +93,7 @@ func ds4TouchpadClickPassthrough(gp *sdl.Gamepad, state *encoding.BinaryMarshale
 	if !clicked && gp.NumTouchpads() >= 2 {
 		_, _, _, _, p0 := gp.GetTouchpadFinger(0, 0)
 		_, _, _, _, p1 := gp.GetTouchpadFinger(1, 0)
-		clicked = p0 >= 0.33 || p1 >= 0.33
+		clicked = p0 >= 0.4 || p1 >= 0.4
 	}
 
 	if clicked {
