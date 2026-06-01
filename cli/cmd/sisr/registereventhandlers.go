@@ -9,6 +9,7 @@ import (
 	"github.com/Alia5/SISR/event/handler"
 	"github.com/Alia5/SISR/event/handler/gamepadupdated"
 	"github.com/Alia5/SISR/event/handler/sensorupdated"
+	"github.com/Alia5/SISR/event/handler/touchpadupdated"
 	"github.com/Alia5/SISR/sdl"
 	"github.com/Alia5/SISR/sdl/extras"
 	"github.com/Alia5/SISR/webview"
@@ -40,6 +41,9 @@ func registerEventHandlers(r event.Router, c *cmd.SISRContext, window *sdl.Windo
 	event.RegisterHandler(r, handler.ToggleUIGamepadButtonUp())
 	event.RegisterHandler(r, gamepadupdated.GamepadUpdated(c))
 	event.RegisterHandler(r, sensorupdated.SensorUpdated(c))
+	event.RegisterHandler(r, touchpadupdated.TouchpadDown(c))
+	event.RegisterHandler(r, touchpadupdated.TouchpadMotion(c))
+	event.RegisterHandler(r, touchpadupdated.TouchpadUp(c))
 
 	if c.Config.KeyboardMouseEmulation {
 		registerKBMForwardHandlers(r, c, window)

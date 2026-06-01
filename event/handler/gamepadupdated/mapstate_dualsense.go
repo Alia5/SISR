@@ -113,6 +113,19 @@ func toDualSenseState(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 
 }
 
+func dualSenseTouchpadClickPassthrough(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
+	s, ok := (*state).(*dualsense.InputState)
+	if !ok || s == nil {
+		return
+	}
+
+	if gp.GetButton(sdl.GamepadButtonTouchpad) {
+		s.Buttons |= dualsense.ButtonTouchpad
+	} else {
+		s.Buttons &^= dualsense.ButtonTouchpad
+	}
+}
+
 func dualSenseBackButtonPassthrough(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 	s, ok := (*state).(*dualsense.InputState)
 	if !ok || s == nil {

@@ -79,3 +79,16 @@ func toDualShock4State(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 	s.RX = int8(clamp(int((int32(gp.GetAxis(sdl.GamepadAxisRightX))*int32(math.MaxInt8+1))/int32(math.MaxInt16)), math.MinInt8, math.MaxInt8))
 	s.RY = int8(clamp(int((int32(gp.GetAxis(sdl.GamepadAxisRightY))*int32(math.MaxInt8+1))/int32(math.MaxInt16)), math.MinInt8, math.MaxInt8))
 }
+
+func ds4TouchpadClickPassthrough(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
+	s, ok := (*state).(*dualshock4.InputState)
+	if !ok || s == nil {
+		return
+	}
+
+	if gp.GetButton(sdl.GamepadButtonTouchpad) {
+		s.Buttons |= dualshock4.ButtonTouchpadClick
+	} else {
+		s.Buttons &^= dualshock4.ButtonTouchpadClick
+	}
+}

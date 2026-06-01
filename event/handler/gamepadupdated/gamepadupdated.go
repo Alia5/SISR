@@ -35,19 +35,31 @@ func gpUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadDevic
 
 			c.Config.Lock()
 			backButtonPassthrough := c.Config.BackButtonPassthrough
+			touchpadPassthrough := c.Config.TouchpadPassthrough
 			c.Config.Unlock()
 
-			if backButtonPassthrough &&
-				dev.RealGamepad != nil && dev.RealGamepad.ID() == gpID &&
+			if dev.RealGamepad != nil && dev.RealGamepad.ID() == gpID &&
 				dev.ViiperDevice != nil {
 				dType := dev.ViiperDevice.Type()
 
-				switch dType {
-				case viiperdevice.DeviceTypeDualSenseEdge:
-					dualSenseBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
-				case viiperdevice.DeviceTypeNS2Pro:
-					ns2ProBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
-				default:
+				if backButtonPassthrough {
+					switch dType {
+					case viiperdevice.DeviceTypeDualSenseEdge:
+						dualSenseBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+					case viiperdevice.DeviceTypeNS2Pro:
+						ns2ProBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+					default:
+					}
+				}
+
+				if touchpadPassthrough {
+					switch dType {
+					case viiperdevice.DeviceTypeDualShock4:
+						ds4TouchpadClickPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+					case viiperdevice.DeviceTypeDualSense, viiperdevice.DeviceTypeDualSenseEdge:
+						dualSenseTouchpadClickPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+					default:
+					}
 				}
 			}
 
