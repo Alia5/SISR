@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	fyne.io/systray v1.12.1
-	github.com/Alia5/VIIPER v0.6.2-0.20260601183327-44c465b9eeab
+	github.com/Alia5/VIIPER v0.7.0
 	github.com/alecthomas/kong v1.15.0
 	github.com/alecthomas/kong-toml v0.4.0
 	github.com/alecthomas/kong-yaml v0.2.0
