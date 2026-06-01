@@ -21,6 +21,7 @@ const (
 	DeviceTypeDualShock4    Type = "dualshock4"
 	DeviceTypeDualSense     Type = "dualsense"
 	DeviceTypeDualSenseEdge Type = "dualsenseedge"
+	DeviceTypeNS2Pro        Type = "ns2pro"
 	DeviceTypeKeyboard      Type = "keyboard"
 	DeviceTypeMouse         Type = "mouse"
 )
@@ -61,6 +62,8 @@ func New(
 		decodeFeedback = readXbox360Feedback
 	case DeviceTypeDualSense, DeviceTypeDualSenseEdge:
 		decodeFeedback = readDualSenseFeedback
+	case DeviceTypeNS2Pro:
+		decodeFeedback = readNS2ProFeedback
 	}
 
 	feedbackCh, errCh := controlStream.StartReading(deviceCtx, stateBufferSize, decodeFeedback)

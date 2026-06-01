@@ -49,7 +49,7 @@ type Window struct {
 }
 
 type ControllerEmulation struct {
-	DefaultControllerType string `default:"xbox360" aliases:"ct" enum:"xbox360,dualshock4,dualsense,dualsenseedge" help:"Default controller type for emulation" env:"SISR_DEFAULT_CONTROLLER_TYPE"`
+	DefaultControllerType string `default:"xbox360" aliases:"ct" enum:"xbox360,dualshock4,dualsense,dualsenseedge,ns2pro" help:"Default controller type for emulation" env:"SISR_DEFAULT_CONTROLLER_TYPE"`
 
 	GyroPassthrough     bool `default:"true" help:"Enable gyro passthrough for supported controllers" env:"SISR_GYRO_PASSTHROUGH"`
 

@@ -68,8 +68,14 @@ func sensorUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadS
 				updateSensorStateDualSense(sensorType, [3]float32{ev.Data0, ev.Data1, ev.Data2}, dev.ViiperDevice.State())
 				updated = true
 			}
+		case viiperdevice.DeviceTypeNS2Pro:
+			sensorType := sdl.SensorType(ev.Sensor)
+			if sensorType == sdl.SensorTypeGyroscope || sensorType == sdl.SensorTypeAccelerometer {
+				updateSensorStateNS2Pro(sensorType, [3]float32{ev.Data0, ev.Data1, ev.Data2}, dev.ViiperDevice.State())
+				updated = true
+			}
 		default:
-			slog.Warn("Cant update unknown VIIPER device type", "device_type", dType)
+			slog.Warn("Sensors: Cant update unknown VIIPER device type", "device_type", dType)
 		}
 
 		if updated && immediateSensorUpdates {
