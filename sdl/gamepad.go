@@ -123,7 +123,17 @@ const (
 	GamepadButtonDpadDown      GamepadButton = C.SDL_GAMEPAD_BUTTON_DPAD_DOWN
 	GamepadButtonDpadLeft      GamepadButton = C.SDL_GAMEPAD_BUTTON_DPAD_LEFT
 	GamepadButtonDpadRight     GamepadButton = C.SDL_GAMEPAD_BUTTON_DPAD_RIGHT
+	GamepadButtonMisc1         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC1
+	GamepadButtonRightPaddle1  GamepadButton = C.SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1
+	GamepadButtonLeftPaddle1   GamepadButton = C.SDL_GAMEPAD_BUTTON_LEFT_PADDLE1
+	GamepadButtonRightPaddle2  GamepadButton = C.SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2
+	GamepadButtonLeftPaddle2   GamepadButton = C.SDL_GAMEPAD_BUTTON_LEFT_PADDLE2
 	GamepadButtonTouchpad      GamepadButton = C.SDL_GAMEPAD_BUTTON_TOUCHPAD
+	GamepadButtonMisc2         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC2
+	GamepadButtonMisc3         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC3
+	GamepadButtonMisc4         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC4
+	GamepadButtonMisc5         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC5
+	GamepadButtonMisc6         GamepadButton = C.SDL_GAMEPAD_BUTTON_MISC6
 )
 
 const (

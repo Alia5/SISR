@@ -30,7 +30,27 @@ func gpUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadDevic
 		if dev.SteamVirtualGamepad == nil {
 			return nil
 		}
+
 		if dev.SteamVirtualGamepad.ID() != gpID {
+
+			c.Config.Lock()
+			backButtonPassthrough := c.Config.BackButtonPassthrough
+			c.Config.Unlock()
+
+			if backButtonPassthrough &&
+				dev.RealGamepad != nil && dev.RealGamepad.ID() == gpID &&
+				dev.ViiperDevice != nil {
+				dType := dev.ViiperDevice.Type()
+
+				switch dType {
+				case viiperdevice.DeviceTypeDualSenseEdge:
+					dualSenseBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+				case viiperdevice.DeviceTypeNS2Pro:
+					ns2ProBackButtonPassthrough(dev.RealGamepad, dev.ViiperDevice.State())
+				default:
+				}
+			}
+
 			return nil
 		}
 
@@ -45,8 +65,8 @@ func gpUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadDevic
 			dev.ViiperDevice = nil
 			return nil
 		}
-
 		dType := dev.ViiperDevice.Type()
+
 		switch dType {
 		case viiperdevice.DeviceTypeXbox360:
 			toXbox360State(dev.SteamVirtualGamepad, dev.ViiperDevice.State())
