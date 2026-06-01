@@ -154,9 +154,6 @@ func (d *Device) handleKeyboardFeedback(ls *keyboard.LEDState) {
 }
 
 func (d *Device) handleDualSenseFeedback(os *dualsense.OutputState) {
-
-	slog.Debug("DualSense feedback received", "output_state", os)
-
 	d.mtx.Lock()
 	defer d.mtx.Unlock()
 	gp := d.SteamVirtualGamepad
