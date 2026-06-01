@@ -946,10 +946,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-gyro-passthrough-truefalse" class="md-nav__link">
+  <a href="#-gyro-passthrough-truefalse-gp" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --gyro-passthrough [true|false]
+        --gyro-passthrough [true|false], --gp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-touchpad-passthrough-truefalse-tp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --touchpad-passthrough [true|false], --tp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-back-button-passthrough-truefalse-bbp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --back-button-passthrough [true|false], --bbp
       
     </span>
   </a>
@@ -1802,10 +1824,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#-gyro-passthrough-truefalse" class="md-nav__link">
+  <a href="#-gyro-passthrough-truefalse-gp" class="md-nav__link">
     <span class="md-ellipsis">
       
-        --gyro-passthrough [true|false]
+        --gyro-passthrough [true|false], --gp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-touchpad-passthrough-truefalse-tp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --touchpad-passthrough [true|false], --tp
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-back-button-passthrough-truefalse-bbp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --back-button-passthrough [true|false], --bbp
       
     </span>
   </a>
@@ -2106,15 +2150,27 @@ If VIIPER address resolves to localhost, this option is ignored</p>
 <h4 id="-default-controller-type-type"><code>--default-controller-type &lt;TYPE&gt;</code></h4>
 <p>Default controller type for emulation</p>
 <ul>
-<li>Allowed: <code>xbox360</code>, <code>dualshock4</code></li>
+<li>Allowed: <code>xbox360</code>, <code>dualshock4</code>, <code>dualsense</code>, <code>dualsenseedge</code>, <code>ns2pro</code></li>
 <li>Default: <code>xbox360</code></li>
 <li>Env var: <code>SISR_DEFAULT_CONTROLLER_TYPE</code></li>
 </ul>
-<h4 id="-gyro-passthrough-truefalse"><code>--gyro-passthrough [true|false]</code></h4>
+<h4 id="-gyro-passthrough-truefalse-gp"><code>--gyro-passthrough [true|false]</code>, <code>--gp</code></h4>
 <p>Enable gyro passthrough for supported controllers</p>
 <ul>
 <li>Default: <code>true</code></li>
 <li>Env var: <code>SISR_GYRO_PASSTHROUGH</code></li>
+</ul>
+<h4 id="-touchpad-passthrough-truefalse-tp"><code>--touchpad-passthrough [true|false]</code>, <code>--tp</code></h4>
+<p>Enable touchpad passthrough for supported controllers (e.g. DualShock 4, DualSense)</p>
+<ul>
+<li>Default: <code>true</code></li>
+<li>Env var: <code>SISR_TOUCHPAD_PASSTHROUGH</code></li>
+</ul>
+<h4 id="-back-button-passthrough-truefalse-bbp"><code>--back-button-passthrough [true|false]</code>, <code>--bbp</code></h4>
+<p>Enable back button (paddle/grip button) passthrough for supported controllers (e.g. DualSense Edge, NS2 Pro)</p>
+<ul>
+<li>Default: <code>false</code></li>
+<li>Env var: <code>SISR_BACK_BUTTON_PASSTHROUGH</code></li>
 </ul>
 <h4 id="-allow-steam-desktop-layout-truefalse"><code>--allow-steam-desktop-layout [true|false]</code></h4>
 <p>Allow/use Steam's desktop configuration for emulated controllers</p>
