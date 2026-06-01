@@ -7,8 +7,10 @@ import (
 
 	"github.com/Alia5/SISR/input/viiperdevice"
 	"github.com/Alia5/SISR/sdl"
+	"github.com/Alia5/VIIPER/device/dualsense"
 	"github.com/Alia5/VIIPER/device/dualshock4"
 	"github.com/Alia5/VIIPER/device/keyboard"
+	"github.com/Alia5/VIIPER/device/ns2pro"
 	"github.com/Alia5/VIIPER/device/xbox360"
 )
 
@@ -89,6 +91,12 @@ func (d *Device) handleFeedback(vd *viiperdevice.Device) {
 			case *keyboard.LEDState:
 				d.handleKeyboardFeedback(fb)
 				continue
+			case *dualsense.OutputState:
+				d.handleDualSenseFeedback(fb)
+				continue
+			case *ns2pro.OutputState:
+				d.handleNS2ProFeedback(fb)
+				continue
 			default:
 				slog.Warn("Received feedback of unknown type for VIIPER device; ignoring", "feedback", fb)
 				continue
@@ -143,4 +151,29 @@ func (d *Device) handleDualShock4Feedback(os *dualshock4.OutputState) {
 
 func (d *Device) handleKeyboardFeedback(ls *keyboard.LEDState) {
 	// TODO: Implement keyboard LED feedback handling
+}
+
+func (d *Device) handleDualSenseFeedback(os *dualsense.OutputState) {
+
+	slog.Debug("DualSense feedback received", "output_state", os)
+
+	d.mtx.Lock()
+	defer d.mtx.Unlock()
+	gp := d.SteamVirtualGamepad
+	if gp == nil {
+		slog.Warn("Received feedback for VIIPER device without a Steam virtual gamepad assigned; ignoring rumble/led command")
+		return
+	}
+	_ = gp.Rumble(uint16(os.RumbleLarge)*257, uint16(os.RumbleSmall)*257, math.MaxUint32)
+}
+
+func (d *Device) handleNS2ProFeedback(os *ns2pro.OutputState) {
+	d.mtx.Lock()
+	defer d.mtx.Unlock()
+	gp := d.SteamVirtualGamepad
+	if gp == nil {
+		slog.Warn("Received feedback for VIIPER device without a Steam virtual gamepad assigned; ignoring rumble/led command")
+		return
+	}
+	_ = gp.Rumble(uint16(os.LeftRumble[0])*257, uint16(os.RightRumble[0])*257, math.MaxUint32)
 }
