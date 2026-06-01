@@ -34,15 +34,10 @@ func SetupLogger(logLevel, logFile string) (*slog.Logger, []io.Closer, error) {
 	level := ParseLevel(logLevel)
 	var handlers []slog.Handler
 
-	if logFile == "" {
-		stdoutHandler := &colorHandler{w: os.Stdout, level: level}
-		handlers = append(handlers, LevelFilter{pass: func(l slog.Level) bool { return l < slog.LevelError }, h: stdoutHandler})
-
-		stderrHandler := &colorHandler{w: os.Stderr, level: slog.LevelError}
-		handlers = append(handlers, LevelFilter{pass: func(l slog.Level) bool { return l >= slog.LevelError }, h: stderrHandler})
-	} else {
-		handlers = append(handlers, slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
-	}
+	stdoutHandler := &colorHandler{w: os.Stdout, level: level}
+	handlers = append(handlers, LevelFilter{pass: func(l slog.Level) bool { return l < slog.LevelError }, h: stdoutHandler})
+	stderrHandler := &colorHandler{w: os.Stderr, level: slog.LevelError}
+	handlers = append(handlers, LevelFilter{pass: func(l slog.Level) bool { return l >= slog.LevelError }, h: stderrHandler})
 	var closeFiles []io.Closer
 	if logFile != "" {
 		f, err := os.OpenFile(logFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
