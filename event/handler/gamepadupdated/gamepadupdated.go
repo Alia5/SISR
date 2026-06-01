@@ -52,8 +52,8 @@ func gpUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadDevic
 			toXbox360State(dev.SteamVirtualGamepad, dev.ViiperDevice.State())
 		case viiperdevice.DeviceTypeDualShock4:
 			toDualShock4State(dev.SteamVirtualGamepad, dev.ViiperDevice.State())
-		// case viiperdevice.DeviceTypeKeyboard:
-		// 	state = toKeyboardState(gp)
+		case viiperdevice.DeviceTypeDualSense, viiperdevice.DeviceTypeDualSenseEdge:
+			toDualSenseState(dev.SteamVirtualGamepad, dev.ViiperDevice.State())
 		default:
 			slog.Warn("Cant update unknown VIIPER device type", "device_type", dType)
 		}
