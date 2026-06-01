@@ -24,6 +24,9 @@ if (-not $version) {
 
 Write-Host "Version: $version" -ForegroundColor Green
 $docsVersion = $version -replace '^v', ''
+if ($docsVersion -eq "dev-snapshot") {
+    $docsVersion = "main"
+}
 
 $arch = if ([Environment]::Is64BitOperatingSystem) {
     if ((Get-CimInstance Win32_ComputerSystem).SystemType -match "ARM") {
@@ -160,13 +163,14 @@ try {
     
     Write-Host ""
     Write-Host "Installing VIIPER version: $viiperVersion"
-    $viiperInstallVersion = $viiperVersion
+    $viiperInstallVersion = $viiperVersion -replace '^v', ''
     if ($viiperInstallVersion -eq "dev-snapshot") {
         $viiperInstallVersion = "main"
     }
     $viiperScript = Join-Path $tempDir "viiper-install.ps1"
     try {
         Invoke-WebRequest -Uri "https://alia5.github.io/VIIPER/$viiperInstallVersion/install.ps1" -OutFile $viiperScript -ErrorAction Stop
+        Unblock-File -Path $viiperScript -ErrorAction SilentlyContinue
         & powershell -ExecutionPolicy Bypass -File $viiperScript
         Write-Host "VIIPER installed successfully" -ForegroundColor Green
     }
