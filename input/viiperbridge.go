@@ -20,15 +20,15 @@ import (
 	"github.com/Alia5/SISR/helper"
 	"github.com/Alia5/SISR/input/viiperdevice"
 	"github.com/Alia5/SISR/sdl"
-	"github.com/Alia5/VIIPER/apiclient"
-	"github.com/Alia5/VIIPER/apitypes"
+	"github.com/Alia5/VIIPER/viiperclient"
+	"github.com/Alia5/VIIPER/viipertypes"
 )
 
 type ViiperBridge interface {
 	CreateDevice(ctx context.Context, gamepadID sdl.GamepadID, deviceType string) (chan *viiperdevice.Device, chan error)
 	IsCreateDeviceScheduled(gamepadID sdl.GamepadID) bool
-	Ping(ctx context.Context) (*apitypes.PingResponse, error)
-	Info() *apitypes.PingResponse
+	Ping(ctx context.Context) (*viipertypes.PingResponse, error)
+	Info() *viipertypes.PingResponse
 	Ready() bool
 	ResolvedAddressAndPort() string
 	IsLoopbackAddress() bool
@@ -48,11 +48,11 @@ func NewViiperBridge(ctx context.Context, dl DeviceStore, cfg *config.Viiper) Vi
 	if cfg != nil && cfg.Address != "" {
 		address = cfg.Address
 	}
-	var client *apiclient.Client
+	var client *viiperclient.Client
 	if cfg != nil && cfg.Password != "" {
-		client = apiclient.NewWithPassword(address, cfg.Password)
+		client = viiperclient.NewWithPassword(address, cfg.Password)
 	} else {
-		client = apiclient.New(address)
+		client = viiperclient.New(address)
 	}
 	v := &viiperBridge{
 		client:     client,
@@ -74,9 +74,9 @@ func NewViiperBridge(ctx context.Context, dl DeviceStore, cfg *config.Viiper) Vi
 }
 
 type viiperBridge struct {
-	client           *apiclient.Client
+	client           *viiperclient.Client
 	busID            uint32
-	viiperServerInfo *apitypes.PingResponse
+	viiperServerInfo *viipertypes.PingResponse
 	deviceList       DeviceStore
 	cfg              *config.Viiper
 
@@ -145,7 +145,7 @@ func (v *viiperBridge) CreateDevice(ctx context.Context, gamepadID sdl.GamepadID
 			return
 		}
 		closeFunc := func() error {
-			_, err := v.client.DeviceRemoveCtx(context.Background(), r.BusID, r.DevId)
+			_, err := v.client.DeviceRemoveCtx(context.Background(), r.BusID, r.DevID)
 			return err
 		}
 		vd := viiperdevice.New(s, r, closeFunc)
@@ -166,7 +166,7 @@ func (v *viiperBridge) IsCreateDeviceScheduled(gamepadID sdl.GamepadID) bool {
 	return ok
 }
 
-func (v *viiperBridge) Info() *apitypes.PingResponse {
+func (v *viiperBridge) Info() *viipertypes.PingResponse {
 	v.mtx.Lock()
 	defer v.mtx.Unlock()
 
@@ -177,7 +177,7 @@ func (v *viiperBridge) Info() *apitypes.PingResponse {
 	return nil
 }
 
-func (v *viiperBridge) Ping(ctx context.Context) (*apitypes.PingResponse, error) {
+func (v *viiperBridge) Ping(ctx context.Context) (*viipertypes.PingResponse, error) {
 	slog.Debug("Pinging VIIPER server...")
 	resp, err := v.client.PingCtx(ctx)
 	if err != nil {

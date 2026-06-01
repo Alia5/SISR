@@ -8,7 +8,7 @@ import (
 
 	"github.com/Alia5/SISR/cmd"
 	"github.com/Alia5/SISR/sdl"
-	"github.com/Alia5/VIIPER/apitypes"
+	"github.com/Alia5/VIIPER/viipertypes"
 	"github.com/danielgtaylor/huma/v2"
 )
 
@@ -19,9 +19,9 @@ type DeviceInfoResponse struct {
 type DeviceInfo []*APIDevice
 
 type APIDevice struct {
-	RealDevice         *APIGamepad      `json:"real_device,omitempty"`
-	SteamVirtualDevice *APIGamepad      `json:"steam_virtual_device,omitempty"`
-	VIIPERDevice       *apitypes.Device `json:"viiper_device,omitempty"`
+	RealDevice         *APIGamepad         `json:"real_device,omitempty"`
+	SteamVirtualDevice *APIGamepad         `json:"steam_virtual_device,omitempty"`
+	VIIPERDevice       *viipertypes.Device `json:"viiper_device,omitempty"`
 }
 
 type APIGamepad struct {

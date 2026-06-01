@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Alia5/SISR/cmd"
-	"github.com/Alia5/VIIPER/apitypes"
+	"github.com/Alia5/VIIPER/viipertypes"
 	"github.com/danielgtaylor/huma/v2"
 )
 
@@ -14,8 +14,8 @@ type VIIPERStatusResponse struct {
 }
 
 type VIIPERStatus struct {
-	Status  *apitypes.PingResponse `json:"status,omitempty"`
-	Address string                 `json:"address,omitempty"`
+	Status  *viipertypes.PingResponse `json:"status,omitempty"`
+	Address string                    `json:"address,omitempty"`
 }
 
 func Register(a huma.API, c *cmd.SISRContext) {

@@ -88,15 +88,15 @@ func MouseButtonDown(c *cmd.SISRContext, devices *handler.KBMDevices) handler.Op
 			state := devices.MouseDev.EnsureMouseState()
 			switch ev.Button {
 			case 1:
-				state.Buttons |= mouse.Btn_Left
+				state.Buttons |= mouse.BtnLeft
 			case 2:
-				state.Buttons |= mouse.Btn_Right
+				state.Buttons |= mouse.BtnRight
 			case 3:
-				state.Buttons |= mouse.Btn_Middle
+				state.Buttons |= mouse.BtnMiddle
 			case 4:
-				state.Buttons |= mouse.Btn_Back
+				state.Buttons |= mouse.BtnBack
 			case 5:
-				state.Buttons |= mouse.Btn_Forward
+				state.Buttons |= mouse.BtnForward
 			}
 			devices.MouseDev.QueueStateSend()
 			return nil
@@ -118,15 +118,15 @@ func MouseButtonUp(c *cmd.SISRContext, devices *handler.KBMDevices) handler.Oper
 			state := devices.MouseDev.EnsureMouseState()
 			switch ev.Button {
 			case 1:
-				state.Buttons &^= mouse.Btn_Left
+				state.Buttons &^= mouse.BtnLeft
 			case 2:
-				state.Buttons &^= mouse.Btn_Right
+				state.Buttons &^= mouse.BtnRight
 			case 3:
-				state.Buttons &^= mouse.Btn_Middle
+				state.Buttons &^= mouse.BtnMiddle
 			case 4:
-				state.Buttons &^= mouse.Btn_Back
+				state.Buttons &^= mouse.BtnBack
 			case 5:
-				state.Buttons &^= mouse.Btn_Forward
+				state.Buttons &^= mouse.BtnForward
 			}
 			devices.MouseDev.QueueStateSend()
 			return nil

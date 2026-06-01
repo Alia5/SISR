@@ -56,7 +56,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/Config.json
+            - http://127.0.0.1:28107/schemas/Config.json
           format: uri
           readOnly: true
           type: string
@@ -94,6 +94,8 @@ components:
           enum:
             - xbox360
             - dualshock4
+            - dualsense
+            - dualsenseedge
           type: string
         GyroPassthrough:
           default: true
@@ -101,9 +103,13 @@ components:
         ImmediateSensorUpdates:
           default: true
           type: boolean
+        TouchpadPassthrough:
+          default: true
+          type: boolean
       required:
         - DefaultControllerType
         - GyroPassthrough
+        - TouchpadPassthrough
         - AllowSteamDesktopLayout
         - ImmediateSensorUpdates
       type: object
@@ -139,7 +145,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/EnforceInputConfig.json
+            - http://127.0.0.1:28107/schemas/EnforceInputConfig.json
           format: uri
           readOnly: true
           type: string
@@ -166,7 +172,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/ErrorModel.json
+            - http://127.0.0.1:28107/schemas/ErrorModel.json
           format: uri
           readOnly: true
           type: string
@@ -213,7 +219,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/InitialLaunch.json
+            - http://127.0.0.1:28107/schemas/InitialLaunch.json
           format: uri
           readOnly: true
           type: string
@@ -237,7 +243,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/OpenConfiguratorArgs.json
+            - http://127.0.0.1:28107/schemas/OpenConfiguratorArgs.json
           format: uri
           readOnly: true
           type: string
@@ -254,7 +260,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/OverlayChanged.json
+            - http://127.0.0.1:28107/schemas/OverlayChanged.json
           format: uri
           readOnly: true
           type: string
@@ -293,7 +299,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/ShowHideUI.json
+            - http://127.0.0.1:28107/schemas/ShowHideUI.json
           format: uri
           readOnly: true
           type: string
@@ -326,7 +332,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/SteamAndCefStatus.json
+            - http://127.0.0.1:28107/schemas/SteamAndCefStatus.json
           format: uri
           readOnly: true
           type: string
@@ -368,7 +374,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/VIIPERStatus.json
+            - http://127.0.0.1:28107/schemas/VIIPERStatus.json
           format: uri
           readOnly: true
           type: string
@@ -383,7 +389,7 @@ components:
         $schema:
           description: A URL to the JSON Schema for this object.
           examples:
-            - http://127.0.0.1:43873/schemas/VersionInfo.json
+            - http://127.0.0.1:28107/schemas/VersionInfo.json
           format: uri
           readOnly: true
           type: string
@@ -433,7 +439,7 @@ components:
       type: object
 info:
   title: SISR API
-  version: v0.4.2-136-gd0f9368
+  version: dev-snapshot
 openapi: 3.1.0
 paths:
   /api/v1/config:
@@ -772,4 +778,4 @@ paths:
           description: Error
 servers:
   - description: SISR API
-    url: http://127.0.0.1:43873
+    url: http://127.0.0.1:28107

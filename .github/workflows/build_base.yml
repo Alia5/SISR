@@ -148,12 +148,28 @@ jobs:
                     exit 1
                   fi
 
-                  VIIPER_ARCH="${{ matrix.target.goarch }}"
-                  VIIPER_ASSET="viiper-windows-${VIIPER_ARCH}.exe"
-                  VIIPER_URL="https://github.com/Alia5/VIIPER/releases/download/${VIIPER_VERSION}/${VIIPER_ASSET}"
+                  # Go pseudo-versions (vX.Y.Z-0.TIMESTAMP-HASH) map to the dev-snapshot release tag
+                  VIIPER_TAG="$VIIPER_VERSION"
+                  if echo "$VIIPER_VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+-0\.[0-9]+-[0-9a-f]+$'; then
+                    VIIPER_TAG="dev-snapshot"
+                  fi
 
-                  echo "Downloading VIIPER from: $VIIPER_URL"
-                  curl -fsSL "$VIIPER_URL" -o dist/viiper.exe
+                  VIIPER_ARCH="${{ matrix.target.goarch }}"
+
+                  # dev-snapshot distributes binaries as .zip; stable releases use plain .exe
+                  if [ "$VIIPER_TAG" = "dev-snapshot" ]; then
+                    VIIPER_ASSET="viiper-windows-${VIIPER_ARCH}.zip"
+                    VIIPER_URL="https://github.com/Alia5/VIIPER/releases/download/${VIIPER_TAG}/${VIIPER_ASSET}"
+                    echo "Downloading VIIPER from: $VIIPER_URL"
+                    curl -fsSL "$VIIPER_URL" -o "dist/viiper-windows-${VIIPER_ARCH}.zip"
+                    7z e "dist/viiper-windows-${VIIPER_ARCH}.zip" -odist/ viiper.exe -y
+                    rm "dist/viiper-windows-${VIIPER_ARCH}.zip"
+                  else
+                    VIIPER_ASSET="viiper-windows-${VIIPER_ARCH}.exe"
+                    VIIPER_URL="https://github.com/Alia5/VIIPER/releases/download/${VIIPER_TAG}/${VIIPER_ASSET}"
+                    echo "Downloading VIIPER from: $VIIPER_URL"
+                    curl -fsSL "$VIIPER_URL" -o dist/viiper.exe
+                  fi
                   echo "Included VIIPER binary: dist/viiper.exe"
 
             - name: Build AppImage

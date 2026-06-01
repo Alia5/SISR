@@ -3,8 +3,8 @@ module github.com/Alia5/SISR
 go 1.26.3
 
 require (
-	fyne.io/systray v1.12.0
-	github.com/Alia5/VIIPER v0.6.1
+	fyne.io/systray v1.12.1
+	github.com/Alia5/VIIPER v0.6.2-0.20260601162257-21fb4eb3b059
 	github.com/alecthomas/kong v1.15.0
 	github.com/alecthomas/kong-toml v0.4.0
 	github.com/alecthomas/kong-yaml v0.2.0
@@ -14,7 +14,7 @@ require (
 	github.com/josephspurrier/goversioninfo v1.7.0
 	github.com/rs/cors v1.11.1
 	github.com/shirou/gopsutil/v4 v4.26.4
-	golang.org/x/sys v0.44.0
+	golang.org/x/sys v0.45.0
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

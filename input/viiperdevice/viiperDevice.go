@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/Alia5/VIIPER/apiclient"
-	"github.com/Alia5/VIIPER/apitypes"
+	"github.com/Alia5/VIIPER/viiperclient"
+	"github.com/Alia5/VIIPER/viipertypes"
 )
 
 const stateBufferSize = 32
@@ -16,16 +16,16 @@ const stateBufferSize = 32
 type Type string
 
 const (
-	DeviceTypeUnknown    Type = "unknown"
-	DeviceTypeXbox360    Type = "xbox360"
-	DeviceTypeDualShock4 Type = "dualshock4"
-	DeviceTypeKeyboard   Type = "keyboard"
-	DeviceTypeMouse      Type = "mouse"
+	DeviceTypeUnknown       Type = "unknown"
+	DeviceTypeXbox360       Type = "xbox360"
+	DeviceTypeDualShock4    Type = "dualshock4"
+	DeviceTypeKeyboard      Type = "keyboard"
+	DeviceTypeMouse         Type = "mouse"
 )
 
 type Device struct {
-	controlStream *apiclient.DeviceStream
-	deviceInfo    *apitypes.Device
+	controlStream *viiperclient.DeviceStream
+	deviceInfo    *viipertypes.Device
 
 	closeFunc func() error
 	closeOnce sync.Once
@@ -42,8 +42,8 @@ type Device struct {
 }
 
 func New(
-	controlStream *apiclient.DeviceStream,
-	deviceInfo *apitypes.Device,
+	controlStream *viiperclient.DeviceStream,
+	deviceInfo *viipertypes.Device,
 	closeFunc func() error,
 ) *Device {
 	stateChan := make(chan []byte, stateBufferSize)
@@ -76,7 +76,7 @@ func New(
 	return d
 }
 
-func (d *Device) Info() apitypes.Device {
+func (d *Device) Info() viipertypes.Device {
 	return *d.deviceInfo
 }
 
