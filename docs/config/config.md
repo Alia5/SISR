@@ -82,14 +82,26 @@ SISR can be configured via:
 
     <tr>
       <td><code>--default-controller-type &lt;type&gt;</code></td>
-      <td>Default controller type for emulation (<code>xbox360</code>, <code>dualshock4</code>)</td>
+      <td>Default controller type for emulation (<code>xbox360</code>, <code>dualshock4</code>, <code>dualsense</code>, <code>dualsenseedge</code>, <code>ns2pro</code>)</td>
       <td><code>xbox360</code></td>
     </tr>
 
     <tr>
-      <td><code>--gyro-passthrough</code></td>
+      <td><code>--gyro-passthrough</code>, <code>--gp</code></td>
       <td>Enable gyro passthrough for supported controllers</td>
       <td><code>true</code></td>
+    </tr>
+
+    <tr>
+      <td><code>--touchpad-passthrough</code>, <code>--tp</code></td>
+      <td>Enable touchpad passthrough for supported controllers (e.g. DualShock 4, DualSense)</td>
+      <td><code>true</code></td>
+    </tr>
+
+    <tr>
+      <td><code>--back-button-passthrough</code>, <code>--bbp</code></td>
+      <td>Enable back button (paddle/grip button) passthrough for supported controllers (e.g. DualSense Edge, NS2 Pro)</td>
+      <td><code>false</code></td>
     </tr>
 
     <tr>
@@ -233,6 +245,12 @@ allow-steam-desktop-layout = false
 
 # Enable gyro passthrough for supported controllers
 gyro-passthrough = true
+
+# Enable touchpad passthrough for supported controllers (e.g. DualShock 4, DualSense)
+touchpad-passthrough = true
+
+# Enable back button (paddle/grip button) passthrough for supported controllers (e.g. DualSense Edge, NS2 Pro)
+back-button-passthrough = false
 
 # Send sensor updates immediately instead of waiting for the next input report
 immediate-sensor-updates = true

@@ -74,16 +74,30 @@ Update notification level
 
 Default controller type for emulation
 
-- Allowed: `xbox360`, `dualshock4`
+- Allowed: `xbox360`, `dualshock4`, `dualsense`, `dualsenseedge`, `ns2pro`
 - Default: `xbox360`
 - Env var: `SISR_DEFAULT_CONTROLLER_TYPE`
 
-#### `--gyro-passthrough [true|false]`
+#### `--gyro-passthrough [true|false]`, `--gp`
 
 Enable gyro passthrough for supported controllers
 
 - Default: `true`
 - Env var: `SISR_GYRO_PASSTHROUGH`
+
+#### `--touchpad-passthrough [true|false]`, `--tp`
+
+Enable touchpad passthrough for supported controllers (e.g. DualShock 4, DualSense)
+
+- Default: `true`
+- Env var: `SISR_TOUCHPAD_PASSTHROUGH`
+
+#### `--back-button-passthrough [true|false]`, `--bbp`
+
+Enable back button (paddle/grip button) passthrough for supported controllers (e.g. DualSense Edge, NS2 Pro)
+
+- Default: `false`
+- Env var: `SISR_BACK_BUTTON_PASSTHROUGH`
 
 #### `--allow-steam-desktop-layout [true|false]`
 
