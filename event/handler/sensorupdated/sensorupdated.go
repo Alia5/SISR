@@ -40,8 +40,8 @@ func sensorUpdate(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadS
 		}
 
 		if dev.ViiperDevice == nil {
-			slog.Debug("No VIIPER device for gamepad found, scheduling create", "id", gpID)
-			handler.CreateViiperDevice(ctx, c, gpID, dev)
+			// slog.Debug("No VIIPER device for gamepad found, scheduling create", "id", gpID)
+			// handler.CreateViiperDevice(ctx, c, gpID, dev)
 			return nil
 		}
 		if dev.ViiperDevice.IsClosed() {
