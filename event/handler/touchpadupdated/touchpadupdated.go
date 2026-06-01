@@ -39,7 +39,7 @@ func touchpadDown(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadT
 		if !touchpadPassthrough {
 			return nil
 		}
-		return handleTouchpadEvent(c, ev, true)
+		return handleTouchpadEvent(c, ev, true, true)
 	}
 }
 
@@ -52,7 +52,7 @@ func touchpadMotion(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.Gamepa
 		if !touchpadPassthrough {
 			return nil
 		}
-		return handleTouchpadEvent(c, ev, true)
+		return handleTouchpadEvent(c, ev, true, false)
 	}
 }
 
@@ -65,11 +65,11 @@ func touchpadUp(c *cmd.SISRContext) func(ctx context.Context, ev *sdl.GamepadTou
 		if !touchpadPassthrough {
 			return nil
 		}
-		return handleTouchpadEvent(c, ev, false)
+		return handleTouchpadEvent(c, ev, false, false)
 	}
 }
 
-func handleTouchpadEvent(c *cmd.SISRContext, ev *sdl.GamepadTouchpadEvent, active bool) error {
+func handleTouchpadEvent(c *cmd.SISRContext, ev *sdl.GamepadTouchpadEvent, active, isDown bool) error {
 	gpID := sdl.GamepadID(ev.Which)
 	dev, ok := c.DeviceStore.DeviceForID(gpID)
 	if !ok {
@@ -92,26 +92,24 @@ func handleTouchpadEvent(c *cmd.SISRContext, ev *sdl.GamepadTouchpadEvent, activ
 		return nil
 	}
 
-	slot, normX, normY := resolveTouchPoint(ev, dev.RealGamepad.NumTouchpads())
+	isDualTouchpad := dev.RealGamepad.NumTouchpads() >= 2
+
+	var normX, normY float32
+	if isDualTouchpad {
+		normX = ev.X*0.5 + float32(ev.Touchpad)*0.5
+		normY = ev.Y
+	} else {
+		normX = ev.X
+		normY = ev.Y
+	}
 
 	dType := dev.ViiperDevice.Type()
 	switch dType {
 	case viiperdevice.DeviceTypeDualShock4:
-		updateTouchpadStateDS4(slot, normX, normY, active, dev.ViiperDevice.State())
+		updateTouchpadStateDS4(ev.Touchpad, ev.Finger, normX, normY, active, isDown, isDualTouchpad, dev.ViiperDevice.State())
 	case viiperdevice.DeviceTypeDualSense, viiperdevice.DeviceTypeDualSenseEdge:
-		updateTouchpadStateDualSense(slot, normX, normY, active, dev.ViiperDevice.State())
+		updateTouchpadStateDualSense(ev.Touchpad, ev.Finger, normX, normY, active, isDown, isDualTouchpad, dev.ViiperDevice.State())
 	}
 
 	return nil
-}
-
-func resolveTouchPoint(ev *sdl.GamepadTouchpadEvent, numTouchpads int) (slot int32, normX, normY float32) {
-	if numTouchpads >= 2 {
-		normX = ev.X * 0.5
-		if ev.Touchpad == 1 {
-			normX += 0.5
-		}
-		return ev.Touchpad, normX, ev.Y
-	}
-	return ev.Finger, ev.X, ev.Y
 }
