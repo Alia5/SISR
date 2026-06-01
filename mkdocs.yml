@@ -70,7 +70,8 @@ nav:
   - General Usage: guides/usage.md
   - Multiple Configurations / GlosSI like usage: guides/multi_configs.md
   - Networked usage: guides/networked.md
-  - DualShock4 Emulation: guides/ds4_emulation.md
+  - Playstation Controller Emulation: guides/playstation_emulation.md
+  - Switch 2 Pro Emulation: guides/ns2pro_emulation.md
 - Troubleshooting: misc/troubleshooting.md
 - FAQ: misc/faq.md
 - Community & Support: misc/support.md
