@@ -121,7 +121,12 @@ func (s *SISR) Run(cfg config.Global) error {
 		s.UpdateNotify,
 		func() {
 			winDispatcher.Schedule(func(w *sdl.Window, wv webview.WebView) any {
+				slog.Debug("UpdateNotify: Showing Window + WebView")
 				w.ShowWindow()
+				err := extras.SetCursorHitTest(w, true)
+				if err != nil {
+					slog.Error("Failed setting window cursor hittest", "error", err)
+				}
 				wv.Eval("window.invalidateAll();")
 				winDispatcher.Schedule(func(w *sdl.Window, wv webview.WebView) any {
 					wv.SetVisible(true)
