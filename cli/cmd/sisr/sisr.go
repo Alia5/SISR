@@ -168,10 +168,15 @@ func (s *SISR) Run(cfg config.Global) error {
 	wv.Navigate(frontendAddr)
 
 	if !s.AllowSteamDesktopLayout {
-		err = bindingEnforcer.ForceOwnAppID()
-		if err != nil {
-			slog.Error("Failed to force SteamInput layout", "error", err)
-		}
+		go func() {
+			// HACK: attempt to workaround possible bug in Steam where inputs might get stuck
+			time.Sleep(2 * time.Second)
+
+			err = bindingEnforcer.ForceOwnAppID()
+			if err != nil {
+				slog.Error("Failed to force SteamInput layout", "error", err)
+			}
+		}()
 	}
 
 	tray.Run(ctx, cmdCtx, trayNotifyCh)
