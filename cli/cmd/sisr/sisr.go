@@ -45,7 +45,7 @@ func (s *SISR) Run(cfg config.Global) error {
 		os.Interrupt, syscall.SIGTERM,
 	)
 	defer stop()
-	defer cleanup(&s.Steam)
+	defer s.cleanup(&s.Steam)
 
 	if s.MaxFPS == 0 {
 		s.targetFrameDuration = 0
@@ -260,8 +260,13 @@ func drainEvents(ctx context.Context, router event.Router) {
 	}
 }
 
-func cleanup(c *config.Steam) {
+func (s *SISR) cleanup(c *config.Steam) {
 	slog.Info("Shutting down")
+
+	if s.NoSteam {
+		return
+	}
+
 	slog.Info("Cleaning up CEF payloads...")
 	err := cefpayloads.SISRCleanup(context.Background(), c)
 	if err != nil {
