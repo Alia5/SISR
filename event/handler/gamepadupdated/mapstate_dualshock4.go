@@ -11,7 +11,11 @@ import (
 func toDualShock4State(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 	s, ok := (*state).(*dualshock4.InputState)
 	if !ok || s == nil {
-		s = &dualshock4.InputState{}
+		s = &dualshock4.InputState{
+			AccelX: dualshock4.DefaultAccelXRaw,
+			AccelY: dualshock4.DefaultAccelYRaw,
+			AccelZ: dualshock4.DefaultAccelZRaw,
+		}
 		*state = s
 	}
 	s.Buttons = 0

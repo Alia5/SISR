@@ -11,7 +11,11 @@ import (
 func toDualSenseState(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 	s, ok := (*state).(*dualsense.InputState)
 	if !ok || s == nil {
-		s = &dualsense.InputState{}
+		s = &dualsense.InputState{
+			AccelX: dualsense.DefaultAccelXRaw,
+			AccelY: dualsense.DefaultAccelYRaw,
+			AccelZ: dualsense.DefaultAccelZRaw,
+		}
 		*state = s
 	}
 	if gp.GetButton(sdl.GamepadButtonSouth) {

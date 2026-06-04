@@ -11,7 +11,11 @@ import (
 func toNS2ProState(gp *sdl.Gamepad, state *encoding.BinaryMarshaler) {
 	s, ok := (*state).(*ns2pro.InputState)
 	if !ok || s == nil {
-		s = &ns2pro.InputState{}
+		s = &ns2pro.InputState{
+			// AccelX: ns2pro,
+			// AccelY: ns2pro.DefaultAccelYRaw,
+			// AccelZ: ns2pro.DefaultAccelZRaw,
+		}
 		*state = s
 	}
 	if gp.GetButton(sdl.GamepadButtonSouth) {
