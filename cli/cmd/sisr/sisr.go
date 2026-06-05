@@ -105,7 +105,7 @@ func (s *SISR) Run(cfg config.Global) error {
 	trayNotifyCh := make(chan any, 10)
 	winDispatcher := cmd.NewWindowDispatcher[any]()
 
-	bindingEnforcer := steaminputbindings.NewEnforcer()
+	bindingEnforcer := steaminputbindings.NewEnforcer(s.NoSteam)
 	eventRouter := event.NewRouter()
 	deviceStore, deviceStoreClose, err := input.NewDeviceStore(s.NoSteam, s.GyroPassthrough)
 	if err != nil {

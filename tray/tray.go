@@ -300,6 +300,13 @@ func (t *tray) handleToggleOverlay(ctx context.Context) {
 }
 
 func (t *tray) handleAllowDesktopConfig() {
+	t.Config.Lock()
+	noSteam := t.Config.NoSteam
+	t.Config.Unlock()
+	if noSteam {
+		return
+	}
+
 	if t.allowDesktopLayoutItem.Checked() {
 		t.allowDesktopLayoutItem.Uncheck()
 	} else {

@@ -17,13 +17,13 @@ type Enforcer interface {
 
 type enforcer struct {
 	forcedAppID uint32
-
-	ownAppID uint32
+	ownAppID    uint32
+	noSteam     bool
 
 	mtx sync.Mutex
 }
 
-func NewEnforcer() Enforcer {
+func NewEnforcer(noSteam bool) Enforcer {
 	var ownAppID uint32
 	ownAppIDStr := os.Getenv("SteamAppId")
 	if ownAppIDStr == "" || ownAppIDStr == "0" {
@@ -39,6 +39,7 @@ func NewEnforcer() Enforcer {
 	}
 	return &enforcer{
 		ownAppID: ownAppID,
+		noSteam:  noSteam,
 	}
 }
 
@@ -51,6 +52,10 @@ func (e *enforcer) GetForcedInputAppID() uint32 {
 func (e *enforcer) ForceInputAppID(appID uint32) error {
 	e.mtx.Lock()
 	defer e.mtx.Unlock()
+
+	if e.noSteam {
+		return nil
+	}
 
 	if appID == 0 {
 		slog.Info("Unforcing SteamInput layout")
@@ -70,6 +75,11 @@ func (e *enforcer) ForceInputAppID(appID uint32) error {
 func (e *enforcer) ForceOwnAppID() error {
 	e.mtx.Lock()
 	defer e.mtx.Unlock()
+
+	if e.noSteam {
+		return nil
+	}
+
 	if e.ownAppID == 0 {
 		return ErrNoSteamAppID
 	}
