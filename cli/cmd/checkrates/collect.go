@@ -19,6 +19,10 @@ var trackedAxes = []sdl.GamepadAxis{
 	sdl.GamepadAxisRightTrigger,
 }
 
+var axisNames = []string{
+	"LeftX", "LeftY", "RightX", "RightY", "LeftTrigger", "RightTrigger",
+}
+
 var trackedButtons = []sdl.GamepadButton{
 	sdl.GamepadButtonSouth,
 	sdl.GamepadButtonEast,
@@ -35,6 +39,14 @@ var trackedButtons = []sdl.GamepadButton{
 	sdl.GamepadButtonDpadDown,
 	sdl.GamepadButtonDpadLeft,
 	sdl.GamepadButtonDpadRight,
+}
+
+var buttonNames = []string{
+	"South", "East", "West", "North",
+	"Back", "Guide", "Start",
+	"LeftStick", "RightStick",
+	"LeftShoulder", "RightShoulder",
+	"DpadUp", "DpadDown", "DpadLeft", "DpadRight",
 }
 
 type touchpadFingerState struct {
@@ -203,7 +215,7 @@ func collect(ctx context.Context, renderer sdl.Renderer, stopAfter time.Duration
 					ms := float64(stamp-prev) / 1_000_000.0
 					if ms > 0.05 && ms < 200 {
 						padIntervals[e.Which] = append(padIntervals[e.Which], ms)
-						fmt.Printf("\r  %d intervals collected", totalCollected())
+						slog.Info("intervals collected", "n", totalCollected())
 					}
 				}
 				lastStamp[e.Which] = stamp

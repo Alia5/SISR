@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/Alia5/SISR/sdl"
@@ -207,6 +208,37 @@ func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.D
 	}
 }
 
+func stateChangeSummary(old, cur gamepadState) string {
+	var parts []string
+	for i := range trackedAxes {
+		if old.axes[i] != cur.axes[i] {
+			parts = append(parts, fmt.Sprintf("%s:%d->%d", axisNames[i], old.axes[i], cur.axes[i]))
+		}
+	}
+	for i := range buttonNames {
+		oldPressed := (old.buttons>>uint(i))&1 == 1
+		newPressed := (cur.buttons>>uint(i))&1 == 1
+		if oldPressed != newPressed {
+			arrow := " pressed"
+			if !newPressed {
+				arrow = " released"
+			}
+			parts = append(parts, buttonNames[i]+arrow)
+		}
+	}
+	for i := range old.touchpads {
+		if old.touchpads[i] != cur.touchpads[i] {
+			t := cur.touchpads[i]
+			if t.down {
+				parts = append(parts, fmt.Sprintf("touch[%d]:(%.3f,%.3f)", i, t.x, t.y))
+			} else {
+				parts = append(parts, fmt.Sprintf("touch[%d]:up", i))
+			}
+		}
+	}
+	return strings.Join(parts, " ")
+}
+
 func handleRealUpdate(
 	g *sdl.Gamepad,
 	id int32,
@@ -237,6 +269,7 @@ func handleRealUpdate(
 		ps.lastRealStamp = stamp
 		return
 	}
+	slog.Debug("real changed", "id", id, "name", ps.cp.realName, "ts_ns", stamp, "changes", stateChangeSummary(ps.lastRealSnap, snap))
 	ps.lastRealSnap = snap
 
 	ms := float64(stamp-ps.lastRealStamp) / 1_000_000.0
@@ -281,6 +314,7 @@ func handleVirtUpdate(
 		ps.lastVirtStamp = stamp
 		return
 	}
+	slog.Debug("virtual changed", "id", id, "name", ps.cp.virtName, "ts_ns", stamp, "changes", stateChangeSummary(ps.lastVirtSnap, snap))
 	ps.lastVirtSnap = snap
 
 	ms := float64(stamp-ps.lastVirtStamp) / 1_000_000.0
@@ -294,6 +328,7 @@ func handleVirtUpdate(
 		lat := float64(stamp-ps.latencyAnchor) / 1_000_000.0
 		if lat >= 0 && lat < 50 {
 			ps.cp.latencies = append(ps.cp.latencies, lat)
+			slog.Debug("latency measured", "real_id", ps.realID, "virt_id", id, "lat_ms", lat, "trigger", stateChangeSummary(ps.lastVirtSnap, snap))
 		}
 		ps.latencyPending = false
 	}
