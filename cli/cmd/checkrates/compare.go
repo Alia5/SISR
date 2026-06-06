@@ -4,11 +4,19 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/Alia5/SISR/sdl"
 )
+
+type pendingUpdate struct {
+	g      *sdl.Gamepad
+	id     int32
+	stamp  uint64
+	isVirt bool
+}
 
 type comparePair struct {
 	realName      string
@@ -32,6 +40,8 @@ type pairState struct {
 
 	latencyAnchor  uint64
 	latencyPending bool
+	virtAnchor     uint64
+	virtPending    bool
 }
 
 func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.Duration, keepDups bool) []comparePair {
@@ -76,6 +86,8 @@ func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.D
 			fmt.Print("Collecting...")
 		}
 	}
+
+	var updates []pendingUpdate
 
 	handle := func(ev sdl.Event) (stop bool) {
 		switch e := ev.(type) {
@@ -146,20 +158,32 @@ func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.D
 				if !ok {
 					return
 				}
-				stamp := e.Timestamp
-				isVirt := padIsVirtual[e.Which]
 
-				if !isVirt {
-					handleRealUpdate(g, e.Which, stamp, keepDups, pairByRealID, startCollecting, totalCollected)
-				} else {
-					handleVirtUpdate(g, e.Which, stamp, keepDups, pairByVirtID, startCollecting, totalCollected)
-				}
+				updates = append(updates, pendingUpdate{
+					g:      g,
+					id:     e.Which,
+					stamp:  e.Timestamp,
+					isVirt: padIsVirtual[e.Which],
+				})
 			}
 
 		case *sdl.QuitEvent:
 			stop = true
 		}
 		return
+	}
+
+	flushUpdates := func(updates []pendingUpdate) {
+		sort.Slice(updates, func(i, j int) bool {
+			return updates[i].stamp < updates[j].stamp
+		})
+		for _, u := range updates {
+			if !u.isVirt {
+				handleRealUpdate(u.g, u.id, u.stamp, keepDups, pairByRealID, startCollecting, totalCollected)
+			} else {
+				handleVirtUpdate(u.g, u.id, u.stamp, keepDups, pairByVirtID, startCollecting, totalCollected)
+			}
+		}
 	}
 
 	finish := func() []comparePair {
@@ -187,6 +211,7 @@ func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.D
 		default:
 		}
 
+		updates = updates[:0]
 		ev, _ := sdl.WaitEventTimeout(16 * time.Millisecond)
 		if ev != nil {
 			if handle(ev) {
@@ -201,6 +226,7 @@ func collectCompare(ctx context.Context, renderer sdl.Renderer, stopAfter time.D
 					return finish()
 				}
 			}
+			flushUpdates(updates)
 		} else {
 			_ = renderer.RenderClear()
 			_ = renderer.RenderPresent()
@@ -269,16 +295,26 @@ func handleRealUpdate(
 		ps.lastRealStamp = stamp
 		return
 	}
-	slog.Debug("real changed", "id", id, "name", ps.cp.realName, "ts_ns", stamp, "changes", stateChangeSummary(ps.lastRealSnap, snap))
+	diff := stateChangeSummary(ps.lastRealSnap, snap)
+	slog.Debug("real changed", "id", id, "name", ps.cp.realName, "ts_ns", stamp, "changes", diff)
 	ps.lastRealSnap = snap
 
 	ms := float64(stamp-ps.lastRealStamp) / 1_000_000.0
 	if ms > 0.05 && ms < 200 {
 		ps.cp.realIntervals = append(ps.cp.realIntervals, ms)
-		fmt.Printf("\r  %d intervals collected", totalCollected())
+		slog.Info("intervals collected", "n", totalCollected())
 	}
 	ps.lastRealStamp = stamp
-	if !ps.latencyPending {
+
+	if ps.virtPending && stamp < ps.virtAnchor {
+
+		lat := float64(ps.virtAnchor-stamp) / 1_000_000.0
+		if lat >= 0 && lat < 50 {
+			ps.cp.latencies = append(ps.cp.latencies, lat)
+			slog.Debug("latency measured", "real_id", id, "virt_id", ps.virtualID, "lat_ms", lat, "trigger", diff)
+		}
+		ps.virtPending = false
+	} else if !ps.latencyPending {
 		ps.latencyAnchor = stamp
 		ps.latencyPending = true
 	}
@@ -314,22 +350,27 @@ func handleVirtUpdate(
 		ps.lastVirtStamp = stamp
 		return
 	}
-	slog.Debug("virtual changed", "id", id, "name", ps.cp.virtName, "ts_ns", stamp, "changes", stateChangeSummary(ps.lastVirtSnap, snap))
+	diff := stateChangeSummary(ps.lastVirtSnap, snap)
+	slog.Debug("virtual changed", "id", id, "name", ps.cp.virtName, "ts_ns", stamp, "changes", diff)
 	ps.lastVirtSnap = snap
 
 	ms := float64(stamp-ps.lastVirtStamp) / 1_000_000.0
 	if ms > 0.05 && ms < 200 {
 		ps.cp.virtIntervals = append(ps.cp.virtIntervals, ms)
-		fmt.Printf("\r  %d intervals collected", totalCollected())
+		slog.Info("intervals collected", "n", totalCollected())
 	}
 	ps.lastVirtStamp = stamp
 
 	if ps.latencyPending {
+
 		lat := float64(stamp-ps.latencyAnchor) / 1_000_000.0
 		if lat >= 0 && lat < 50 {
 			ps.cp.latencies = append(ps.cp.latencies, lat)
-			slog.Debug("latency measured", "real_id", ps.realID, "virt_id", id, "lat_ms", lat, "trigger", stateChangeSummary(ps.lastVirtSnap, snap))
+			slog.Debug("latency measured", "real_id", ps.realID, "virt_id", id, "lat_ms", lat, "trigger", diff)
 		}
 		ps.latencyPending = false
+	} else {
+		ps.virtAnchor = stamp
+		ps.virtPending = true
 	}
 }

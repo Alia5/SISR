@@ -134,7 +134,7 @@ func printMsRows(lw, mw, sdw int, rows []tableRow) {
 			mw, st.mean,
 			sdw, st.sd,
 			st.p1, st.p25, st.p50, st.p75, st.p99,
-			st.n, st.n+1,
+			st.n, len(r.intervals),
 		)
 	}
 }
@@ -156,7 +156,7 @@ func printHzRows(lw, mw, sdw int, rows []tableRow) {
 			mw, st.mean,
 			sdw, st.sd,
 			st.p1, st.p25, st.p50, st.p75, st.p99,
-			st.n, st.n+1,
+			st.n, len(r.intervals),
 		)
 	}
 }
