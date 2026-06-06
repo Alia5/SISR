@@ -22,7 +22,7 @@ var toUnhookFNs = []string{
 	"HidP_MaxDataListLength",
 }
 
-func unhookSteamHid() {
+func UnhookSteamHid() {
 	if runtime.GOOS == "windows" {
 		hookedFns := hooks.DetectHooks("hid.dll")
 		if len(hookedFns) > 0 {

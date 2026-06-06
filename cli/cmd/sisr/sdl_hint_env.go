@@ -16,7 +16,7 @@ var hintMap = map[string]string{
 	"SDL_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT": "",
 }
 
-func setSDLHintEnv() {
+func SetSDLHintEnv() {
 	for key, value := range hintMap {
 		err := os.Setenv(key, value)
 		if err != nil {

@@ -53,8 +53,8 @@ func (s *SISR) Run(cfg config.Global) error {
 		s.targetFrameDuration = time.Second / 60
 	}
 
-	setSDLHintEnv()
-	setSDLHints()
+	SetSDLHintEnv()
+	SetSDLHints()
 	s.checkInitialLaunch()
 
 	launchedViaSteam, launchedInGameMode := steam.LaunchedViaSteam()
@@ -85,7 +85,7 @@ func (s *SISR) Run(cfg config.Global) error {
 		window.Destroy()
 	}()
 
-	unhookSteamHid()
+	UnhookSteamHid()
 	err = sdl.InitSubSystem(sdl.InitFlagGamepad)
 	if err != nil {
 		slog.Error("Failed to initialize SDL Gamepad subsystem", "error", err)

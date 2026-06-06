@@ -38,7 +38,7 @@ var sdlHints = map[sdl.Hint]string{
 	// sdl.HintHIDAPILibUSB:             "1",
 }
 
-func setSDLHints() {
+func SetSDLHints() {
 	for hint, value := range sdlHints {
 		err := sdl.SetHint(hint, value)
 		if err != nil {
