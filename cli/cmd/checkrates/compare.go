@@ -235,8 +235,6 @@ func handleRealUpdate(
 	snap := getSnapshot(g)
 	if !keepDups && snap == ps.lastRealSnap {
 		ps.lastRealStamp = stamp
-		ps.latencyAnchor = stamp
-		ps.latencyPending = true
 		return
 	}
 	ps.lastRealSnap = snap
@@ -247,8 +245,10 @@ func handleRealUpdate(
 		fmt.Printf("\r  %d intervals collected", totalCollected())
 	}
 	ps.lastRealStamp = stamp
-	ps.latencyAnchor = stamp
-	ps.latencyPending = true
+	if !ps.latencyPending {
+		ps.latencyAnchor = stamp
+		ps.latencyPending = true
+	}
 }
 
 func handleVirtUpdate(
@@ -279,7 +279,6 @@ func handleVirtUpdate(
 	snap := getSnapshot(g)
 	if !keepDups && snap == ps.lastVirtSnap {
 		ps.lastVirtStamp = stamp
-		ps.latencyPending = false
 		return
 	}
 	ps.lastVirtSnap = snap

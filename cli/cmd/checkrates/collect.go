@@ -48,10 +48,17 @@ type gamepadState struct {
 	touchpads [4]touchpadFingerState
 }
 
+func deadzone(v int16) int16 {
+	if v > axisThreshold || v < -axisThreshold {
+		return v
+	}
+	return 0
+}
+
 func getSnapshot(g *sdl.Gamepad) gamepadState {
 	var s gamepadState
 	for i, axis := range trackedAxes {
-		s.axes[i] = g.GetAxis(axis)
+		s.axes[i] = deadzone(g.GetAxis(axis))
 	}
 	for i, btn := range trackedButtons {
 		if g.GetButton(btn) {
@@ -64,12 +71,12 @@ func getSnapshot(g *sdl.Gamepad) gamepadState {
 		numFingers := g.NumTouchpadFingers(tp)
 		for f := 0; f < numFingers && idx < 4; f++ {
 			ok, down, x, y, pressure := g.GetTouchpadFinger(tp, f)
-			if ok {
+			if ok && down {
 				s.touchpads[idx] = touchpadFingerState{
 					x:        x,
 					y:        y,
 					pressure: pressure,
-					down:     down,
+					down:     true,
 				}
 			}
 			idx++
