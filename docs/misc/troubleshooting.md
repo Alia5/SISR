@@ -113,12 +113,14 @@
 
 ??? question "Doubled controllers / One physical controller controls multiple emulated controllers"
 
-    You can try one of the two following things:
+    You can try one (or multiple) of the two following things:
 
     1. Ensure that in the Steam Controller configurator for SISR,
     the controller order uses your "real" controllers **before any emulated controllers**  
 
-    2. Use the `--require-controllers-connected-before-launch` option (_default_) to make SISR ignore controllers that are created after SISR has started
+    2. Install and use [HidHide](https://github.com/nefarius/HidHide) to hide your physical controllers from games  
+    Keep the visible to Steam and SISR  
+    _How?_ **RTFM**...
 
     3. Depending on what controller type you emulate  
     Turn off `Enable Steam Input for Xbox controllers` or `Playstation Controller support` in Steam settings.  
