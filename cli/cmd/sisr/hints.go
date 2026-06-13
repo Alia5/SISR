@@ -33,7 +33,7 @@ var sdlHints = map[sdl.Hint]string{
 	sdl.HintJoystickHIDAPIGIP:             "1",
 
 	sdl.HintJoystickWGI:       "0",
-	sdl.HintJoystickGameinput: "0",
+	sdl.HintJoystickGameinput: "1",
 
 	// sdl.HintHIDAPILibUSB:             "1",
 }
