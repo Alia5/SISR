@@ -37,6 +37,7 @@ win-resource:
 
 [arg("type", long="type", help="Build type (Debug/Release)")]
 build-sdl type="Debug":
+	{{ if os_family() == "windows" { "if (!(Test-Path deps/SDL/include/gameinput.h)) { python deps/SDL/build-scripts/download-gameinput-sdk.py -o deps/SDL }" } else { "true" } }}
 	{{
 		if os_family() == "windows" {
 			"if (!(Test-Path deps/SDL/build)) { cmake -S deps/SDL -B deps/SDL/build -DSDL_TEST_LIBRARY=OFF -DSDL_TESTS=OFF -DSDL_INSTALL_TESTS=OFF }"
