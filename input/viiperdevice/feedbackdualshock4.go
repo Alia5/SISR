@@ -9,7 +9,7 @@ import (
 )
 
 func readDualShock4Feedback(r *bufio.Reader) (encoding.BinaryUnmarshaler, error) {
-	var b [7]byte
+	var b [8]byte
 	if _, err := io.ReadFull(r, b[:]); err != nil {
 		return nil, err
 	}
