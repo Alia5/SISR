@@ -34,7 +34,7 @@ type ViiperBridge interface {
 	IsLoopbackAddress() bool
 }
 
-const minSupportedVIIPERVersion = "v0.6.1"
+const minSupportedVIIPERVersion = "v0.8.0"
 const expectedServerName = "VIIPER"
 const defaultDeviceType = "xbox360"
 const defaultAddress = "localhost:3242"

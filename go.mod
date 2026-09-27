@@ -3,8 +3,8 @@ module github.com/Alia5/SISR
 go 1.27.1
 
 require (
-	github.com/Alia5/VIIPER v0.7.0
 	fyne.io/systray v1.12.2
+	github.com/Alia5/VIIPER v0.8.0
 	github.com/alecthomas/kong v1.16.1
 	github.com/alecthomas/kong-toml v0.4.0
 	github.com/alecthomas/kong-yaml v0.2.0
