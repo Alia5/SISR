@@ -1,7 +1,7 @@
 fyne.io/systray v1.12.2 h1:Y8DZxgLHsVQt6rY9Zrkkg+j67S7vv/1F2viOWKPpVeA=
 fyne.io/systray v1.12.2/go.mod h1:RVwqP9nYMo7h5zViCBHri2FgjXF7H2cub7MAq4NSoLs=
-github.com/Alia5/VIIPER v0.8.0 h1:9mYUwZJ7E17m9EPDQuCRO6Osa/lFuh6oOXyPouk4FwI=
-github.com/Alia5/VIIPER v0.8.0/go.mod h1:OOHoTgLZG5plLwQyWw/6z/W5NgzzJIeKHRjWNw4Rv14=
+github.com/Alia5/VIIPER v0.8.2 h1:0aSl3GOGzVJiQu5VTQb5e3TlRw6x/+i0kMLfbXGu3Ys=
+github.com/Alia5/VIIPER v0.8.2/go.mod h1:OOHoTgLZG5plLwQyWw/6z/W5NgzzJIeKHRjWNw4Rv14=
 github.com/akavel/rsrc v0.10.2 h1:Zxm8V5eI1hW4gGaYsJQUhxpjkENuG91ki8B4zCrvEsw=
 github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/alecthomas/assert/v2 v2.11.0 h1:2Q9r3ki8+JYXvGsDyBXwH3LcJ+WK5D0gc5E8vS6K3D0=
