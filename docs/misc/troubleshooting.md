@@ -193,7 +193,7 @@
 ??? question "I can't see the UI / The UI doesn't show up"
 
     It's a system tray app. Right-click the tray icon to toggle the UI (among other things)
-    **Or** launch with `--w --window.fullscreen false` to show the window at startup
+    **Or** launch with `-w --window.fullscreen false` to show the window at startup
     **If** the window runs **as overlay** press **`Ctrl+Shift+Alt+S`**
         or **`LB+RB+BACK+A`** (_A button needs to be pressed last_) to toggle UI visibility.
 

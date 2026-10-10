@@ -118,7 +118,7 @@ SISR can be configured via:
 
     <tr>
       <td>
-        <div><code>--w</code></div>
+        <div><code>-w</code></div>
         <div><code>--window.show [true|false]</code></div>
       </td>
       <td>Shows window on startup; when used with fullscreen enabled, this will enable Steam Overlay</td>
@@ -127,7 +127,7 @@ SISR can be configured via:
 
     <tr>
       <td>
-        <div><code>--f</code></div>
+        <div><code>-f</code></div>
         <div><code>--window.fullscreen [true|false]</code></div>
       </td>
       <td>Create a transparent, borderless, always-on-top overlay window</td>
