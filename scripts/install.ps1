@@ -163,18 +163,12 @@ try {
     
     Write-Host ""
     Write-Host "Installing VIIPER version: $viiperVersion"
-    $viiperInstallVersion = $viiperVersion -replace '^v', ''
-    if ($viiperInstallVersion -eq "dev-snapshot") {
-        $viiperInstallVersion = "main"
-    }
-    $viiperScript = Join-Path $tempDir "viiper-install.ps1"
-    try {
-        Invoke-WebRequest -Uri "https://alia5.github.io/VIIPER/$viiperInstallVersion/install.ps1" -OutFile $viiperScript -ErrorAction Stop
-        Unblock-File -Path $viiperScript -ErrorAction SilentlyContinue
-        & powershell -ExecutionPolicy Bypass -File $viiperScript
+    $rebootRequiredExitCode = 3010
+    & (Join-Path $installDir "viiper.exe") install --quiet --no-update
+    if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq $rebootRequiredExitCode) {
         Write-Host "VIIPER installed successfully" -ForegroundColor Green
     }
-    catch {
+    else {
         Write-Host "Warning: VIIPER installation failed. You may need to install it manually." -ForegroundColor Yellow
         Write-Host "See: https://alia5.github.io/VIIPER/stable/getting-started/installation/" -ForegroundColor Yellow
     }

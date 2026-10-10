@@ -21,20 +21,19 @@ import (
 	"github.com/Alia5/SISR/input/viiperdevice"
 	"github.com/Alia5/SISR/sdl"
 	"github.com/Alia5/VIIPER/viiperclient"
-	"github.com/Alia5/VIIPER/viipertypes"
 )
 
 type ViiperBridge interface {
 	CreateDevice(ctx context.Context, gamepadID sdl.GamepadID, deviceType string) (chan *viiperdevice.Device, chan error)
 	IsCreateDeviceScheduled(gamepadID sdl.GamepadID) bool
-	Ping(ctx context.Context) (*viipertypes.PingResponse, error)
-	Info() *viipertypes.PingResponse
+	Ping(ctx context.Context) (*viiperclient.PingResponse, error)
+	Info() *viiperclient.PingResponse
 	Ready() bool
 	ResolvedAddressAndPort() string
 	IsLoopbackAddress() bool
 }
 
-const minSupportedVIIPERVersion = "v0.8.0"
+const minSupportedVIIPERVersion = "v0.9.0"
 const expectedServerName = "VIIPER"
 const defaultDeviceType = "xbox360"
 const defaultAddress = "localhost:3242"
@@ -76,7 +75,7 @@ func NewViiperBridge(ctx context.Context, dl DeviceStore, cfg *config.Viiper) Vi
 type viiperBridge struct {
 	client           *viiperclient.Client
 	busID            uint32
-	viiperServerInfo *viipertypes.PingResponse
+	viiperServerInfo *viiperclient.PingResponse
 	deviceList       DeviceStore
 	cfg              *config.Viiper
 
@@ -166,7 +165,7 @@ func (v *viiperBridge) IsCreateDeviceScheduled(gamepadID sdl.GamepadID) bool {
 	return ok
 }
 
-func (v *viiperBridge) Info() *viipertypes.PingResponse {
+func (v *viiperBridge) Info() *viiperclient.PingResponse {
 	v.mtx.Lock()
 	defer v.mtx.Unlock()
 
@@ -177,7 +176,7 @@ func (v *viiperBridge) Info() *viipertypes.PingResponse {
 	return nil
 }
 
-func (v *viiperBridge) Ping(ctx context.Context) (*viipertypes.PingResponse, error) {
+func (v *viiperBridge) Ping(ctx context.Context) (*viiperclient.PingResponse, error) {
 	slog.Debug("Pinging VIIPER server...")
 	resp, err := v.client.PingCtx(ctx)
 	if err != nil {

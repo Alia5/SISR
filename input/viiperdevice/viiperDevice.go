@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/Alia5/VIIPER/viiperclient"
-	"github.com/Alia5/VIIPER/viipertypes"
 )
 
 const stateBufferSize = 32
@@ -28,7 +27,7 @@ const (
 
 type Device struct {
 	controlStream *viiperclient.DeviceStream
-	deviceInfo    *viipertypes.Device
+	deviceInfo    *viiperclient.Device
 
 	closeFunc func() error
 	closeOnce sync.Once
@@ -46,7 +45,7 @@ type Device struct {
 
 func New(
 	controlStream *viiperclient.DeviceStream,
-	deviceInfo *viipertypes.Device,
+	deviceInfo *viiperclient.Device,
 	closeFunc func() error,
 ) *Device {
 	stateChan := make(chan []byte, stateBufferSize)
@@ -83,7 +82,7 @@ func New(
 	return d
 }
 
-func (d *Device) Info() viipertypes.Device {
+func (d *Device) Info() viiperclient.Device {
 	return *d.deviceInfo
 }
 
