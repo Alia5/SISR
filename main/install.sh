@@ -3,7 +3,7 @@
 set -e
 
 SISR_VERSION="dev-snapshot"
-VIIPER_VERSION="v0.8.2"
+VIIPER_VERSION="v0.9.0"
 
 REPO="Alia5/SISR"
 API_URL="https://api.github.com/repos/${REPO}/releases/latest"
@@ -172,11 +172,14 @@ echo ""
 echo "Installing VIIPER..."
 
 echo "Installing VIIPER version: $VIIPER_VERSION"
-VIIPER_INSTALL_VERSION=$VIIPER_VERSION
-if [ "$VIIPER_INSTALL_VERSION" = "dev-snapshot" ]; then
-    VIIPER_INSTALL_VERSION="main"
+if [ "$ARCH" = "x86_64" ]; then
+    VIIPER_ARCH="amd64"
+else
+    VIIPER_ARCH="arm64"
 fi
-if curl -fsSL "https://alia5.github.io/VIIPER/${VIIPER_INSTALL_VERSION}/install.sh" | sh; then
+if curl -fsSL -o viiper "https://github.com/Alia5/VIIPER/releases/download/${VIIPER_VERSION}/viiper-linux-${VIIPER_ARCH}" \
+    && chmod +x viiper \
+    && sudo ./viiper install --quiet --no-update; then
     echo "VIIPER installed successfully"
 else
     echo "Warning: VIIPER installation failed. You may need to install it manually." 

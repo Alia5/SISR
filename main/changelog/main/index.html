@@ -1294,17 +1294,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🐛 Fixes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#miscellaneous" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1343,36 +1332,33 @@
   <h1>Main</h1>
 
 <h2 id="changelog-for-development-version">Changelog for Development Version</h2>
-<p>Changes since v0.6.0:</p>
+<p>Changes since v0.6.1:</p>
 <h3 id="new-features">✨ New Features</h3>
 <ul>
-<li>Add Ratecheck / SteamInput Latency Test<ul>
-<li>Run from Steam with <code>checkrates --console --compare-latency=true --l=debug --time=10s</code> args</li>
+<li>All binaries are now signed<ul>
+<li>Windows binaries use Authenticode<ul>
+<li><code>SISR.exe</code></li>
+<li>To validate use the "Digital Signatures" tab in the Windows file properties</li>
+</ul>
+</li>
+<li>Linux binaries are signed headless<ul>
+<li>Detached CMS signature (<code>.p7</code>) over the SHA256 checksum file</li>
+<li><code>SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code> + <code>SISR-&lt;arch&gt;.AppImage.SHA256SUMS.p7</code> as separate release assets</li>
+<li><code>SHA256SUMS</code> + <code>SHA256SUMS.p7</code> inside the <code>.tar.gz</code> archives</li>
+<li>To validate:<ul>
+<li><code>sha256sum -c SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code></li>
+<li><code>openssl cms -verify -binary -purpose any -inform DER -in SISR-&lt;arch&gt;.AppImage.SHA256SUMS.p7 -content SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code></li>
 </ul>
 </li>
 </ul>
-<h3 id="fixes">🐛 Fixes</h3>
-<ul>
-<li>Fix non-clickable updateUI<ul>
-<li>Fixes: #84</li>
-</ul>
 </li>
-<li>Do not run Steam Cleanup when launched in No-Steam mode<ul>
-<li>Fixes Steam launching on SISR close</li>
 </ul>
 </li>
 </ul>
 <h3 id="miscellaneous">🔧 Miscellaneous</h3>
 <ul>
-<li>Update VIIPER<ul>
-<li>Fixes increased CPU usage</li>
-</ul>
-</li>
-<li>Update / Require VIIPER v0.8.0</li>
-<li>Update dependencies / Go</li>
 <li>Update SDL</li>
-<li>Update SDL</li>
-<li>Delay forcing input config in an attempt to workaround a potential issue with Steam</li>
+<li>Update deps / VIIPER</li>
 </ul>
 
 
