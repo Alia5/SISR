@@ -38,6 +38,14 @@ jobs:
             artifact_suffix: "-Snapshot"
             upload_artifacts: true
 
+    sign:
+        needs: build
+        uses: ./.github/workflows/sign.yml
+        secrets:
+            SIGNSERVER_TOKEN: ${{ secrets.SIGNSERVER_TOKEN }}
+        with:
+            artifact_suffix: "-Snapshot"
+
     generate-changelog:
         name: Generate Changelog
         needs: build
@@ -47,7 +55,7 @@ jobs:
 
     create-pre-release:
         name: Create Pre-Release
-        needs: [build, generate-changelog]
+        needs: [build, sign, generate-changelog]
         runs-on: ubuntu-latest
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
         steps:

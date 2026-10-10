@@ -16,6 +16,14 @@ jobs:
             artifact_suffix: "-Release"
             upload_artifacts: true
 
+    sign:
+        needs: build
+        uses: ./.github/workflows/sign.yml
+        secrets:
+            SIGNSERVER_TOKEN: ${{ secrets.SIGNSERVER_TOKEN }}
+        with:
+            artifact_suffix: "-Release"
+
     generate-changelog:
         name: Generate Changelog
         needs: build
@@ -26,7 +34,7 @@ jobs:
 
     create-release:
         name: Create Release
-        needs: [build, generate-changelog]
+        needs: [build, sign, generate-changelog]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
