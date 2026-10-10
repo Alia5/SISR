@@ -62,7 +62,7 @@ if (Test-Path $viiperExe) {
     if ($answer -match "^[Yy]") {
         Write-Host "Uninstalling VIIPER..."
         try {
-            Start-Process -FilePath $viiperExe -ArgumentList "uninstall" -Wait -WindowStyle Hidden -ErrorAction SilentlyContinue
+            Start-Process -FilePath $viiperExe -ArgumentList "uninstall", "--quiet" -Wait -WindowStyle Hidden -ErrorAction SilentlyContinue
         }
         catch {
             Write-Host "Warning: viiper uninstall command failed (may already be stopped)" -ForegroundColor Yellow
