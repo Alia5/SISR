@@ -46,48 +46,39 @@ Refer to the [USBIP setup guide](../getting-started/usbip.md)
 For networked scenarios you will have to install [VIIPER](https://alia5.github.io/VIIPER/) as a background "service".  
 _(VIIPER is used by SISR to emulate controllers!)_
 
-VIIPER provides [easy to use installation scripts](https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script)
-for both Windows and Linux.  
+The VIIPER executable is its own
+[installer](https://alia5.github.io/VIIPER/stable/getting-started/installation/#installer).  
 
 === "Windows"
 
     In a PowerShell run
 
     ```powershell
-    irm https://alia5.github.io/VIIPER/stable/install.ps1 | iex
+    winget install Alia5.VIIPER
     ```
 
     This will
     
     - Install VIIPER to `%LOCALAPPDATA%\VIIPER\viiper.exe`
     - Set the VIIPER server to start automatically with Windows
+    - Install USBIP-Win2
     - Start the VIIPER server immediately
-  
-    !!! warning "USBIP not included"
-        The VIIPER install script does not install/setup USBIP.
-        Make sure a USBIP-client is installed and configured before installing VIIPER.
-
-        The SISR install script should include everything you need, though
 
 === "Linux"
 
-    In a terminal run
+    Download `viiper-linux-amd64` from the [VIIPER releases](https://github.com/Alia5/VIIPER/releases) and in a terminal run
 
     ```bash
-    curl -fsSL https://alia5.github.io/VIIPER/stable/install.sh | sh
+    chmod +x viiper-linux-amd64
+    sudo ./viiper-linux-amd64 install
     ```
 
     This will
 
     - install VIIPER to `/usr/local/bin/viiper`
     - Creates systemd service: `/etc/systemd/system/viiper.service`
+    - Installs USBIP and loads the `vhci_hcd` kernel module
     - Enables and starts the VIIPER service immediately
-
-    !!! warning "USBIP not included"
-        The VIIPER install script does not install/setup USBIP.
-        Make sure a USBIP-client is installed and configured before installing VIIPER.
-
-        The SISR install script should include everything you need, though
 
 Refer to the [VIIPER documentation](https://alia5.github.io/VIIPER/) for more details and information
 

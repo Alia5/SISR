@@ -28,11 +28,8 @@ that should setup everything you need to get started with SISR quickly
     The script will:
 
     - Download and install (or update) SISR to `%LOCALAPPDATA%\SISR\SISR.exe`
-    - Download and install VIIPER
-      Using the [VIIPER install script](https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script) to
-      `%LOCALAPPDATA%\VIIPER\viiper.exe`
-        - Setup the USBIP-Win2 driver  
-          <sup>Driver only, not the full USBIP-Win2 package</sup>
+    - Install the bundled VIIPER to `%LOCALAPPDATA%\VIIPER\viiper.exe`
+        - Install USBIP-Win2
     - Enable Steam CEF remote debugging
     - Create Desktop and Start Menu shortcuts
 
@@ -62,7 +59,6 @@ that should setup everything you need to get started with SISR quickly
 
     - Download and install SISR to `~/.local/share/SISR/SISR.AppImage`
     - Download and install VIIPER as a systemd service  
-      Using the [VIIPER install script](https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script)
         - Attempt to setup USBIP (installation of required packages)
         - Load the required `vhci-hcd` kernel module  
           And setup automatic loading on boot
@@ -100,20 +96,22 @@ that should setup everything you need to get started with SISR quickly
 
     VIIPER is bundled with SISR.No separate installation required  
 
-    That said, for networked scenarios it's easier to install VIIPER as a standalone service using the [VIIPER install script](https://alia5.github.io/VIIPER/stable/getting-started/installation/#automated-install-script)
+    For networked scenarios it's easier to install VIIPER as a standalone service
 
     In a powerShell run
 
     ```powershell
-    irm https://alia5.github.io/VIIPER/stable/install.ps1 | iex
+    winget install Alia5.VIIPER
     ```
 
 === "Linux"
 
-    Linux requires VIIPER as a system service:
+    Linux requires VIIPER as a system service.  
+    Download `viiper-linux-amd64` from the [VIIPER releases](https://github.com/Alia5/VIIPER/releases) and run
 
     ```bash
-    curl -fsSL https://alia5.github.io/VIIPER/stable/install.sh | sh
+    chmod +x viiper-linux-amd64
+    sudo ./viiper-linux-amd64 install
     ```
 
     This will install VIIPER, and run it as a systemd service.
