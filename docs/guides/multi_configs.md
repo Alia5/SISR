@@ -36,7 +36,7 @@ add the <code>--marker</code> launch option here!</p>
 
 - <h3>**1.** Add SISR as a non-Steam game in your Steam library</h3>
       Provide the following flags as launch options  
-      - `--w --f`  
+      - `-w -f`  
       <sup>show-window, fullscreen</sup>  
 
       You can rename the shortcut to something meaningful, like _"SISR - Game XYZ"_

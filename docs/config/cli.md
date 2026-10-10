@@ -123,14 +123,14 @@ Run in no-Steam mode
 
 ### Window
 
-#### `--w`, `--window.show [true|false]`
+#### `-w`, `--window.show [true|false]`
 
 Shows window on startup; when used with fullscreen enabled, this will enable Steam Overlay
 
 - Default: `false`
 - Env var: `SISR_SHOW_WINDOW`
 
-#### `--f`, `--window.fullscreen [true|false]`
+#### `-f`, `--window.fullscreen [true|false]`
 
 Create a transparent, borderless, always-on-top overlay window
 
@@ -146,7 +146,7 @@ Maximim FPS for SteamOverlay/UI (Does not affect inputs)
 
 ### Logging
 
-#### `--l`, `--log.level <LEVEL>`
+#### `-l`, `--log.level <LEVEL>`
 
 Logging level
 
