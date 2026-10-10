@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/alecthomas/kong"
 	kongtoml "github.com/alecthomas/kong-toml"
@@ -21,7 +22,7 @@ func main() {
 	jsonPaths, yamlPaths, tomlPaths := configCandidatePaths(userCfg)
 
 	var cli cli.CLI
-	ctx := kong.Parse(&cli,
+	parser := kong.Must(&cli,
 		kong.Name("SISR"),
 		kong.Description(meta.Description()),
 		kong.UsageOnError(),
@@ -29,6 +30,9 @@ func main() {
 		kong.Configuration(kongyaml.Loader, yamlPaths...),
 		kong.Configuration(kongtoml.Loader, tomlPaths...),
 	)
+	expandOneCharacterAliases(parser.Model, os.Args[1:])
+	ctx, err := parser.Parse(os.Args[1:])
+	parser.FatalIfErrorf(err)
 
 	applyPlatformStartup(cli.Config)
 
@@ -59,6 +63,28 @@ func main() {
 
 	err = ctx.Run()
 	ctx.FatalIfErrorf(err)
+}
+
+func expandOneCharacterAliases(model *kong.Application, args []string) {
+	longNames := map[string]string{}
+	_ = kong.Visit(model, func(node kong.Visitable, next kong.Next) error {
+		flag, ok := node.(*kong.Flag)
+		if ok {
+			for _, alias := range flag.Aliases {
+				if utf8.RuneCountInString(alias) == 1 {
+					longNames["--"+alias] = "--" + flag.Name
+				}
+			}
+		}
+		return next(nil)
+	})
+	for i, arg := range args {
+		name, _, _ := strings.Cut(arg, "=")
+		longName, ok := longNames[name]
+		if ok {
+			args[i] = longName + strings.TrimPrefix(arg, name)
+		}
+	}
 }
 
 func findUserConfig(args []string) string {
