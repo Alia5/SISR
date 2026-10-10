@@ -360,7 +360,7 @@ func (v *viiperBridge) trySpawnViiperServer() {
 		return
 	}
 
-	cmd := exec.Command(viiperPath, "server", "--log.file=viiper.log")
+	cmd := exec.Command(viiperPath, "server", "--log.file=viiper.log", "--update-notify=none")
 	err = cmd.Start()
 	if err != nil {
 		slog.Error("viiper_spawn: failed to start VIIPER server process", "error", err)
