@@ -60,7 +60,7 @@
     SISR runs as a **system tray application** by default.
 
     - Right-click the tray icon to show/hide the UI
-    - Or launch with `--w --window.fullscreen false` to show the window at startup
+    - Or launch with `-w --window.fullscreen false` to show the window at startup
     - **If** the window runs **as overlay** press **`Ctrl+Shift+Alt+S`**
     or **`LB+RB+BACK+A`** (_"A" button needs to be pressed last_) to toggle UI visibility.
 
@@ -71,7 +71,7 @@
 ??? question "I don't like the system tray app behavior, can I run it as a normal windowed application?"
 
     Yes, you can!  
-    Launch SISR with `--w --window.fullscreen false` to show the window at startup and disable fullscreen behavior
+    Launch SISR with `-w --window.fullscreen false` to show the window at startup and disable fullscreen behavior
 
 ## I don't like the chosen overlay shortcut/controller chord, can I change it? {.toc-anchor}
 
