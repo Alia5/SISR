@@ -89,6 +89,15 @@ jobs:
                   sha256sum "$BINARY" > SHA256SUMS
                   curl --fail -H "Authorization: Bearer $SIGNSERVER_TOKEN" -F "sha256sums=@SHA256SUMS" -o SHA256SUMS.p7 "$SIGNSERVER/sha256sums"
 
+            - name: Wrap signature in CMS ContentInfo
+              if: ${{ matrix.target.goos == 'linux' }}
+              run: |
+                  # SEQUENCE { OID signedData, [0] <SignedData from the server> }
+                  size=$(stat -c %s SHA256SUMS.p7)
+                  { printf '3082%04X06092A864886F70D010702A082%04X' $((size + 15)) "$size" | basenc --base16 -d; cat SHA256SUMS.p7; } > content-info.der
+                  mv content-info.der SHA256SUMS.p7
+                  openssl cms -verify -binary -purpose any -inform DER -in SHA256SUMS.p7 -content SHA256SUMS -out /dev/null
+
             - name: Prefix SHA256SUMS with binary name
               if: ${{ matrix.target.goos == 'linux' && matrix.target.archive == '' }}
               run: |
