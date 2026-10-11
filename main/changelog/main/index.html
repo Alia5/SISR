@@ -1279,45 +1279,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Changelog for Development Version">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#new-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ✨ New Features
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🐛 Fixes
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#miscellaneous" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🔧 Miscellaneous
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
     </ul>
@@ -1343,40 +1304,8 @@
   <h1>Main</h1>
 
 <h2 id="changelog-for-development-version">Changelog for Development Version</h2>
-<p>Changes since v0.6.1:</p>
-<h3 id="new-features">✨ New Features</h3>
-<ul>
-<li>All binaries are now signed<ul>
-<li>Windows binaries use Authenticode<ul>
-<li><code>SISR.exe</code></li>
-<li>To validate use the "Digital Signatures" tab in the Windows file properties</li>
-</ul>
-</li>
-<li>Linux binaries are signed headless<ul>
-<li>Detached CMS signature (<code>.p7</code>) over the SHA256 checksum file</li>
-<li><code>SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code> + <code>SISR-&lt;arch&gt;.AppImage.SHA256SUMS.p7</code> as separate release assets</li>
-<li><code>SHA256SUMS</code> + <code>SHA256SUMS.p7</code> inside the <code>.tar.gz</code> archives</li>
-<li>To validate:<ul>
-<li><code>sha256sum -c SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code></li>
-<li><code>openssl cms -verify -binary -purpose any -inform DER -in SISR-&lt;arch&gt;.AppImage.SHA256SUMS.p7 -content SISR-&lt;arch&gt;.AppImage.SHA256SUMS</code></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="fixes">🐛 Fixes</h3>
-<ul>
-<li>Re-Introduce option to use double dashes for single character flags (<code>--w</code>, <code>--f</code>) after dependency update broke em</li>
-</ul>
-<h3 id="miscellaneous">🔧 Miscellaneous</h3>
-<ul>
-<li>Disable update notifier when launching bundled viiper
-    Regular VIIPER install is <strong>not</strong> affected!</li>
-<li>Update SDL</li>
-<li>Update deps / VIIPER</li>
-</ul>
+<p>Changes since v0.6.2:</p>
+<p>No changes yet.</p>
 
 
 
