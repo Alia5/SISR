@@ -1,0 +1,33 @@
+
+@media screen and (min-width: 76.25em) {
+	.md-main__inner {
+		max-width: 67rem;
+	}
+}
+
+[data-md-color-scheme="slate"] {
+	--md-default-bg-color: #0d1117;
+	--md-default-bg-color--light: #121826;
+	--md-default-bg-color--lighter: #1b2433;
+}
+
+.sisr-download-center {
+	text-align: center;
+	margin: 1.2rem 0 1.6rem;
+}
+
+.sisr-download-status {
+	margin-top: 0.75rem;
+	font-size: 0.9em;
+	opacity: 0.9;
+	white-space: pre-line;
+}
+
+/* A subtle "not primary" button variant for pre-releases */
+.sisr-button-muted {
+	opacity: 0.85;
+}
+
+.sisr-download-assets {
+	margin-top: 0.75rem;
+}
